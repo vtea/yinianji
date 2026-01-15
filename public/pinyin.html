@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>声母韵母 - 拼音学习</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #fff3e0;
+    }
+
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-top: 20px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #ff6f61;
+      padding-bottom: 8px;
+    }
+
+    .pinyin-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .pinyin-btn {
+      background: white;
+      border: 2px solid #ff6f61;
+      border-radius: 8px;
+      padding: 10px 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 80px;
+      font-family: inherit;
+    }
+
+    .pinyin-btn:hover {
+      background: #ffe0d6;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .pinyin-btn:active {
+      transform: scale(0.95);
+    }
+
+    .pinyin-text {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ff6f61;
+    }
+
+    .learn-count {
+      font-size: 11px;
+      color: #999;
+      background: #f5f5f5;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #888;
+      padding: 40px 16px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .pinyin-list {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .pinyin-btn {
+        min-height: 70px;
+        padding: 8px 6px;
+      }
+      
+      .pinyin-text {
+        font-size: 14px;
+      }
+    }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      .pinyin-list {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 769px) {
+      .pinyin-list {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <div id="initialsSection"></div>
+  <div id="finalsSection"></div>
+</div>
+
+<script>
+// 从父页面获取当前用户信息
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+// 声母
+const initials = [
+  "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h",
+  "j", "q", "x", "zh", "ch", "sh", "r", "z", "c", "s", "y", "w"
+];
+
+// 韵母
+const finals = [
+  "a", "o", "e", "i", "u", "ü", "er",
+  "ai", "ei", "ao", "ou", "an", "en", "ang", "eng", "ong",
+  "ia", "ie", "iao", "iu", "ian", "in", "iang", "ing", "iong",
+  "ua", "uo", "uai", "ui", "uan", "un", "uang", "ueng",
+  "üe", "üan", "ün"
+];
+
+// 拼音对应的示例汉字（用于发音）
+const pinyinExamples = {
+  // 声母例子
+  'b': '八',
+  'p': '泡',
+  'm': '妈',
+  'f': '佛',
+  'd': '大',
+  't': '他',
+  'n': '你',
+  'l': '来',
+  'g': '哥',
+  'k': '卡',
+  'h': '呵',
+  'j': '鸡',
+  'q': '七',
+  'x': '西',
+  'zh': '知',
+  'ch': '吃',
+  'sh': '诗',
+  'r': '日',
+  'z': '子',
+  'c': '次',
+  's': '思',
+  'y': '烟',
+  'w': '五',
+  // 韵母例子
+  'a': '啊',
+  'o': '哦',
+  'e': '呃',
+  'i': '衣',
+  'u': '乌',
+  'ü': '女',
+  'er': '儿',
+  'ai': '爱',
+  'ei': '欸',
+  'ao': '熬',
+  'ou': '欧',
+  'an': '安',
+  'en': '恩',
+  'ang': '昂',
+  'eng': '嗯',
+  'ong': '嗡',
+  'ia': '呀',
+  'ie': '耶',
+  'iao': '腰',
+  'iu': '油',
+  'ian': '烟',
+  'in': '因',
+  'iang': '央',
+  'ing': '英',
+  'iong': '用',
+  'ua': '蛙',
+  'uo': '我',
+  'uai': '歪',
+  'ui': '威',
+  'uan': '弯',
+  'un': '温',
+  'uang': '王',
+  'ueng': '翁',
+  'üe': '约',
+  'üan': '冤',
+  'ün': '晕'
+};
+
+function speakPinyin(py, type) {
+  // 使用汉字示例来发音，以获得更准确的发音
+  const example = pinyinExamples[py];
+  if (!example) return;
+  
+  // 调用父页面的统一发音函数
+  if (window.parent && window.parent.speak) {
+    window.parent.speak(example, 'pinyin');
+  } else {
+    // 备用方案（如果在独立环境中）
+    const u = new SpeechSynthesisUtterance(example);
+    u.lang = "zh-CN";
+    u.rate = 0.8;
+    u.pitch = 1;
+    speechSynthesis.cancel();
+    setTimeout(() => {
+      speechSynthesis.speak(u);
+    }, 50);
+  }
+}
+
+function createPinyinButton(py, type, learnCount) {
+  const btn = document.createElement("button");
+  btn.className = "pinyin-btn";
+  btn.innerHTML = `
+    <span class="pinyin-text">${py}</span>
+    <span class="learn-count">🔊 ${learnCount || 0}</span>
+  `;
+  
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    speakPinyin(py, type);
+    recordLearn(py, type);
+    
+    // 更新学习计数
+    const countSpan = btn.querySelector(".learn-count");
+    const currentCount = parseInt(countSpan.textContent.match(/\d+/)[0]);
+    countSpan.textContent = `🔊 ${currentCount + 1}`;
+  };
+  
+  return btn;
+}
+
+function recordLearn(py, type) {
+  if (!currentUser) return;
+  
+  fetch("/api/pinyin-learn", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+      user_id: currentUser.user_id, 
+      pinyin: py, 
+      type: type 
+    })
+  }).catch(err => console.error("记录失败：", err));
+}
+
+function loadPinyinPage() {
+  if (!currentUser) return;
+
+  // 先获取用户的学习记录
+  fetch(`/api/pinyin/${currentUser.user_id}`)
+    .then(res => res.json())
+    .then(data => {
+      // 构建学习记录映射
+      const learnMap = {};
+      data.forEach(item => {
+        learnMap[`${item.type}:${item.pinyin}`] = item.learn_count || 0;
+      });
+
+      // 如果用户没有任何记录，初始化
+      if (data.length === 0) {
+        fetch("/api/pinyin-init", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: currentUser.user_id })
+        }).then(() => loadPinyinPage());
+        return;
+      }
+
+      // 渲染声母
+      const initialsSection = document.getElementById("initialsSection");
+      initialsSection.innerHTML = '<div class="section-title">声母</div>';
+      const initialsList = document.createElement("div");
+      initialsList.className = "pinyin-list";
+      
+      initials.forEach(py => {
+        const count = learnMap[`initial:${py}`] || 0;
+        initialsList.appendChild(createPinyinButton(py, "initial", count));
+      });
+      
+      initialsSection.appendChild(initialsList);
+
+      // 渲染韵母
+      const finalsSection = document.getElementById("finalsSection");
+      finalsSection.innerHTML = '<div class="section-title">韵母</div>';
+      const finalsList = document.createElement("div");
+      finalsList.className = "pinyin-list";
+      
+      finals.forEach(py => {
+        const count = learnMap[`final:${py}`] || 0;
+        finalsList.appendChild(createPinyinButton(py, "final", count));
+      });
+      
+      finalsSection.appendChild(finalsList);
+    })
+    .catch(err => {
+      console.error("加载失败：", err);
+      document.getElementById("initialsSection").innerHTML = 
+        '<div class="empty-message">加载失败，请重试</div>';
+    });
+}
+
+// 页面加载时初始化
+loadPinyinPage();
+</script>
+</body>
+</html>

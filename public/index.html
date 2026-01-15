@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>一年级生字本</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+  body {
+    font-family: "Microsoft YaHei", sans-serif;
+    background: #fff3e0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* 响应式布局 */
+  @media (max-width: 480px) {
+    /* 手机端：3 个生字 */
+    #list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .container {
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 481px) and (max-width: 768px) {
+    /* 平板：4 个生字 */
+    #list {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .container {
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 769px) {
+    /* 桌面：5 个生字 */
+    #list {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .container {
+      max-width: 100%;
+    }
+  }
+
+  /* 登录/注册页面 */
+  /* 登录/注册页面容器 */
+  #auth-page {
+    display: none;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ff6f61 0%, #ffb88c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 16px;
+    width: 100%;
+  }
+
+  .auth-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    width: 100%;
+    max-width: 900px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    background: white;
+    min-height: 500px;
+  }
+
+  .auth-panel {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 40px;
+  }
+
+  .auth-panel.active {
+    display: flex;
+  }
+
+  .auth-panel h2 {
+    text-align: center;
+    color: #ff6f61;
+    margin: 0 0 12px 0;
+    font-size: 28px;
+  }
+
+  .auth-panel .subtitle {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .form-group input {
+    padding: 12px 16px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #ff6f61;
+  }
+
+  .form-group input::placeholder {
+    color: #bbb;
+  }
+
+  .auth-submit-btn {
+    padding: 12px 16px;
+    background: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 8px;
+  }
+
+  .auth-submit-btn:hover {
+    background: #ff3b2f;
+  }
+
+  .auth-submit-btn:active {
+    transform: scale(0.98);
+  }
+
+  .auth-toggle {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .auth-toggle a {
+    color: #ff6f61;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .auth-toggle a:hover {
+    color: #ff3b2f;
+  }
+
+  .auth-side {
+    background: linear-gradient(135deg, #ff6f61 0%, #ffb88c 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px 40px;
+    text-align: center;
+  }
+
+  .auth-side h3 {
+    font-size: 32px;
+    margin: 0 0 16px 0;
+  }
+
+  .auth-side p {
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+
+  .auth-error {
+    padding: 12px 16px;
+    background: #ffebee;
+    color: #c62828;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+    margin-bottom: 16px;
+  }
+
+  .auth-error.show {
+    display: block;
+  }
+
+  /* 移动端响应式 */
+  @media (max-width: 768px) {
+    .auth-container {
+      grid-template-columns: 1fr;
+    }
+
+    .auth-side {
+      display: none;
+    }
+
+    .auth-panel {
+      padding: 32px 24px;
+    }
+
+    .auth-panel h2 {
+      font-size: 24px;
+    }
+  }
+
+  /* 导航栏 */
+  .navbar {
+    background: #ff6f61;
+    color: white;
+    padding: 12px 16px;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar h1 {
+    margin: 0;
+    font-size: 20px;
+    flex: 1;
+  }
+
+  .user-menu-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .user-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .user-menu {
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 16px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    min-width: 180px;
+  }
+
+  .user-menu.show {
+    display: block;
+  }
+
+  .user-menu-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: #333;
+  }
+
+  .user-menu-item:last-child {
+    border-bottom: none;
+  }
+
+  .user-menu-item:hover {
+    background: #f5f5f5;
+  }
+
+  .user-info-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    color: #666;
+  }
+
+  /* 功能菜单导航 */
+  .feature-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0;
+    padding: 16px;
+    background: white;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+  }
+
+  .feature-nav > div {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+  }
+
+  .feature-btn {
+    padding: 10px 14px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    text-align: center;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .feature-btn:hover {
+    border-color: #ff6f61;
+    color: #ff6f61;
+  }
+
+  .feature-btn.active {
+    background: #ff6f61;
+    color: white;
+    border-color: #ff6f61;
+  }
+
+  /* 子菜单样式 */
+  .submenu {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px !important;
+  }
+
+  .submenu-item {
+    padding: 10px 14px;
+    background: white;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    text-align: left;
+    font-size: 13px;
+    transition: background 0.2s;
+    color: #333;
+  }
+
+  .submenu-item:last-child {
+    border-bottom: none;
+  }
+
+  .submenu-item:hover {
+    background: #f5f5f5;
+  }
+
+  .submenu-item.active {
+    background: #ffe0d6;
+    color: #ff6f61;
+    font-weight: bold;
+  }
+
+  /* iframe 容器 */
+  #contentFrame {
+    width: 100%;
+    height: 100vh;
+    border: none;
+    background: #fff3e0;
+    display: block;
+  }
+  
+  #app-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  #app-page > .navbar {
+    flex-shrink: 0;
+  }
+  
+  #app-page > .feature-nav {
+    flex-shrink: 0;
+  }
+  
+  #contentFrame {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .word-info .speak-count {
+    display: block;
+    color: #ff6f61;
+    font-weight: bold;
+  }
+
+  .word-actions {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .word-actions button {
+    flex: 1;
+    padding: 6px;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .speak-btn {
+    background: #4caf50;
+    color: white;
+  }
+
+  .speak-btn:hover {
+    background: #45a049;
+  }
+
+  .del-btn {
+    background: #ff6f61;
+    color: white;
+  }
+
+  .del-btn:hover {
+    background: #ff3b2f;
+  }
+
+  /* 输入区域 */
+  #input-area {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  #input-area input {
+    flex-grow: 1;
+    padding: 10px 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  #input-area button {
+    width: 100px;
+    background-color: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  #input-area button:hover {
+    background-color: #ff3b2f;
+  }
+
+  /* 浮动按钮 */
+  .fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255, 111, 97, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 50;
+  }
+
+  .fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(255, 111, 97, 0.6);
+  }
+
+  .fab.show {
+    display: flex;
+  }
+
+  /* 模态框 */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.3s;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal.show {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    background: white;
+    width: 100%;
+    padding: 24px 16px;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    color: #ff6f61;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+  }
+
+  .modal-close:hover {
+    color: #ff6f61;
+  }
+
+  .modal-input-area {
+    display: flex;
+    gap: 8px;
+  }
+
+  .modal-input-area input {
+    flex-grow: 1;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  .modal-input-area button {
+    width: 80px;
+    background-color: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .modal-input-area button:hover {
+    background-color: #ff3b2f;
+  }
+
+  /* 发音设置面板 */
+  .pronunciation-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .pronunciation-type {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #fff9f0 0%, #fff3e0 100%);
+    border-radius: 12px;
+    border-left: 4px solid #ff6f61;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .pronunciation-type-label {
+    font-weight: bold;
+    font-size: 15px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pronunciation-type-label::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ff6f61;
+  }
+
+  .speed-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .speed-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #666;
+  }
+
+  .speed-btn:hover {
+    border-color: #ff6f61;
+    color: #ff6f61;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(255, 111, 97, 0.2);
+  }
+
+  .speed-btn.active {
+    background: linear-gradient(135deg, #ff6f61 0%, #ff8575 100%);
+    color: white;
+    border-color: #ff6f61;
+    box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+  }
+
+  .pronunciation-test {
+    margin-top: 4px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+  }
+
+  .pronunciation-test button {
+    margin-top: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+  }
+
+  .pronunciation-test button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+  }
+
+  .pronunciation-test button:active {
+    transform: translateY(0);
+  }
+
+  .voice-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .voice-select:hover {
+    border-color: #ff6f61;
+    box-shadow: 0 2px 6px rgba(255, 111, 97, 0.15);
+  }
+
+  .voice-select:focus {
+    outline: none;
+    border-color: #ff6f61;
+    box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.1);
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <!-- 登录/注册页面 -->
+  <div id="auth-page">
+    <div class="auth-container">
+      <!-- 登录面板 -->
+      <div class="auth-panel active" id="login-panel">
+        <h2>🔐 登录账户</h2>
+        <p class="subtitle">欢迎回来</p>
+        <div class="auth-error" id="login-error"></div>
+        <form class="auth-form" id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="login-username">用户名</label>
+            <input 
+              type="text" 
+              id="login-username" 
+              placeholder="请输入用户名" 
+              required
+              minlength="3"
+            />
+          </div>
+          <div class="form-group">
+            <label for="login-password">密码</label>
+            <input 
+              type="password" 
+              id="login-password" 
+              placeholder="请输入密码" 
+              required
+              minlength="6"
+            />
+          </div>
+          <button type="submit" class="auth-submit-btn">登录</button>
+        </form>
+        <div class="auth-toggle">
+          还没有账户？<a onclick="switchAuthMode()">立即注册</a>
+        </div>
+      </div>
+
+      <!-- 注册面板 -->
+      <div class="auth-panel" id="register-panel">
+        <h2>📝 注册账户</h2>
+        <p class="subtitle">创建新账户</p>
+        <div class="auth-error" id="register-error"></div>
+        <form class="auth-form" id="register-form" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label for="register-username">用户名</label>
+            <input 
+              type="text" 
+              id="register-username" 
+              placeholder="请输入用户名（至少 3 个字符）" 
+              required
+              minlength="3"
+            />
+          </div>
+          <div class="form-group">
+            <label for="register-password">密码</label>
+            <input 
+              type="password" 
+              id="register-password" 
+              placeholder="请输入密码（至少 6 个字符）" 
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group">
+            <label for="register-confirm">确认密码</label>
+            <input 
+              type="password" 
+              id="register-confirm" 
+              placeholder="请再次输入密码" 
+              required
+              minlength="6"
+            />
+          </div>
+          <button type="submit" class="auth-submit-btn">注册</button>
+        </form>
+        <div class="auth-toggle">
+          已有账户？<a onclick="switchAuthMode()">立即登录</a>
+        </div>
+      </div>
+
+      <!-- 侧边栏 -->
+      <div class="auth-side">
+        <h3>📚 一年级生字本</h3>
+        <p>帮助小朋友学习新的汉字，提高阅读能力。加油！</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主应用页面 -->
+  <div id="app-page">
+    <!-- 导航栏 -->
+    <div class="navbar">
+      <h1 id="pageTitle">学习工具</h1>
+      <div style="position: relative;">
+        <button class="user-menu-btn" onclick="toggleUserMenu()" id="userMenuBtn">👤 菜单</button>
+        <div class="user-menu" id="userMenu">
+          <div class="user-info-item" id="usernameDisplay"></div>
+          <div class="user-menu-item" onclick="openPronunciationSettings()">🔊 发音设置</div>
+          <div class="user-menu-item" onclick="openChangePassword()">🔐 修改密码</div>
+          <div class="user-menu-item" style="background: #ffebee; color: #ff6f61;" onclick="logout()">🚪 退出登录</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 功能菜单 -->
+    <div class="feature-nav" id="featureNav">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <div style="position: relative;">
+          <button class="feature-btn active" onclick="toggleChineseMenu(event)">📚 语文</button>
+          <div class="submenu" id="chineseSubmenu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 10; min-width: 120px;">
+            <button class="submenu-item active" onclick="switchPage('chinese')">生字</button>
+            <button class="submenu-item" onclick="switchPage('pinyin')">声母韵母</button>
+          </div>
+        </div>
+        <button class="feature-btn" onclick="switchPage('math')">🔢 数学</button>
+        <button class="feature-btn" onclick="switchPage('english')">🔤 英语</button>
+      </div>
+    </div>
+
+    <!-- 内容容器 - 通过 iframe 加载各个模块 -->
+    <iframe id="contentFrame" style="width: 100%; border: none; background: #fff3e0; min-height: 400px;" src="chinese.html"></iframe>
+  </div>
+</div>
+
+<!-- 浮动按钮 -->
+<button class="fab show" onclick="openAddItemModal()" id="fabBtn">➕</button>
+
+<!-- 添加内容模态框 -->
+<div class="modal" id="addItemModal" onclick="closeAddItemModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTitle">添加内容</h3>
+      <button class="modal-close" onclick="closeAddItemModal()">✕</button>
+    </div>
+    <div class="modal-input-area" id="modalInputArea">
+      <!-- 根据不同页面动态改变 -->
+    </div>
+  </div>
+</div>
+
+<!-- 发音设置模态框 -->
+<div class="modal" id="pronunciationModal" onclick="closePronunciationSettings(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🔊 发音设置</h3>
+      <button class="modal-close" onclick="closePronunciationSettings()">✕</button>
+    </div>
+    <div class="pronunciation-settings">
+      <!-- 中文发音 -->
+      <div class="pronunciation-type">
+        <div class="pronunciation-type-label">📖 中文发音</div>
+        
+        <div style="margin-bottom: 12px;">
+          <div style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px;">🎤 选择发音人：</div>
+          <select id="chineseVoiceSelect" class="voice-select" onchange="setVoiceUI('chinese', this.value)">
+            <option value="">加载中...</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px;">⚡ 调整速度：</div>
+          <div class="speed-buttons">
+            <button class="speed-btn" onclick="setPronunciationSpeedUI('chinese', 'slow')">🐢 很慢</button>
+            <button class="speed-btn active" onclick="setPronunciationSpeedUI('chinese', 'normal')">🎯 正常</button>
+            <button class="speed-btn" onclick="setPronunciationSpeedUI('chinese', 'fast')">🚀 快速</button>
+          </div>
+        </div>
+
+        <div class="pronunciation-test">
+          <div style="margin-bottom: 8px; font-weight: 600; color: #555;">🔊 试听效果：</div>
+          <button onclick="testPronunciation('你好，中文发音', 'chinese')">▶ 试听中文</button>
+        </div>
+      </div>
+
+      <!-- 拼音发音 -->
+      <div class="pronunciation-type">
+        <div class="pronunciation-type-label">🔤 拼音发音</div>
+        
+        <div style="margin-bottom: 12px;">
+          <div style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px;">🎤 选择发音人：</div>
+          <select id="pinyinVoiceSelect" class="voice-select" onchange="setVoiceUI('pinyin', this.value)">
+            <option value="">加载中...</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px;">⚡ 调整速度：</div>
+          <div class="speed-buttons">
+            <button class="speed-btn" onclick="setPronunciationSpeedUI('pinyin', 'slow')">🐢 很慢</button>
+            <button class="speed-btn active" onclick="setPronunciationSpeedUI('pinyin', 'normal')">🎯 正常</button>
+            <button class="speed-btn" onclick="setPronunciationSpeedUI('pinyin', 'fast')">🚀 快速</button>
+          </div>
+        </div>
+
+        <div class="pronunciation-test">
+          <div style="margin-bottom: 8px; font-weight: 600; color: #555;">🔊 试听效果：</div>
+          <button onclick="testPronunciation('八', 'pinyin')">▶ 试听拼音</button>
+        </div>
+      </div>
+
+      <!-- 英文发音 -->
+      <div class="pronunciation-type">
+        <div class="pronunciation-type-label">🌍 英文发音</div>
+        
+        <div style="margin-bottom: 12px;">
+          <div style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px;">🎤 选择发音人：</div>
+          <select id="englishVoiceSelect" class="voice-select" onchange="setVoiceUI('english', this.value)">
+            <option value="">加载中...</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px;">⚡ 调整速度：</div>
+          <div class="speed-buttons">
+            <button class="speed-btn" onclick="setPronunciationSpeedUI('english', 'slow')">🐢 很慢</button>
+            <button class="speed-btn active" onclick="setPronunciationSpeedUI('english', 'normal')">🎯 正常</button>
+            <button class="speed-btn" onclick="setPronunciationSpeedUI('english', 'fast')">🚀 快速</button>
+          </div>
+        </div>
+
+        <div class="pronunciation-test">
+          <div style="margin-bottom: 8px; font-weight: 600; color: #555;">🔊 试听效果：</div>
+          <button onclick="testPronunciation('Hello, how are you', 'english')">▶ 试听英文</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let currentPage = "chinese";
+
+// ==================== 全局发音配置系统 ====================
+
+// 存储所有可用的发音人
+let availableVoices = {
+  chinese: [],
+  english: []
+};
+
+// 初始化发音人列表
+function initializeVoices() {
+  const allVoices = speechSynthesis.getVoices();
+  
+  // 获取中文发音人
+  availableVoices.chinese = allVoices.filter(voice => voice.lang.startsWith('zh'));
+  
+  // 获取英文发音人
+  availableVoices.english = allVoices.filter(voice => voice.lang.startsWith('en'));
+  
+  // 如果没有找到，使用所有可用的
+  if (availableVoices.chinese.length === 0) {
+    availableVoices.chinese = allVoices;
+  }
+  if (availableVoices.english.length === 0) {
+    availableVoices.english = allVoices;
+  }
+}
+
+// 当发音人加载完成时初始化
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = initializeVoices;
+}
+initializeVoices();
+
+const PRONUNCIATION_CONFIG = {
+  // 中文发音配置
+  chinese: {
+    lang: "zh-CN",
+    speeds: {
+      slow: 0.5,      // 很慢
+      normal: 0.7,    // 正常
+      fast: 0.9       // 快速
+    },
+    currentSpeed: 0.7,
+    voiceIndex: 0,    // 默认使用第一个发音人
+    pitch: 1,
+    volume: 1
+  },
+  
+  // 拼音发音配置
+  pinyin: {
+    lang: "zh-CN",
+    speeds: {
+      slow: 0.6,
+      normal: 0.8,
+      fast: 1.0
+    },
+    currentSpeed: 0.8,
+    voiceIndex: 0,
+    pitch: 1,
+    volume: 1
+  },
+  
+  // 英文发音配置
+  english: {
+    lang: "en-US",
+    speeds: {
+      slow: 0.6,
+      normal: 0.8,
+      fast: 1.0
+    },
+    currentSpeed: 0.8,
+    voiceIndex: 0,
+    pitch: 1,
+    volume: 1
+  }
+};
+
+// 获取对应类型的发音人列表
+function getVoicesForType(type) {
+  if (type === 'pinyin') {
+    return availableVoices.chinese;
+  } else if (type === 'english') {
+    return availableVoices.english;
+  }
+  return availableVoices.chinese;
+}
+
+// 获取发音人名称
+function getVoiceName(voice) {
+  return voice.name || '默认声音';
+}
+
+// 统一的发音函数
+function speak(text, type = 'chinese', speed = null) {
+  if (!text) return;
+  
+  const config = PRONUNCIATION_CONFIG[type];
+  if (!config) return;
+  
+  const rate = speed || config.currentSpeed;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = config.lang;
+  u.rate = rate;
+  u.pitch = config.pitch;
+  u.volume = config.volume;
+  
+  // 设置发音人
+  const voices = getVoicesForType(type);
+  if (voices.length > 0) {
+    const voiceIndex = Math.min(config.voiceIndex, voices.length - 1);
+    u.voice = voices[voiceIndex];
+  }
+  
+  // 取消任何正在进行的发音
+  speechSynthesis.cancel();
+  
+  // 延迟50ms后发音，确保取消操作生效
+  setTimeout(() => {
+    speechSynthesis.speak(u);
+  }, 50);
+}
+
+// 设置发音速度
+function setPronunciationSpeed(type, speedKey) {
+  const speeds = PRONUNCIATION_CONFIG[type]?.speeds;
+  if (speeds && speeds[speedKey] !== undefined) {
+    PRONUNCIATION_CONFIG[type].currentSpeed = speeds[speedKey];
+    return speeds[speedKey];
+  }
+  return null;
+}
+
+// 获取当前发音速度
+function getPronunciationSpeed(type) {
+  return PRONUNCIATION_CONFIG[type]?.currentSpeed;
+}
+
+// ==================== 登陆/注册模块 ====================
+
+function restoreUser() {
+  const saved = localStorage.getItem("currentUser");
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    showAppPage();
+  } else {
+    showAuthPage();
+  }
+}
+
+function switchAuthMode() {
+  const loginPanel = document.getElementById("login-panel");
+  const registerPanel = document.getElementById("register-panel");
+  
+  loginPanel.classList.toggle("active");
+  registerPanel.classList.toggle("active");
+  
+  // 清空错误信息和表单
+  clearAuthErrors();
+  document.getElementById("login-form").reset();
+  document.getElementById("register-form").reset();
+}
+
+// ==================== 菜单页面切换 ====================
+
+function toggleChineseMenu(event) {
+  event.stopPropagation();
+  const submenu = document.getElementById("chineseSubmenu");
+  submenu.style.display = submenu.style.display === "none" ? "flex" : "none";
+}
+
+function switchPage(page) {
+  currentPage = page;
+  const frameUrls = {
+    'chinese': 'chinese.html',
+    'pinyin': 'pinyin.html',
+    'math': 'math.html',
+    'english': 'english.html'
+  };
+  
+  // 更新 iframe 内容
+  if (frameUrls[page]) {
+    document.getElementById("contentFrame").src = frameUrls[page];
+  }
+  
+  // 关闭语文子菜单
+  const chineseSubmenu = document.getElementById("chineseSubmenu");
+  if (chineseSubmenu) {
+    chineseSubmenu.style.display = "none";
+  }
+  
+  // 更新菜单按钮的活跃状态
+  const featureBtns = document.querySelectorAll(".feature-btn");
+  featureBtns.forEach(btn => {
+    if (btn.textContent.includes(
+      page === 'chinese' || page === 'pinyin' ? '语文' : 
+      page === 'math' ? '数学' : 
+      page === 'english' ? '英语' : ''
+    )) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+  
+  // 更新子菜单按钮的活跃状态
+  const submenuItems = document.querySelectorAll(".submenu-item");
+  submenuItems.forEach(btn => {
+    if ((page === 'chinese' && btn.textContent === '生字') ||
+        (page === 'pinyin' && btn.textContent === '声母韵母')) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+}
+
+function clearAuthErrors() {
+  document.getElementById("login-error").classList.remove("show");
+  document.getElementById("register-error").classList.remove("show");
+}
+
+function showAuthError(panelId, message) {
+  const errorEl = document.getElementById(panelId === "login-panel" ? "login-error" : "register-error");
+  errorEl.textContent = message;
+  errorEl.classList.add("show");
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  clearAuthErrors();
+  
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value.trim();
+
+  if (!username || !password) {
+    showAuthError("login-panel", "请输入用户名和密码");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (res.status === 200) {
+      currentUser = { user_id: data.user_id, username: data.username };
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      document.getElementById("login-form").reset();
+      showAppPage();
+    } else {
+      showAuthError("login-panel", data.error || "登录失败");
+    }
+  } catch (err) {
+    console.error("登录请求出错：", err);
+    showAuthError("login-panel", "网络错误，请重试");
+  }
+}
+
+async function handleRegister(event) {
+  event.preventDefault();
+  clearAuthErrors();
+  
+  const username = document.getElementById("register-username").value.trim();
+  const password = document.getElementById("register-password").value.trim();
+  const confirm = document.getElementById("register-confirm").value.trim();
+
+  if (!username || !password || !confirm) {
+    showAuthError("register-panel", "请填写所有字段");
+    return;
+  }
+
+  if (username.length < 3) {
+    showAuthError("register-panel", "用户名至少需要 3 个字符");
+    return;
+  }
+
+  if (password.length < 6) {
+    showAuthError("register-panel", "密码至少需要 6 个字符");
+    return;
+  }
+
+  if (password !== confirm) {
+    showAuthError("register-panel", "两次输入的密码不一致");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (res.status === 200) {
+      alert("注册成功！请登录");
+      document.getElementById("register-form").reset();
+      switchAuthMode(); // 切换到登录面板
+    } else {
+      showAuthError("register-panel", data.error || "注册失败");
+    }
+  } catch (err) {
+    console.error("注册请求出错：", err);
+    showAuthError("register-panel", "网络错误，请重试");
+  }
+}
+
+function showAuthPage() {
+  document.getElementById("auth-page").style.display = "flex";
+  document.getElementById("app-page").style.display = "none";
+  // 重置为登录面板
+  document.getElementById("login-panel").classList.add("active");
+  document.getElementById("register-panel").classList.remove("active");
+}
+
+// ==================== 主应用模块 ====================
+
+function showAppPage() {
+  document.getElementById("auth-page").style.display = "none";
+  document.getElementById("app-page").style.display = "block";
+  document.getElementById("fabBtn").classList.add("show");
+  updateUserMenu();
+  switchPage("chinese");
+}
+
+function openAddItemModal() {
+  // 声母韵母页面不需要添加按钮
+  if (currentPage === 'pinyin') return;
+  
+  // 根据当前页面设置模态框内容
+  const modalInputArea = document.getElementById("modalInputArea");
+  const modalTitle = document.getElementById("modalTitle");
+  
+  if (currentPage === 'chinese') {
+    modalTitle.textContent = "添加生字";
+    modalInputArea.innerHTML = `
+      <input type="text" id="addItemInput" placeholder="请输入生字" maxlength="1" />
+      <button onclick="saveChineseItem()">保存</button>
+    `;
+  } else if (currentPage === 'math') {
+    modalTitle.textContent = "添加数学题";
+    modalInputArea.innerHTML = `
+      <input type="text" id="addItemInput" placeholder="请输入题目内容" />
+      <button onclick="saveMathItem()">保存</button>
+    `;
+  } else if (currentPage === 'english') {
+    modalTitle.textContent = "添加英语单词";
+    modalInputArea.innerHTML = `
+      <input type="text" id="addItemInput" placeholder="请输入英文单词" />
+      <input type="text" id="addItemInput2" placeholder="请输入中文翻译" />
+      <button onclick="saveEnglishItem()">保存</button>
+    `;
+  }
+  
+  document.getElementById("addItemModal").classList.add("show");
+  document.getElementById("addItemInput").focus();
+}
+
+function closeAddItemModal(event) {
+  if (event && event.target.id !== "addItemModal") return;
+  document.getElementById("addItemModal").classList.remove("show");
+}
+
+// ==================== 语文模块函数 ====================
+
+function saveChineseItem() {
+  const hanzi = document.getElementById("addItemInput").value.trim();
+  if (!hanzi) return alert("请输入生字");
+  if (!currentUser) return alert("请先登录");
+
+  fetch("/api/words", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: currentUser.user_id, hanzi })
+  }).then(res => {
+    if (res.status === 409) {
+      alert(`"${hanzi}" 已经存在了！`);
+    } else if (res.status === 200) {
+      closeAddItemModal();
+      // 刷新 iframe 内容
+      document.getElementById("contentFrame").src = "chinese.html";
+    } else {
+      alert("保存失败，请重试！");
+    }
+  }).catch(err => {
+    console.error("请求出错：", err);
+    alert("网络错误");
+  });
+}
+
+// ==================== 数学模块函数 ====================
+
+function saveMathItem() {
+  const content = document.getElementById("addItemInput").value.trim();
+  if (!content) return alert("请输入题目");
+  alert("数学题目功能开发中...");
+}
+
+// ==================== 英语模块函数 ====================
+
+function saveEnglishItem() {
+  const word = document.getElementById("addItemInput").value.trim();
+  const meaning = document.getElementById("addItemInput2").value.trim();
+  if (!word || !meaning) return alert("请输入单词和翻译");
+  alert("英语单词功能开发中...");
+}
+
+// 支持 Enter 键在添加内容模态框中保存
+document.addEventListener("keypress", (e) => {
+  if (e.key === "Enter" && document.getElementById("addItemModal").classList.contains("show")) {
+    if (currentPage === 'chinese') {
+      saveChineseItem();
+    } else if (currentPage === 'math') {
+      saveMathItem();
+    } else if (currentPage === 'english') {
+      saveEnglishItem();
+    }
+  }
+});
+
+// ==================== 发音设置函数 ====================
+
+function openPronunciationSettings() {
+  closeUserMenu();
+  const modal = document.getElementById("pronunciationModal");
+  modal.classList.add("show");
+  
+  // 初始化发音人选择器
+  initializeVoiceSelectors();
+  
+  // 更新所有按钮状态
+  updatePronunciationButtonStates();
+}
+
+// 初始化所有发音人选择器
+function initializeVoiceSelectors() {
+  initializeVoiceSelector('chinese', 'chineseVoiceSelect');
+  initializeVoiceSelector('pinyin', 'pinyinVoiceSelect');
+  initializeVoiceSelector('english', 'englishVoiceSelect');
+}
+
+// 初始化单个发音人选择器
+function initializeVoiceSelector(type, selectId) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  
+  const voices = getVoicesForType(type);
+  select.innerHTML = '';
+  
+  if (voices.length === 0) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = '暂无可用声音';
+    select.appendChild(option);
+    return;
+  }
+  
+  voices.forEach((voice, index) => {
+    const option = document.createElement('option');
+    option.value = index;
+    const lang = voice.lang.substring(0, 2).toUpperCase();
+    option.textContent = `${getVoiceName(voice)} (${lang})`;
+    select.appendChild(option);
+  });
+  
+  // 设置当前选中的发音人
+  const currentVoiceIndex = PRONUNCIATION_CONFIG[type].voiceIndex;
+  select.value = currentVoiceIndex;
+}
+
+function closePronunciationSettings(event) {
+  // 如果点击了内容区域，直接返回
+  if (event && event.target.closest('.modal-content')) return;
+  document.getElementById("pronunciationModal").classList.remove("show");
+}
+
+function updatePronunciationButtonStates() {
+  // 更新中文按钮状态
+  const chineseSpeed = getPronunciationSpeed('chinese');
+  const chineseSpeedKey = Object.keys(PRONUNCIATION_CONFIG.chinese.speeds).find(
+    key => PRONUNCIATION_CONFIG.chinese.speeds[key] === chineseSpeed
+  );
+  document.querySelectorAll('.pronunciation-type')[0].querySelectorAll('.speed-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active', 
+      btn.textContent.includes('很慢') && chineseSpeedKey === 'slow' ||
+      btn.textContent.includes('正常') && chineseSpeedKey === 'normal' ||
+      btn.textContent.includes('快速') && chineseSpeedKey === 'fast'
+    );
+  });
+
+  // 更新拼音按钮状态
+  const pinyinSpeed = getPronunciationSpeed('pinyin');
+  const pinyinSpeedKey = Object.keys(PRONUNCIATION_CONFIG.pinyin.speeds).find(
+    key => PRONUNCIATION_CONFIG.pinyin.speeds[key] === pinyinSpeed
+  );
+  document.querySelectorAll('.pronunciation-type')[1].querySelectorAll('.speed-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active',
+      btn.textContent.includes('很慢') && pinyinSpeedKey === 'slow' ||
+      btn.textContent.includes('正常') && pinyinSpeedKey === 'normal' ||
+      btn.textContent.includes('快速') && pinyinSpeedKey === 'fast'
+    );
+  });
+
+  // 更新英文按钮状态
+  const englishSpeed = getPronunciationSpeed('english');
+  const englishSpeedKey = Object.keys(PRONUNCIATION_CONFIG.english.speeds).find(
+    key => PRONUNCIATION_CONFIG.english.speeds[key] === englishSpeed
+  );
+  document.querySelectorAll('.pronunciation-type')[2].querySelectorAll('.speed-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active',
+      btn.textContent.includes('很慢') && englishSpeedKey === 'slow' ||
+      btn.textContent.includes('正常') && englishSpeedKey === 'normal' ||
+      btn.textContent.includes('快速') && englishSpeedKey === 'fast'
+    );
+  });
+}
+
+function setPronunciationSpeedUI(type, speedKey) {
+  setPronunciationSpeed(type, speedKey);
+  
+  // 更新按钮状态
+  const types = ['chinese', 'pinyin', 'english'];
+  const typeIndex = types.indexOf(type);
+  if (typeIndex >= 0) {
+    const typeElement = document.querySelectorAll('.pronunciation-type')[typeIndex];
+    if (typeElement) {
+      typeElement.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (
+          (btn.textContent.includes('很慢') && speedKey === 'slow') ||
+          (btn.textContent.includes('正常') && speedKey === 'normal') ||
+          (btn.textContent.includes('快速') && speedKey === 'fast')
+        ) {
+          btn.classList.add('active');
+        }
+      });
+    }
+  }
+}
+
+// 设置发音人
+function setVoiceUI(type, voiceIndex) {
+  if (voiceIndex !== '' && voiceIndex !== undefined && voiceIndex !== null) {
+    PRONUNCIATION_CONFIG[type].voiceIndex = parseInt(voiceIndex);
+  }
+}
+
+function testPronunciation(text, type) {
+  speak(text, type);
+}
+
+// ==================== 用户菜单函数 ====================
+
+function toggleUserMenu() {
+  const userMenu = document.getElementById("userMenu");
+  userMenu.classList.toggle("show");
+}
+
+function closeUserMenu() {
+  const userMenu = document.getElementById("userMenu");
+  userMenu.classList.remove("show");
+}
+
+function updateUserMenu() {
+  const usernameDisplay = document.getElementById("usernameDisplay");
+  if (currentUser) {
+    usernameDisplay.textContent = `👤 ${currentUser.username}`;
+  }
+}
+
+function logout() {
+  localStorage.removeItem("currentUser");
+  currentUser = null;
+  showAuthPage();
+}
+
+function openChangePassword() {
+  alert("密码修改功能开发中...");
+}
+
+// 全局点击监听 - 点击菜单外部时关闭菜单
+document.addEventListener("click", (e) => {
+  const userMenuBtn = document.getElementById("userMenuBtn");
+  const userMenu = document.getElementById("userMenu");
+  const chineseSubmenu = document.getElementById("chineseSubmenu");
+  
+  // 如果点击的不是菜单按钮或菜单本身，则关闭用户菜单
+  if (userMenu.classList.contains("show") && 
+      !userMenuBtn.contains(e.target) && 
+      !userMenu.contains(e.target)) {
+    closeUserMenu();
+  }
+  
+  // 关闭语文子菜单
+  if (chineseSubmenu && chineseSubmenu.style.display !== "none") {
+    const chineseNavArea = e.target.closest('.feature-nav div[style*="position"]');
+    if (!chineseNavArea) {
+      chineseSubmenu.style.display = "none";
+    }
+  }
+});
+
+// 初始化
+restoreUser();
+</script>
+</body>
+</html>

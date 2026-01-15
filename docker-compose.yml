@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_PATH=/app/words.db
+    volumes:
+      - ./words.db:/app/words.db
+    restart: unless-stopped

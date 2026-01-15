@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>语文 - 生字学习</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #fff3e0;
+    }
+
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* 生字卡片网格 */
+    #list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 12px;
+      margin-top: 0;
+    }
+
+    .word-wrapper {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .word-wrapper:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .word-display {
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff6f61;
+      text-align: center;
+      line-height: 1;
+      min-height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .word-display ruby {
+      font-size: 28px;
+    }
+
+    .word-display rt {
+      font-size: 10px;
+      color: #999;
+    }
+
+    .word-info {
+      font-size: 11px;
+      color: #999;
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .date {
+      background: #f5f5f5;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .speak-count {
+      background: #f5f5f5;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .word-actions {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .speak-btn,
+    .del-btn {
+      flex: 1;
+      padding: 4px 6px;
+      border: none;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: bold;
+    }
+
+    .speak-btn {
+      background: #4caf50;
+      color: white;
+    }
+
+    .speak-btn:hover {
+      background: #45a049;
+    }
+
+    .del-btn {
+      background: #ff6f61;
+      color: white;
+    }
+
+    .del-btn:hover {
+      background: #ff3b2f;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #888;
+      padding: 40px 16px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      #list {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .container {
+        padding: 12px;
+      }
+    }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      #list {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 769px) {
+      #list {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <div id="list"></div>
+</div>
+
+<script>
+// 从父页面获取当前用户信息
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const beijingTime = new Date(date.getTime() + (8 * 60 * 60 * 1000));
+  const year = beijingTime.getFullYear();
+  const month = String(beijingTime.getMonth() + 1).padStart(2, '0');
+  const day = String(beijingTime.getDate()).padStart(2, '0');
+  return `${year}/${month}/${day}`;
+}
+
+function speakChinese(hanzi, py, wordId) {
+  if (!hanzi) return;
+  
+  // 调用父页面的统一发音函数
+  if (window.parent && window.parent.speak) {
+    window.parent.speak(`${hanzi}，拼音：${py}`, 'chinese');
+  } else {
+    // 备用方案（如果在独立环境中）
+    const u = new SpeechSynthesisUtterance(`${hanzi}，拼音：${py}`);
+    u.lang = "zh-CN";
+    u.rate = 0.7;
+    speechSynthesis.cancel();
+    setTimeout(() => {
+      speechSynthesis.speak(u);
+    }, 50);
+  }
+
+  // 记录发音次数
+  if (!currentUser) return;
+  
+  fetch("/api/speak", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: wordId })
+  }).then(() => {
+    loadChinesePage();
+  });
+}
+
+function deleteChineseWord(id, hanzi) {
+  if (confirm(`确定要删除 "${hanzi}" 吗？`)) {
+    fetch("/api/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id })
+    }).then(res => {
+      if (res.status === 200) {
+        loadChinesePage();
+      } else {
+        alert("删除失败");
+      }
+    });
+  }
+}
+
+function loadChinesePage() {
+  if (!currentUser) return;
+
+  fetch(`/api/words/${currentUser.user_id}`)
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+
+      if (data.length === 0) {
+        list.innerHTML = "<div class='empty-message'>还没有添加任何生字，点击下方按钮添加吧！</div>";
+        return;
+      }
+
+      data.forEach(w => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "word-wrapper";
+
+        const date = formatDate(w.created_at);
+        wrapper.innerHTML = `
+          <div class="word-display">
+            <ruby>${w.hanzi}<rt>${w.pinyin}</rt></ruby>
+          </div>
+          <div class="word-info">
+            <span class="date">${date}</span>
+            <span class="speak-count">🔊 ${w.speak_count}</span>
+          </div>
+          <div class="word-actions">
+            <button class="speak-btn">朗读</button>
+            <button class="del-btn">删除</button>
+          </div>
+        `;
+
+        wrapper.querySelector(".speak-btn").onclick = () => speakChinese(w.hanzi, w.pinyin, w.id);
+        wrapper.querySelector(".del-btn").onclick = () => deleteChineseWord(w.id, w.hanzi);
+
+        list.appendChild(wrapper);
+      });
+    });
+}
+
+// 页面加载时初始化
+loadChinesePage();
+</script>
+</body>
+</html>
