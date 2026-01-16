@@ -33,26 +33,36 @@
 
     .header {
       background: white;
-      padding: 14px 16px;
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 2px solid var(--border-color);
       flex-shrink: 0;
       width: 100%;
+      z-index: 10;
     }
 
 
     .header-title {
       font-weight: 800;
-      font-size: 20px;
+      font-size: 18px;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
 
     .model-selector {
       display: flex;
-      gap: 12px;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none; /* Firefox */
     }
+    .model-selector::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
 
     .model-btn {
       padding: 8px 16px;
@@ -105,7 +115,38 @@
       border-bottom-left-radius: 4px;
       border: 2px solid var(--border-color);
       box-shadow: 0 4px 0 var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
+
+    .message-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .delete-msg-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ff4b4b;
+      color: white;
+      border: 2px solid white;
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      z-index: 5;
+    }
+
+    .message:hover .delete-msg-btn { display: flex; }
+
 
     .input-area {
       background: white;
@@ -206,42 +247,36 @@
 
     @media (max-width: 768px) {
       .header { 
-        padding: 12px 16px; 
-        flex-direction: column; 
-        align-items: flex-start; 
-        gap: 10px; 
+        padding: 8px 12px;
+        flex-direction: row; /* 保持一行，内部滚动 */
+        align-items: center;
       }
-      .header-title { font-size: 18px; }
+      .header-title { font-size: 16px; flex-shrink: 0; }
       .model-selector { 
-        width: 100%; 
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        gap: 8px;
+        flex: 1;
+        margin-left: 10px;
+        gap: 6px;
       }
       .voice-toggle { 
-        padding: 6px 10px; 
-        font-size: 12px; 
-        flex-shrink: 0;
-      }
-      .model-btn { 
-        padding: 6px 10px; 
-        font-size: 12px; 
-        flex-shrink: 0;
+        padding: 4px 8px; 
+        font-size: 11px; 
         white-space: nowrap;
       }
-      #chat-container { padding: 14px; }
-      .message { max-width: 94%; padding: 12px; font-size: 15px; }
-      .input-area { padding: 10px 12px 12px; }
-      .input-row { 
-        display: grid; 
-        grid-template-columns: 42px 1fr 42px 42px; 
-        gap: 8px; 
-        align-items: center; 
+      .model-btn { 
+        padding: 4px 8px; 
+        font-size: 11px; 
+        white-space: nowrap;
       }
-      .input-box { width: 100%; }
-      .icon-btn { width: 42px; height: 42px; font-size: 18px; }
+      #chat-container { padding: 12px; }
+      .message { max-width: 92%; padding: 10px 14px; font-size: 15px; }
+      .input-area { padding: 8px 10px 10px; }
+      .input-row { 
+        grid-template-columns: 40px 1fr 40px 40px; 
+        gap: 6px; 
+      }
+      .icon-btn { width: 40px; height: 40px; font-size: 18px; border-radius: 14px; }
     }
+
 
     @media (max-width: 360px) {
       .header-title { font-size: 17px; }
@@ -270,7 +305,9 @@
       <label class="voice-toggle">
         <input type="checkbox" id="autoSpeak" checked> 自动读题
       </label>
+      <button class="model-btn" onclick="clearHistory()" style="border-color: #ff4b4b; color: #ff4b4b;">清空记录</button>
       <button class="model-btn active" onclick="setModel('gemini-3-pro-image-preview', this)">Gemini Pro</button>
+
 
       <button class="model-btn" onclick="setModel('claude-haiku-4-5-20251001', this)">Claude Haiku</button>
     </div>
@@ -305,22 +342,124 @@
     });
 
     let currentModel = 'gemini-3-pro-image-preview';
+    let currentUser = null;
+
+    function restoreUser() {
+      const saved = localStorage.getItem("currentUser");
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        loadChatHistory();
+      }
+    }
+
+    async function loadChatHistory() {
+      if (!currentUser) return;
+      try {
+        const res = await fetch(`/api/ai-chat-history/${currentUser.user_id}`);
+        const history = await res.json();
+        const chat = document.getElementById('chat-container');
+        chat.innerHTML = '<div class="message ai-message">你好！我是你的 AI 辅导老师。你可以问我题目，或者拍照片给我看。我会耐心地教你哦！🌟</div>';
+        history.forEach(msg => {
+          appendMessage(msg.role, msg.content, msg.image_data, msg.id);
+        });
+      } catch (e) {}
+    }
+
+    async function clearHistory() {
+      if (!confirm("确定要清空所有对话记录吗？")) return;
+      try {
+        await fetch(`/api/ai-chat-history/${currentUser.user_id}`, { method: 'DELETE' });
+        loadChatHistory();
+      } catch (e) {}
+    }
+
+    async function deleteMessage(id, el) {
+      try {
+        await fetch(`/api/ai-chat-history/${currentUser.user_id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        el.remove();
+      } catch (e) {}
+    }
 
     let imageData = null;
-    let isRecording = false;
+
+
+    // 语音对话：你说一句 -> AI 回一句并朗读 -> 自动继续听
+    let voiceChatEnabled = false;
+    let awaitingAI = false;
+    let speaking = false;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
 
-    if ('webkitSpeechRecognition' in window) {
-      recognition = new webkitSpeechRecognition();
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
       recognition.continuous = false;
+      recognition.interimResults = true; // 开启中间结果，提升交互感
       recognition.lang = 'zh-CN';
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-        document.getElementById('userInput').value += text;
-        toggleVoice();
+
+      recognition.onstart = () => {
+        if (voiceChatEnabled) {
+          document.getElementById('voiceBtn').classList.add('recording');
+        }
       };
-      recognition.onerror = () => toggleVoice();
+
+      recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        if (finalTranscript) {
+          const text = finalTranscript.trim();
+          if (!text) return;
+
+          if (voiceChatEnabled) {
+            sendMessage(text);
+          } else {
+            document.getElementById('userInput').value += text;
+          }
+        } else if (interimTranscript) {
+          // 显示正在听的状态
+          if (voiceChatEnabled) {
+            const input = document.getElementById('userInput');
+            input.placeholder = "正在听: " + interimTranscript;
+          }
+        }
+      };
+
+      recognition.onend = () => {
+        document.getElementById('voiceBtn').classList.remove('recording');
+        if (!voiceChatEnabled) return;
+        if (awaitingAI || speaking) return;
+        
+        // 自动重启录音
+        setTimeout(() => {
+          if (voiceChatEnabled && !awaitingAI && !speaking) {
+            try { recognition.start(); } catch (e) {}
+          }
+        }, 300);
+      };
+
+
+      recognition.onerror = () => {
+        if (!voiceChatEnabled) return;
+        // 轻微延迟后重试
+        setTimeout(() => {
+          try { recognition.start(); } catch (e) {}
+        }, 600);
+      };
     }
+
 
     function setModel(model, btn) {
       currentModel = model;
@@ -340,47 +479,166 @@
       reader.readAsDataURL(file);
     }
 
-    function toggleVoice() {
-      if (!recognition) return alert("当前浏览器不支持录音功能");
-      isRecording = !isRecording;
-      const btn = document.getElementById('voiceBtn');
-      if (isRecording) {
-        btn.style.background = '#ff4b4b';
-        btn.style.color = 'white';
-        recognition.start();
-      } else {
-        btn.style.background = 'white';
-        btn.style.color = 'inherit';
-        recognition.stop();
+    function getVoiceSettingsSafe() {
+      try {
+        const raw = localStorage.getItem('voiceSettings');
+        return raw ? JSON.parse(raw) : { rate: 0.8, voiceName: null };
+      } catch (e) {
+        return { rate: 0.8, voiceName: null };
       }
     }
 
-    function appendMessage(role, content) {
+    function speakText(text, type = 'chinese') {
+      return new Promise((resolve) => {
+        const content = (text || '').trim();
+        if (!content) return resolve();
+
+        // 优先使用本页 speechSynthesis（移动端更稳定，不依赖 parent）
+        const synth = window.speechSynthesis;
+        if (!synth) {
+          // fallback
+          try {
+            if (window.parent && typeof window.parent.speak === 'function') {
+              window.parent.speak(content, type);
+            }
+          } catch (e) {}
+          return resolve();
+        }
+
+        const settings = getVoiceSettingsSafe();
+        const u = new SpeechSynthesisUtterance(content);
+        u.lang = (type === 'english') ? 'en-US' : 'zh-CN';
+        u.rate = settings.rate || 0.8;
+
+        try {
+          if (settings.voiceName && settings.voiceName !== 'default') {
+            const voices = synth.getVoices();
+            const v = voices.find(x => x.name === settings.voiceName);
+            if (v) u.voice = v;
+          }
+        } catch (e) {}
+
+        u.onend = () => resolve();
+        u.onerror = () => resolve();
+
+        try {
+          synth.cancel();
+          synth.speak(u);
+        } catch (e) {
+          resolve();
+        }
+      });
+    }
+
+    function setVoiceBtnState(enabled) {
+      const btn = document.getElementById('voiceBtn');
+      const input = document.getElementById('userInput');
+      if (!btn) return;
+      if (enabled) {
+        btn.innerText = '⏹️';
+        btn.title = '结束语音对话';
+        input.placeholder = "语音对话模式已开启，请说话...";
+      } else {
+        btn.innerText = '🎤';
+        btn.title = '语音对话';
+        btn.classList.remove('recording');
+        input.placeholder = "输入问题或点击录音...";
+      }
+    }
+
+
+    function toggleVoice() {
+      if (!recognition) return alert('当前浏览器不支持语音对话');
+
+      voiceChatEnabled = !voiceChatEnabled;
+      setVoiceBtnState(voiceChatEnabled);
+
+      if (voiceChatEnabled) {
+        // 开启连续对话：立即开始听
+        try { recognition.stop(); } catch (e) {}
+        setTimeout(() => {
+          try { recognition.start(); } catch (e) {}
+        }, 120);
+      } else {
+        // 关闭：停止听 + 停止播报
+        try { recognition.stop(); } catch (e) {}
+        try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+        speaking = false;
+        awaitingAI = false;
+      }
+    }
+
+
+    function setAIMessage(container, text, id) {
+      container.innerHTML = '';
+      if (id) {
+        const delBtn = document.createElement('div');
+        delBtn.className = 'delete-msg-btn';
+        delBtn.innerText = '×';
+        delBtn.onclick = (e) => { e.stopPropagation(); deleteMessage(id, container); };
+        container.appendChild(delBtn);
+      }
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      const span = document.createElement('span');
+      span.innerText = text;
+      contentDiv.appendChild(span);
+      
+      const speaker = document.createElement('button');
+      speaker.innerText = '🔊';
+      speaker.style = 'border:none; background:none; cursor:pointer; margin-left:8px;';
+      speaker.onclick = () => speakText(text, 'chinese');
+      contentDiv.appendChild(speaker);
+      
+      container.appendChild(contentDiv);
+    }
+
+    function appendMessage(role, content, img, id) {
       const chat = document.getElementById('chat-container');
       const div = document.createElement('div');
       div.className = `message ${role}-message`;
-      div.innerText = content;
+      
+      if (id) {
+        const delBtn = document.createElement('div');
+        delBtn.className = 'delete-msg-btn';
+        delBtn.innerText = '×';
+        delBtn.onclick = (e) => { e.stopPropagation(); deleteMessage(id, div); };
+        div.appendChild(delBtn);
+      }
+
+      if (img) {
+        const imgEl = document.createElement('img');
+        imgEl.src = img;
+        imgEl.style = 'max-width: 100%; border-radius: 12px; margin-bottom: 8px; display: block;';
+        div.appendChild(imgEl);
+      }
+
+      if (role === 'ai') {
+        setAIMessage(div, content);
+      } else {
+        const span = document.createElement('span');
+        span.innerText = content;
+        div.appendChild(span);
+      }
+      
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
-      
-      if (role === 'ai') {
-        const speaker = document.createElement('button');
-        speaker.innerText = '🔊';
-        speaker.style = 'border:none; background:none; cursor:pointer; margin-left:8px;';
-        speaker.onclick = () => window.parent.speak(content, 'chinese');
-        div.appendChild(speaker);
-      }
       return div;
     }
 
-    async function sendMessage() {
+
+    async function sendMessage(textOverride) {
       const input = document.getElementById('userInput');
-      const text = input.value.trim();
+      const text = (typeof textOverride === 'string') ? textOverride.trim() : input.value.trim();
       if (!text && !imageData) return;
 
-      appendMessage('user', text);
-      input.value = '';
-      const loading = appendMessage('ai', '思考中...');
+      // 语音对话：发送期间暂停继续听
+      awaitingAI = true;
+
+      appendMessage('user', text || '（图片）', imageData);
+      if (typeof textOverride !== 'string') input.value = '';
+
+      const loading = appendMessage('ai', '');
       loading.innerHTML = '<span class="loading-dots">老师正在看题目</span>';
 
       try {
@@ -388,32 +646,52 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            user_id: currentUser ? currentUser.user_id : null,
             model: currentModel,
             prompt: text,
             image: imageData
           })
         });
-        
+
         const data = await res.json();
+        const reply = (data && data.reply) ? String(data.reply) : '';
+
+        // 渲染回复
+        setAIMessage(loading, reply);
         
-        // 渲染回复并自动播放
-        loading.innerHTML = '';
-        loading.innerText = data.reply;
-        
-        // 自动播报 (仅在勾选时)
-        if (document.getElementById('autoSpeak').checked) {
-          console.log("Attempting auto-speak...");
-          window.parent.speak(data.reply, 'chinese');
+        // 重新加载历史以获取最新的 ID (简单处理，实际可由后端返回 ID)
+        setTimeout(loadChatHistory, 500);
+
+        // 自动播报：语音对话开启时强制播报；否则按开关
+
+        const shouldSpeak = voiceChatEnabled || document.getElementById('autoSpeak').checked;
+        if (shouldSpeak) {
+          speaking = true;
+          await speakText(reply, 'chinese');
+          speaking = false;
         }
-        
+
         // 重置图片
         imageData = null;
         document.getElementById('previewArea').innerHTML = '';
       } catch (e) {
-        loading.innerText = "抱歉，老师开小差了，请稍后再试。";
+        loading.innerText = '抱歉，老师开小差了，请稍后再试。';
+      } finally {
+        awaitingAI = false;
+        // 连续语音对话：播报结束后继续听
+        if (voiceChatEnabled && recognition && !speaking) {
+          setTimeout(() => {
+            try { recognition.start(); } catch (e) {}
+          }, 250);
+        }
       }
     }
 
+
+  </script>
+  <script>
+    restoreUser();
   </script>
 </body>
+
 </html>

@@ -139,6 +139,23 @@ function initDatabase() {
       else console.log("✓ english_new_words 表已创建");
     });
 
+    // 创建 ai_chat_history 表
+    db.run(`
+      CREATE TABLE IF NOT EXISTS ai_chat_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        role TEXT NOT NULL,
+        content TEXT NOT NULL,
+        image_data TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `, (err) => {
+      if (err) console.error("创建 ai_chat_history 表失败：", err);
+      else console.log("✓ ai_chat_history 表已创建");
+    });
+
+
     // 检查并迁移 english_new_words 表（添加 play_count）
     db.all("PRAGMA table_info(english_new_words)", (err, columns) => {
       if (err) return;
@@ -646,18 +663,22 @@ app.post("/api/change-password", (req, res) => {
 
 // AI 辅导代理接口
 app.post("/api/ai-tutor", async (req, res) => {
-  const { model, prompt, image } = req.body;
+  const { user_id, model, prompt, image } = req.body;
   const API_KEY = "sk-lvPJFVhX6BJzny89SUvx37NpC1n2514pT2ttdJdwPfAK04RB"; // 替换为你的有效 API Key
   const API_URL = "https://api.aass.cc/v1/chat/completions";
 
   try {
+    // 保存用户消息
+    if (user_id) {
+      db.run("INSERT INTO ai_chat_history (user_id, role, content, image_data) VALUES (?, ?, ?, ?)", [user_id, 'user', prompt || '', image || null]);
+    }
+
     const messages = [
       {
         role: "system",
-        content: "你是一位耐心的一年级辅导老师。你的任务是帮助小朋友理解问题，而不是直接给出答案。请使用亲切、简单、富有鼓励性的语言。重要规则：1. 禁止使用 ###, ---, > 等复杂的 Markdown 符号。2. 使用简单的空格和换行来分段。3. 重点词汇可以用少量的加粗，但不要大面积使用。4. 保持回答简洁，每次只专注于解释一个知识点，不要一次给太多信息。"
+        content: "你是一位耐心的一年级辅导老师。你的任务是帮助小朋友理解问题，而不是直接给出答案。请使用亲切、简单、富有鼓励性的语言。重要规则：1. 禁止使用 ###, ---, > 等复杂的 Markdown 符号。2. 使用简单的空格和换行来分段。3. 重点词汇可以用少量的加粗，但不要大面积使用。4. 保持回答简洁，每次只专注于解释一个知识点，不要一次给太多信息。5. 回复中不要包含任何代码块或编程相关的特殊字符。"
       }
     ];
-
 
     const userContent = [];
     if (prompt) userContent.push({ type: "text", text: prompt });
@@ -688,12 +709,46 @@ app.post("/api/ai-tutor", async (req, res) => {
     if (data.error) throw new Error(data.error.message || "API Error");
     
     const reply = data.choices[0].message.content;
+
+    // 保存 AI 回复
+    if (user_id) {
+      db.run("INSERT INTO ai_chat_history (user_id, role, content) VALUES (?, ?, ?)", [user_id, 'ai', reply]);
+    }
+
     res.json({ reply });
   } catch (error) {
     console.error("AI Proxy Error:", error);
     res.status(500).json({ error: "AI 老师暂时不在位，请检查网络或配置" });
   }
 });
+
+// 获取 AI 对话历史
+app.get("/api/ai-chat-history/:user_id", (req, res) => {
+  const { user_id } = req.params;
+  db.all("SELECT * FROM ai_chat_history WHERE user_id = ? ORDER BY created_at ASC", [user_id], (err, rows) => {
+    if (err) return res.status(500).json({ error: "查询失败" });
+    res.json(rows || []);
+  });
+});
+
+// 删除 AI 对话记录
+app.delete("/api/ai-chat-history/:user_id", (req, res) => {
+  const { user_id } = req.params;
+  const { id } = req.body;
+  
+  if (id) {
+    db.run("DELETE FROM ai_chat_history WHERE user_id = ? AND id = ?", [user_id, id], (err) => {
+      if (err) return res.status(500).json({ error: "删除失败" });
+      res.json({ success: true });
+    });
+  } else {
+    db.run("DELETE FROM ai_chat_history WHERE user_id = ?", [user_id], (err) => {
+      if (err) return res.status(500).json({ error: "清空失败" });
+      res.json({ success: true });
+    });
+  }
+});
+
 
 const PORT = process.env.PORT || 3000;
 
