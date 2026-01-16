@@ -2,11 +2,14 @@ const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const path = require("path");
+const https = require("https");
 const { default: pinyin } = require("pinyin");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 
 // 让服务器可以访问 public 文件夹
 app.use(express.static(path.join(__dirname, "public")));
@@ -116,6 +119,36 @@ function initDatabase() {
     `, (err) => {
       if (err) console.error("创建 english_learn 表失败：", err);
       else console.log("✓ english_learn 表已创建");
+    });
+
+    // 创建 english_new_words 表（英语单词本）
+    db.run(`
+      CREATE TABLE IF NOT EXISTS english_new_words (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        word TEXT NOT NULL,
+        phonetic TEXT,
+        chinese TEXT,
+        play_count INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE(user_id, word)
+      )
+    `, (err) => {
+      if (err) console.error("创建 english_new_words 表失败：", err);
+      else console.log("✓ english_new_words 表已创建");
+    });
+
+    // 检查并迁移 english_new_words 表（添加 play_count）
+    db.all("PRAGMA table_info(english_new_words)", (err, columns) => {
+      if (err) return;
+      const hasPlayCount = columns && columns.some(col => col.name === "play_count");
+      if (columns && columns.length > 0 && !hasPlayCount) {
+        db.run("ALTER TABLE english_new_words ADD COLUMN play_count INTEGER DEFAULT 0", (err) => {
+          if (err) console.error("迁移 english_new_words 表失败：", err);
+          else console.log("✓ english_new_words 表已添加 play_count 列");
+        });
+      }
     });
   });
 }
@@ -432,6 +465,138 @@ app.get("/api/english/:user_id", (req, res) => {
   );
 });
 
+// ==================== 英语单词本 API ====================
+
+// 获取用户的单词本
+app.get("/api/english-new-words/:user_id", (req, res) => {
+  const { user_id } = req.params;
+
+  db.all(
+    "SELECT * FROM english_new_words WHERE user_id = ? ORDER BY created_at DESC",
+    [user_id],
+    (err, rows) => {
+      if (err) {
+        console.error("查询单词本失败：", err);
+        return res.sendStatus(500);
+      }
+      res.json(rows || []);
+    }
+  );
+});
+
+// 添加单词到单词本
+app.post("/api/english-new-words", (req, res) => {
+  const { user_id, word, phonetic, chinese } = req.body;
+
+  if (!user_id || !word) {
+    return res.status(400).json({ error: "缺少必要参数" });
+  }
+
+  db.run(
+    `INSERT INTO english_new_words (user_id, word, phonetic, chinese)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(user_id, word) DO UPDATE SET 
+       phonetic = excluded.phonetic,
+       chinese = excluded.chinese`,
+    [user_id, word, phonetic, chinese],
+    (err) => {
+      if (err) {
+        console.error("添加单词到单词本失败：", err);
+        return res.sendStatus(500);
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+// 从单词本中删除单词
+app.delete("/api/english-new-words", (req, res) => {
+  const { user_id, word } = req.body;
+
+  if (!user_id || !word) {
+    return res.status(400).json({ error: "缺少必要参数" });
+  }
+
+  db.run(
+    "DELETE FROM english_new_words WHERE user_id = ? AND word = ?",
+    [user_id, word],
+    (err) => {
+      if (err) {
+        console.error("删除单词本单词失败：", err);
+        return res.sendStatus(500);
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+// 增加单词本播放次数
+app.post("/api/english-new-words/speak", (req, res) => {
+  const { user_id, word } = req.body;
+
+  if (!user_id || !word) {
+    return res.status(400).json({ error: "缺少参数" });
+  }
+
+  db.run(
+    "UPDATE english_new_words SET play_count = play_count + 1 WHERE user_id = ? AND word = ?",
+    [user_id, word],
+    (err) => {
+      if (err) {
+        console.error("更新播放次数失败：", err);
+        return res.sendStatus(500);
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+// 英语单词查询代理（解决 CORS 问题）
+app.get("/api/proxy/english/:word", (req, res) => {
+  const { word } = req.params;
+  
+  // 同时请求有道建议和 Dictionary API
+  const results = { chinese: "", phonetic: "" };
+  let completed = 0;
+
+  const checkDone = () => {
+    completed++;
+    if (completed === 2) {
+      res.json(results);
+    }
+  };
+
+  // 获取翻译
+  https.get(`https://dict.youdao.com/suggest?q=${word}&num=1&doctype=json`, (resp) => {
+    let data = '';
+    resp.on('data', (chunk) => data += chunk);
+    resp.on('end', () => {
+      try {
+        const json = JSON.parse(data);
+        if (json.data && json.data.entries && json.data.entries.length > 0) {
+          results.chinese = json.data.entries[0].explain;
+        }
+      } catch (e) {}
+      checkDone();
+    });
+  }).on("error", checkDone);
+
+  // 获取音标
+  https.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`, (resp) => {
+    let data = '';
+    resp.on('data', (chunk) => data += chunk);
+    resp.on('end', () => {
+      try {
+        const json = JSON.parse(data);
+        if (Array.isArray(json) && json.length > 0) {
+          results.phonetic = json[0].phonetic || (json[0].phonetics && json[0].phonetics.find(p => p.text)?.text) || "";
+        }
+      } catch (e) {}
+      checkDone();
+    });
+  }).on("error", checkDone);
+});
+
 // 删除生字
 app.post("/api/delete", (req, res) => {
   const { id } = req.body;
@@ -452,7 +617,87 @@ app.post("/api/delete", (req, res) => {
 
 
 
+// 修改密码接口
+app.post("/api/change-password", (req, res) => {
+  const { user_id, oldPassword, newPassword } = req.body;
+
+  if (!user_id || !oldPassword || !newPassword) {
+    return res.status(400).json({ error: "缺少必要参数" });
+  }
+
+  db.get(
+    "SELECT password FROM users WHERE id = ?",
+    [user_id],
+    (err, row) => {
+      if (err || !row) return res.status(500).json({ error: "用户不存在" });
+      if (row.password !== oldPassword) return res.status(401).json({ error: "旧密码错误" });
+
+      db.run(
+        "UPDATE users SET password = ? WHERE id = ?",
+        [newPassword, user_id],
+        (err) => {
+          if (err) return res.status(500).json({ error: "更新失败" });
+          res.json({ success: true });
+        }
+      );
+    }
+  );
+});
+
+// AI 辅导代理接口
+app.post("/api/ai-tutor", async (req, res) => {
+  const { model, prompt, image } = req.body;
+  const API_KEY = "sk-lvPJFVhX6BJzny89SUvx37NpC1n2514pT2ttdJdwPfAK04RB"; // 替换为你的有效 API Key
+  const API_URL = "https://api.aass.cc/v1/chat/completions";
+
+  try {
+    const messages = [
+      {
+        role: "system",
+        content: "你是一位耐心的一年级辅导老师。你的任务是帮助小朋友理解问题，而不是直接给出答案。请使用亲切、简单、富有鼓励性的语言。重要规则：1. 禁止使用 ###, ---, > 等复杂的 Markdown 符号。2. 使用简单的空格和换行来分段。3. 重点词汇可以用少量的加粗，但不要大面积使用。4. 保持回答简洁，每次只专注于解释一个知识点，不要一次给太多信息。"
+      }
+    ];
+
+
+    const userContent = [];
+    if (prompt) userContent.push({ type: "text", text: prompt });
+    if (image) {
+      const base64Data = image.split(",")[1] || image;
+      userContent.push({
+        type: "image_url",
+        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
+      });
+    }
+
+    messages.push({ role: "user", content: userContent });
+
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message || "API Error");
+    
+    const reply = data.choices[0].message.content;
+    res.json({ reply });
+  } catch (error) {
+    console.error("AI Proxy Error:", error);
+    res.status(500).json({ error: "AI 老师暂时不在位，请检查网络或配置" });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
+
+
 
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);

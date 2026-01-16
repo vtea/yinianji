@@ -5,65 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>语文 - 生字学习</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --primary-color: #58cc02;
+      --primary-hover: #46a302;
+      --secondary-color: #1cb0f6;
+      --accent-color: #ffc800;
+      --text-color: #4b4b4b;
+      --border-color: #e5e5e5;
     }
 
     body {
-      font-family: "Microsoft YaHei", sans-serif;
-      background: #fff3e0;
+      font-family: "din-round", "Microsoft YaHei", sans-serif;
+      background: #ffffff;
+      color: var(--text-color);
+      padding: 0;
+      margin: 0;
     }
 
     .container {
-      max-width: 100%;
+      max-width: 1000px;
       margin: 0 auto;
-      padding: 16px;
+      padding: 24px;
     }
 
-    /* 生字卡片网格 */
     #list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 12px;
-      margin-top: 0;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 24px;
     }
 
     .word-wrapper {
       background: white;
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      gap: 12px;
+      position: relative;
+      box-shadow: 0 4px 0 var(--border-color);
+      transition: all 0.2s;
+      cursor: pointer;
     }
 
     .word-wrapper:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      background-color: #f7f7f7;
+      transform: translateY(-2px);
     }
 
+    .word-wrapper:active {
+      transform: translateY(4px);
+      box-shadow: 0 0px 0 var(--border-color);
+    }
+
+
     .word-display {
-      font-size: 28px;
-      font-weight: bold;
-      color: #ff6f61;
-      text-align: center;
-      line-height: 1;
-      min-height: 80px;
+      width: 100px;
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 80px;
-      height: 80px;
-      margin: 0 auto;
       position: relative;
+      background: #fff;
+      border: 2px solid #333;
     }
 
-    /* 米字格背景 */
+    /* 现代化的米字格 */
     .word-display::before {
       content: '';
       position: absolute;
@@ -72,22 +80,21 @@
       width: 100%;
       height: 100%;
       background-image: 
-        linear-gradient(#ddd 1px, transparent 1px),
-        linear-gradient(90deg, #ddd 1px, transparent 1px),
-        linear-gradient(45deg, #e8e8e8 1px, transparent 1px),
-        linear-gradient(-45deg, #e8e8e8 1px, transparent 1px);
-      background-size: 40px 40px, 40px 40px, 56px 56px, 56px 56px;
-      background-position: 0 0, 0 0, 0 0, 0 0;
+        linear-gradient(#eee 1px, transparent 1px),
+        linear-gradient(90deg, #eee 1px, transparent 1px),
+        linear-gradient(45deg, #f5f5f5 1px, transparent 1px),
+        linear-gradient(-45deg, #f5f5f5 1px, transparent 1px);
+      background-size: 50% 50%, 50% 50%, 70% 70%, 70% 70%;
+      background-position: center;
       pointer-events: none;
-      border: 2px solid #333;
-      border-radius: 0;
     }
 
     .word-display ruby {
-      font-size: 50px;
-      position: relative;
+      font-size: 64px;
+      font-weight: 800;
       z-index: 1;
       line-height: 1;
+      color: #333;
     }
 
     .word-display rt {
@@ -95,162 +102,110 @@
     }
 
     .word-pinyin {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 8px;
-      order: -1;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--secondary-color);
+      background: #ddf4ff;
+      padding: 4px 12px;
+      border-radius: 12px;
     }
 
     .word-info {
-      font-size: 11px;
-      color: #999;
       display: flex;
-      gap: 4px;
-      justify-content: center;
+      justify-content: space-between;
       width: 100%;
-      flex-wrap: wrap;
-    }
-
-    .date {
-      background: #f5f5f5;
-      padding: 2px 4px;
-      border-radius: 3px;
-    }
-
-    .speak-count {
-      background: #f5f5f5;
-      padding: 2px 4px;
-      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #afafaf;
     }
 
     .word-actions {
       display: flex;
-      gap: 4px;
+      gap: 8px;
       width: 100%;
-      justify-content: center;
+      margin-top: 8px;
     }
 
-    .speak-btn,
-    .del-btn {
+    .speak-btn, .del-btn {
       flex: 1;
-      padding: 4px 6px;
+      padding: 8px;
       border: none;
-      border-radius: 4px;
-      font-size: 10px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 12px;
       cursor: pointer;
-      transition: background 0.2s;
-      font-weight: bold;
+      text-transform: uppercase;
+      transition: all 0.1s;
     }
 
     .speak-btn {
-      background: #4caf50;
+      background: var(--primary-color);
       color: white;
+      box-shadow: 0 3px 0 var(--primary-hover);
     }
 
-    .speak-btn:hover {
-      background: #45a049;
+    .speak-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 0 0;
     }
 
     .del-btn {
-      background: #ff6f61;
+      background: #ff4b4b;
       color: white;
+      box-shadow: 0 3px 0 #d33131;
     }
 
-    .del-btn:hover {
-      background: #ff3b2f;
+    .del-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 0 0;
     }
 
     .empty-message {
       text-align: center;
-      color: #888;
-      padding: 40px 16px;
-      font-size: 14px;
+      color: #afafaf;
+      padding: 60px 16px;
+      font-size: 18px;
+      font-weight: 800;
     }
 
     @media (max-width: 480px) {
       #list {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
       }
-      
-      .container {
-        padding: 12px;
-      }
-    }
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      #list {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    @media (min-width: 769px) {
-      #list {
-        grid-template-columns: repeat(5, 1fr);
-      }
-    }
-
-    /* 拼音四线格 */
-    .pinyin-line {
-      display: inline-block;
-      position: relative;
-      padding: 0;
-      height: 28px;
-      line-height: 28px;
-      background-image: 
-        linear-gradient(#2196F3 2px, transparent 2px),
-        linear-gradient(#E3F2FD 2px, transparent 2px),
-        linear-gradient(#E3F2FD 2px, transparent 2px),
-        linear-gradient(#2196F3 2px, transparent 2px);
-      background-size: 100% 28px;
-      background-position: 0 0px, 0 8px, 0 18px, 0 26px;
-      background-repeat: repeat-x;
-      text-align: center;
-      font-size: 16px;
-      color: #333;
-      font-weight: normal;
-      white-space: nowrap;
-      padding-left: 8px;
-      padding-right: 8px;
     }
   </style>
 </head>
-
 <body>
 <div class="container">
   <div id="list"></div>
 </div>
 
 <script>
-// 从父页面获取当前用户信息
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
 function formatDate(dateString) {
   const date = new Date(dateString);
-  const beijingTime = new Date(date.getTime() + (8 * 60 * 60 * 1000));
-  const year = beijingTime.getFullYear();
-  const month = String(beijingTime.getMonth() + 1).padStart(2, '0');
-  const day = String(beijingTime.getDate()).padStart(2, '0');
-  return `${year}/${month}/${day}`;
+  return date.toLocaleDateString();
 }
 
 function speakChinese(hanzi, py, wordId) {
   if (!hanzi) return;
   
-  // 调用父页面的统一发音函数
   if (window.parent && window.parent.speak) {
     window.parent.speak(`${hanzi}，拼音：${py}`, 'chinese');
   } else {
-    // 备用方案（如果在独立环境中）
+    const saved = localStorage.getItem("voiceSettings");
+    const voiceSettings = saved ? JSON.parse(saved) : { rate: 0.8 };
     const u = new SpeechSynthesisUtterance(`${hanzi}，拼音：${py}`);
     u.lang = "zh-CN";
-    u.rate = 0.7;
+    u.rate = voiceSettings.rate;
     speechSynthesis.cancel();
     setTimeout(() => {
       speechSynthesis.speak(u);
     }, 50);
   }
 
-  // 记录发音次数
+
   if (!currentUser) return;
   
   fetch("/api/speak", {
@@ -262,7 +217,8 @@ function speakChinese(hanzi, py, wordId) {
   });
 }
 
-function deleteChineseWord(id, hanzi) {
+function deleteChineseWord(event, id, hanzi) {
+  event.stopPropagation();
   if (confirm(`确定要删除 "${hanzi}" 吗？`)) {
     fetch("/api/delete", {
       method: "POST",
@@ -285,10 +241,11 @@ function loadChinesePage() {
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById("list");
+      if (!list) return;
       list.innerHTML = "";
 
       if (data.length === 0) {
-        list.innerHTML = "<div class='empty-message'>还没有添加任何生字，点击下方按钮添加吧！</div>";
+        list.innerHTML = "<div class='empty-message'>还没有添加任何生字，快去添加吧！</div>";
         return;
       }
 
@@ -298,14 +255,12 @@ function loadChinesePage() {
 
         const date = formatDate(w.created_at);
         wrapper.innerHTML = `
+          <div class="word-pinyin">${w.pinyin}</div>
           <div class="word-display">
             <ruby>${w.hanzi}<rt></rt></ruby>
           </div>
-          <div class="word-pinyin">
-            <span class="pinyin-line">${w.pinyin}</span>
-          </div>
           <div class="word-info">
-            <span class="date">${date}</span>
+            <span>📅 ${date}</span>
             <span class="speak-count">🔊 ${w.speak_count}</span>
           </div>
           <div class="word-actions">
@@ -314,15 +269,18 @@ function loadChinesePage() {
           </div>
         `;
 
-        wrapper.querySelector(".speak-btn").onclick = () => speakChinese(w.hanzi, w.pinyin, w.id);
-        wrapper.querySelector(".del-btn").onclick = () => deleteChineseWord(w.id, w.hanzi);
+        wrapper.onclick = () => speakChinese(w.hanzi, w.pinyin, w.id);
+        wrapper.querySelector(".speak-btn").onclick = (e) => {
+          e.stopPropagation();
+          speakChinese(w.hanzi, w.pinyin, w.id);
+        };
+        wrapper.querySelector(".del-btn").onclick = (e) => deleteChineseWord(e, w.id, w.hanzi);
 
         list.appendChild(wrapper);
       });
     });
 }
 
-// 页面加载时初始化
 loadChinesePage();
 </script>
 </body>

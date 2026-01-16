@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>英语单词本</title>
+  <style>
+    :root {
+      --primary-color: #58cc02;
+      --primary-hover: #46a302;
+      --secondary-color: #1cb0f6;
+      --accent-color: #ffc800;
+      --text-color: #4b4b4b;
+      --border-color: #e5e5e5;
+    }
+
+    body {
+      font-family: "din-round", "Microsoft YaHei", sans-serif;
+      background: #ffffff;
+      color: var(--text-color);
+      padding: 0;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--primary-color);
+    }
+
+    .back-btn {
+      padding: 12px 24px;
+      background: white;
+      color: #afafaf;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 800;
+      box-shadow: 0 4px 0 var(--border-color);
+      transition: all 0.1s;
+    }
+
+    .back-btn:hover {
+      background-color: #f7f7f7;
+    }
+
+    .back-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0;
+    }
+
+    .word-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 24px;
+    }
+
+    .word-card {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      box-shadow: 0 4px 0 var(--border-color);
+    }
+
+    .word-card:hover {
+      background-color: #f7f7f7;
+      transform: translateY(-2px);
+    }
+
+    .word-card:active {
+      transform: translateY(2px);
+      box-shadow: 0 0px 0 var(--border-color);
+    }
+
+    .word-english {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--secondary-color);
+    }
+
+    .word-phonetic {
+      font-size: 14px;
+      color: #afafaf;
+      font-weight: 500;
+    }
+
+    .word-chinese {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-color);
+      background: #f1f1f1;
+      padding: 6px 16px;
+      border-radius: 12px;
+      width: 100%;
+    }
+
+    .word-meta {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 12px;
+      font-weight: 800;
+      color: #afafaf;
+      margin-top: 8px;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      background: #ff4b4b;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 0 #d33131;
+      transition: all 0.1s;
+    }
+
+    .remove-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 0 0;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #afafaf;
+      padding: 80px 16px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 480px) {
+      .word-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="section-title">我的单词本</div>
+    <button class="back-btn" onclick="goBack()">返回学习</button>
+  </div>
+  <div id="contentArea">
+    <div class="word-list" id="wordList"></div>
+  </div>
+</div>
+
+<script>
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+function goBack() {
+  window.location.href = "english.html";
+}
+
+function speakWord(english) {
+  if (!english) return;
+  
+  if (currentUser) {
+    fetch("/api/english-new-words/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        user_id: currentUser.user_id, 
+        word: english 
+      })
+    }).then(() => {
+      const cards = document.querySelectorAll(".word-card");
+      cards.forEach(card => {
+        if (card.querySelector(".word-english").textContent === english) {
+          const countEl = card.querySelector(".play-count");
+          if (countEl) {
+            const count = parseInt(countEl.textContent.match(/\d+/)[0]);
+            countEl.textContent = `🔊 ${count + 1}`;
+          }
+        }
+      });
+    }).catch(err => console.error("更新播放次数失败：", err));
+  }
+
+  if (window.parent && window.parent.speak) {
+    window.parent.speak(english, 'english');
+  } else {
+    const saved = localStorage.getItem("voiceSettings");
+    const voiceSettings = saved ? JSON.parse(saved) : { rate: 0.8 };
+    const u = new SpeechSynthesisUtterance(english);
+    u.lang = "en-US";
+    u.rate = voiceSettings.rate;
+    speechSynthesis.cancel();
+    setTimeout(() => {
+      speechSynthesis.speak(u);
+    }, 50);
+  }
+
+}
+
+async function removeWord(event, word) {
+  event.stopPropagation();
+  if (!currentUser) return;
+  
+  if (!confirm(`确定要从单词本中删除 "${word}" 吗？`)) return;
+
+  try {
+    const res = await fetch("/api/english-new-words", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        user_id: currentUser.user_id, 
+        word: word 
+      })
+    });
+    
+    if (res.ok) {
+      loadNewWords();
+    }
+  } catch (err) {
+    console.error("删除失败：", err);
+  }
+}
+
+function createWordCard(wordObj) {
+  const date = new Date(wordObj.created_at).toLocaleDateString();
+  const card = document.createElement("div");
+  card.className = "word-card";
+  card.innerHTML = `
+    <button class="remove-btn" onclick="removeWord(event, '${wordObj.word}')">✕</button>
+    <div class="word-english">${wordObj.word}</div>
+    <div class="word-phonetic">${wordObj.phonetic || ''}</div>
+    <div class="word-chinese">${wordObj.chinese || ''}</div>
+    <div class="word-meta">
+      <span class="play-count">🔊 ${wordObj.play_count || 0}</span>
+      <span>📅 ${date}</span>
+    </div>
+  `;
+  
+  card.onclick = () => speakWord(wordObj.word);
+  
+  return card;
+}
+
+async function loadNewWords() {
+  if (!currentUser) return;
+  
+  try {
+    const res = await fetch(`/api/english-new-words/${currentUser.user_id}`);
+    const words = await res.json();
+    
+    const wordList = document.getElementById("wordList");
+    if (!wordList) return;
+    
+    wordList.innerHTML = "";
+    
+    if (words.length === 0) {
+      document.getElementById("contentArea").innerHTML = '<div class="empty-message">单词本还是空的，去学习新单词吧！</div>';
+      return;
+    }
+    
+    words.forEach(word => {
+      wordList.appendChild(createWordCard(word));
+    });
+  } catch (err) {
+    console.error("加载单词本失败：", err);
+  }
+}
+
+if (currentUser) {
+  loadNewWords();
+} else {
+  document.getElementById("contentArea").innerHTML = '<div class="empty-message">请先登录</div>';
+}
+</script>
+</body>
+</html>

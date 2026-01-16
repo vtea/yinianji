@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 辅导 - 学习助手</title>
+  <style>
+    :root {
+      --primary-color: #58cc02;
+      --secondary-color: #1cb0f6;
+      --accent-color: #ffc800;
+      --text-color: #4b4b4b;
+      --border-color: #e5e5e5;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "din-round", "Microsoft YaHei", sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+
+
+    .header {
+      background: white;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border-color);
+      flex-shrink: 0;
+      width: 100%;
+    }
+
+
+    .header-title {
+      font-weight: 800;
+      font-size: 20px;
+    }
+
+
+    .model-selector {
+      display: flex;
+      gap: 12px;
+    }
+
+    .model-btn {
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+      background: white;
+      font-weight: 800;
+      cursor: pointer;
+      color: #777;
+      transition: all 0.2s;
+    }
+
+    .model-btn.active {
+      border-color: var(--secondary-color);
+      color: var(--secondary-color);
+      background: #ddf4ff;
+    }
+
+    #chat-container {
+      flex: 1 1 auto;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 0;
+    }
+
+
+    .message {
+      max-width: 80%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .user-message {
+      align-self: flex-end;
+      background: var(--secondary-color);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .ai-message {
+      align-self: flex-start;
+      background: white;
+      color: var(--text-color);
+      border-bottom-left-radius: 4px;
+      border: 2px solid var(--border-color);
+      box-shadow: 0 4px 0 var(--border-color);
+    }
+
+    .input-area {
+      background: white;
+      padding: 24px;
+      border-top: 2px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .input-box {
+      flex: 1;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-size: 16px;
+      font-weight: 700;
+      outline: none;
+      resize: none;
+      min-height: 24px;
+      max-height: 120px;
+    }
+
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      box-shadow: 0 4px 0 var(--border-color);
+      transition: all 0.1s;
+    }
+
+    .icon-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0;
+    }
+
+    .send-btn {
+      background: var(--primary-color);
+      color: white;
+      border-color: #46a302;
+      box-shadow: 0 4px 0 #46a302;
+    }
+
+    .preview-area {
+      display: flex;
+      gap: 8px;
+    }
+
+    .img-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 2px solid var(--secondary-color);
+    }
+
+    .loading-dots {
+      display: inline-block;
+    }
+
+    .loading-dots::after {
+      content: '.';
+      animation: dots 1s steps(5, end) infinite;
+    }
+
+    .voice-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #777;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+    }
+
+    .voice-toggle input {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .header { 
+        padding: 12px 16px; 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 10px; 
+      }
+      .header-title { font-size: 18px; }
+      .model-selector { 
+        width: 100%; 
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+      .voice-toggle { 
+        padding: 6px 10px; 
+        font-size: 12px; 
+        flex-shrink: 0;
+      }
+      .model-btn { 
+        padding: 6px 10px; 
+        font-size: 12px; 
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      #chat-container { padding: 14px; }
+      .message { max-width: 94%; padding: 12px; font-size: 15px; }
+      .input-area { padding: 10px 12px 12px; }
+      .input-row { 
+        display: grid; 
+        grid-template-columns: 42px 1fr 42px 42px; 
+        gap: 8px; 
+        align-items: center; 
+      }
+      .input-box { width: 100%; }
+      .icon-btn { width: 42px; height: 42px; font-size: 18px; }
+    }
+
+    @media (max-width: 360px) {
+      .header-title { font-size: 17px; }
+      .voice-toggle, .model-btn { font-size: 11px; padding: 5px 8px; }
+      .input-row { grid-template-columns: 36px 1fr 36px 36px; gap: 6px; }
+      .icon-btn { width: 36px; height: 36px; font-size: 16px; }
+      .input-box { font-size: 14px; padding: 10px 12px; }
+    }
+
+
+
+    @keyframes dots {
+
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60% { content: '...'; }
+      80%, 100% { content: ''; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-title">🦉 AI 辅导老师</div>
+
+    <div class="model-selector">
+      <label class="voice-toggle">
+        <input type="checkbox" id="autoSpeak" checked> 自动读题
+      </label>
+      <button class="model-btn active" onclick="setModel('gemini-3-pro-image-preview', this)">Gemini Pro</button>
+
+      <button class="model-btn" onclick="setModel('claude-haiku-4-5-20251001', this)">Claude Haiku</button>
+    </div>
+  </div>
+
+  <div id="chat-container">
+    <div class="message ai-message">你好！我是你的 AI 辅导老师。你可以问我题目，或者拍照片给我看。我会耐心地教你哦！🌟</div>
+  </div>
+
+  <div class="input-area">
+    <div class="preview-area" id="previewArea"></div>
+    <div class="input-row">
+      <button class="icon-btn" title="上传图片" onclick="document.getElementById('fileInput').click()">📷</button>
+      <input type="file" id="fileInput" hidden accept="image/*" onchange="handleImage(this)">
+      
+      <textarea id="userInput" class="input-box" placeholder="输入问题或点击录音..." rows="1"></textarea>
+      
+      <button class="icon-btn" id="voiceBtn" title="语音输入" onclick="toggleVoice()">🎤</button>
+      <button class="icon-btn send-btn" onclick="sendMessage()">⬆️</button>
+    </div>
+  </div>
+
+  <script>
+    // 防止在 iframe/移动端出现初始滚动偏移导致顶部被“吃掉”
+    window.addEventListener('load', () => {
+      try {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      } catch (e) {}
+    });
+
+    let currentModel = 'gemini-3-pro-image-preview';
+
+    let imageData = null;
+    let isRecording = false;
+    let recognition = null;
+
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'zh-CN';
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        document.getElementById('userInput').value += text;
+        toggleVoice();
+      };
+      recognition.onerror = () => toggleVoice();
+    }
+
+    function setModel(model, btn) {
+      currentModel = model;
+      document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function handleImage(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imageData = e.target.result;
+        const preview = document.getElementById('previewArea');
+        preview.innerHTML = `<img src="${imageData}" class="img-preview" onclick="this.parentElement.innerHTML=''">`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function toggleVoice() {
+      if (!recognition) return alert("当前浏览器不支持录音功能");
+      isRecording = !isRecording;
+      const btn = document.getElementById('voiceBtn');
+      if (isRecording) {
+        btn.style.background = '#ff4b4b';
+        btn.style.color = 'white';
+        recognition.start();
+      } else {
+        btn.style.background = 'white';
+        btn.style.color = 'inherit';
+        recognition.stop();
+      }
+    }
+
+    function appendMessage(role, content) {
+      const chat = document.getElementById('chat-container');
+      const div = document.createElement('div');
+      div.className = `message ${role}-message`;
+      div.innerText = content;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+      
+      if (role === 'ai') {
+        const speaker = document.createElement('button');
+        speaker.innerText = '🔊';
+        speaker.style = 'border:none; background:none; cursor:pointer; margin-left:8px;';
+        speaker.onclick = () => window.parent.speak(content, 'chinese');
+        div.appendChild(speaker);
+      }
+      return div;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text && !imageData) return;
+
+      appendMessage('user', text);
+      input.value = '';
+      const loading = appendMessage('ai', '思考中...');
+      loading.innerHTML = '<span class="loading-dots">老师正在看题目</span>';
+
+      try {
+        const res = await fetch('/api/ai-tutor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: currentModel,
+            prompt: text,
+            image: imageData
+          })
+        });
+        
+        const data = await res.json();
+        
+        // 渲染回复并自动播放
+        loading.innerHTML = '';
+        loading.innerText = data.reply;
+        
+        // 自动播报 (仅在勾选时)
+        if (document.getElementById('autoSpeak').checked) {
+          console.log("Attempting auto-speak...");
+          window.parent.speak(data.reply, 'chinese');
+        }
+        
+        // 重置图片
+        imageData = null;
+        document.getElementById('previewArea').innerHTML = '';
+      } catch (e) {
+        loading.innerText = "抱歉，老师开小差了，请稍后再试。";
+      }
+    }
+
+  </script>
+</body>
+</html>

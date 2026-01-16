@@ -5,114 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>英语 - 词汇学习</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --primary-color: #58cc02;
+      --primary-hover: #46a302;
+      --secondary-color: #1cb0f6;
+      --accent-color: #ffc800;
+      --text-color: #4b4b4b;
+      --border-color: #e5e5e5;
     }
 
     body {
-      font-family: "Microsoft YaHei", sans-serif;
-      background: #fff3e0;
+      font-family: "din-round", "Microsoft YaHei", sans-serif;
+      background: #ffffff;
+      color: var(--text-color);
+      padding: 0;
+      margin: 0;
     }
 
     .container {
-      max-width: 100%;
+      max-width: 1000px;
       margin: 0 auto;
-      padding: 16px;
+      padding: 24px;
     }
 
     .level-selector {
       display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
       flex-wrap: wrap;
+      background: #f7f7f7;
+      padding: 12px;
+      border-radius: 24px;
     }
 
     .level-btn {
-      padding: 8px 16px;
-      border: 2px solid #ddd;
-      background: white;
-      border-radius: 6px;
+      padding: 12px 24px;
+      border: 2px solid transparent;
+      background: transparent;
+      border-radius: 16px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #afafaf;
       transition: all 0.2s;
-      font-weight: 500;
     }
 
     .level-btn:hover {
-      border-color: #4caf50;
-      color: #4caf50;
+      color: var(--text-color);
     }
 
     .level-btn.active {
-      background: #4caf50;
+      background: white;
+      color: var(--secondary-color);
+      box-shadow: 0 4px 0 var(--border-color);
+      transform: translateY(4px);
+    }
+
+
+    .vocab-btn {
+      background: var(--accent-color);
       color: white;
-      border-color: #4caf50;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #e5a500;
+      transition: all 0.1s;
+    }
+
+    .vocab-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0;
     }
 
     .section-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      margin: 16px 0 12px 0;
-      border-bottom: 2px solid #4caf50;
-      padding-bottom: 8px;
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      margin: 40px 0 24px;
+      color: var(--text-color);
     }
 
     .word-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 8px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px;
     }
 
     .word-card {
       background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 20px;
+      padding: 24px 16px;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.2s;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      min-height: 100px;
+      gap: 12px;
+      position: relative;
+      box-shadow: 0 4px 0 var(--border-color);
     }
 
     .word-card:hover {
-      border-color: #4caf50;
-      background: #f0f8f5;
+      background-color: #f7f7f7;
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .word-card:active {
+      transform: translateY(2px);
+      box-shadow: 0 0px 0 var(--border-color);
     }
 
     .word-card.learned {
-      border-color: #4caf50;
-      background: #e8f5e9;
+      border-color: var(--primary-color);
+      background: #f7fff0;
+      box-shadow: 0 4px 0 var(--primary-color);
     }
 
     .word-english {
-      font-size: 16px;
-      font-weight: bold;
-      color: #4caf50;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--secondary-color);
     }
 
     .word-phonetic {
-      font-size: 12px;
-      color: #666;
-      font-style: italic;
-      font-family: Georgia, serif;
+      font-size: 14px;
+      color: #afafaf;
+      font-weight: 500;
     }
 
     .word-chinese {
-      font-size: 12px;
-      color: #666;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-color);
+      background: #f1f1f1;
+      padding: 4px 12px;
+      border-radius: 10px;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.2s;
     }
 
     .word-card:hover .word-chinese,
@@ -120,45 +154,51 @@
       opacity: 1;
     }
 
+    .add-vocab-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .add-vocab-btn.active {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+      color: white;
+      box-shadow: 0 2px 0 #e5a500;
+    }
+
     .learn-count {
-      font-size: 10px;
-      color: #999;
-      background: #f5f5f5;
-      padding: 2px 4px;
-      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #afafaf;
     }
 
     .empty-message {
       text-align: center;
-      color: #888;
-      padding: 40px 16px;
-      font-size: 14px;
+      color: #afafaf;
+      padding: 60px 16px;
+      font-size: 18px;
+      font-weight: 800;
     }
 
     @media (max-width: 480px) {
       .word-list {
         grid-template-columns: repeat(2, 1fr);
       }
-      
-      .container {
-        padding: 12px;
-      }
-    }
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      .word-list {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (min-width: 769px) {
-      .word-list {
-        grid-template-columns: repeat(4, 1fr);
-      }
     }
   </style>
 </head>
-
 <body>
 <div class="container">
   <div class="level-selector" id="levelSelector"></div>
@@ -167,8 +207,10 @@
 
 <script>
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+let userVocab = new Set();
+let currentLevel = 'beginner';
 
-// 英语词汇库 - 按难度分级
+// 英语词汇库
 const englishVocabulary = {
   'beginner': {
     name: '小白入门',
@@ -289,29 +331,71 @@ const englishVocabulary = {
   }
 };
 
-let currentLevel = 'beginner';
+async function loadUserVocab() {
+  if (!currentUser) return;
+  try {
+    const res = await fetch(`/api/english-new-words/${currentUser.user_id}`);
+    const words = await res.json();
+    userVocab = new Set(words.map(w => w.word));
+    renderLevel(currentLevel);
+  } catch (err) {
+    console.error("加载单词本失败：", err);
+  }
+}
+
+async function toggleVocab(event, wordObj) {
+  event.stopPropagation();
+  if (!currentUser) return alert("请先登录");
+  
+  const isAdding = !userVocab.has(wordObj.english);
+  const url = "/api/english-new-words";
+  const method = isAdding ? "POST" : "DELETE";
+  
+  try {
+    const res = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        user_id: currentUser.user_id, 
+        word: wordObj.english,
+        phonetic: wordObj.phonetic,
+        chinese: wordObj.chinese
+      })
+    });
+    
+    if (res.ok) {
+      if (isAdding) {
+        userVocab.add(wordObj.english);
+      } else {
+        userVocab.delete(wordObj.english);
+      }
+      renderLevel(currentLevel);
+    }
+  } catch (err) {
+    console.error("操作失败：", err);
+  }
+}
 
 function speakWord(english) {
   if (!english) return;
-  
-  // 调用父页面的统一发音函数
   if (window.parent && window.parent.speak) {
     window.parent.speak(english, 'english');
   } else {
-    // 备用方案（如果在独立环境中）
+    const saved = localStorage.getItem("voiceSettings");
+    const voiceSettings = saved ? JSON.parse(saved) : { rate: 0.8 };
     const u = new SpeechSynthesisUtterance(english);
     u.lang = "en-US";
-    u.rate = 0.8;
+    u.rate = voiceSettings.rate;
     speechSynthesis.cancel();
     setTimeout(() => {
       speechSynthesis.speak(u);
     }, 50);
   }
+
 }
 
 function recordLearn(english) {
   if (!currentUser) return;
-  
   fetch("/api/english-learn", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -324,12 +408,14 @@ function recordLearn(english) {
 }
 
 function createWordCard(wordObj, learnCount = 0) {
+  const isInVocab = userVocab.has(wordObj.english);
   const card = document.createElement("div");
   card.className = "word-card" + (learnCount > 0 ? " learned" : "");
   card.innerHTML = `
+    <button class="add-vocab-btn ${isInVocab ? 'active' : ''}" onclick="toggleVocab(event, ${JSON.stringify(wordObj).replace(/"/g, '&quot;')})">📖</button>
     <div class="word-english">${wordObj.english}</div>
-    <div class="word-phonetic">${wordObj.phonetic}</div>
-    <div class="word-chinese">${wordObj.chinese}</div>
+    <div class="word-phonetic">${wordObj.phonetic || ''}</div>
+    <div class="word-chinese">${wordObj.chinese || ''}</div>
     <div class="learn-count">🔊 ${learnCount}</div>
   `;
   
@@ -351,7 +437,7 @@ function renderLevel(level) {
   const contentArea = document.getElementById("contentArea");
   
   contentArea.innerHTML = `
-    <div class="section-title">${data.name} (${data.words.length}个单词)</div>
+    <div class="section-title">${data.name}</div>
     <div class="word-list" id="wordList"></div>
   `;
   
@@ -359,25 +445,56 @@ function renderLevel(level) {
   data.words.forEach(word => {
     wordList.appendChild(createWordCard(word, 0));
   });
+
+  fetchMissingPhonetics();
+}
+
+async function fetchMissingPhonetics() {
+  const cards = document.querySelectorAll(".word-card");
+  for (const card of cards) {
+    const phoneticEl = card.querySelector(".word-phonetic");
+    const english = card.querySelector(".word-english").textContent;
+    
+    if (!phoneticEl.textContent || phoneticEl.textContent === "undefined") {
+      try {
+        const res = await fetch(`/api/proxy/english/${english}`);
+        const data = await res.json();
+        if (data.phonetic) {
+          phoneticEl.textContent = data.phonetic;
+        }
+      } catch (err) {
+        console.error(`获取 ${english} 音标失败`, err);
+      }
+    }
+  }
 }
 
 function initLevelSelector() {
   const selector = document.getElementById("levelSelector");
+  selector.innerHTML = '';
   Object.keys(englishVocabulary).forEach(key => {
     const btn = document.createElement("button");
-    btn.className = "level-btn" + (key === 'beginner' ? " active" : "");
+    btn.className = "level-btn" + (key === currentLevel ? " active" : "");
     btn.textContent = englishVocabulary[key].name;
     btn.onclick = () => {
+      currentLevel = key;
       document.querySelectorAll(".level-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       renderLevel(key);
     };
     selector.appendChild(btn);
   });
+
+  const vocabBtn = document.createElement("button");
+  vocabBtn.className = "vocab-btn";
+  vocabBtn.textContent = "📖 单词本";
+  vocabBtn.onclick = () => window.location.href = "vocabulary.html";
+  selector.appendChild(vocabBtn);
 }
 
 // 初始化
 if (currentUser) {
+  loadUserVocab();
   initLevelSelector();
   renderLevel('beginner');
 } else {
