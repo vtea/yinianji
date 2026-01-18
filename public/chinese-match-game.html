@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>配对游戏 - 生字学习</title>
+  <style>
+    :root {
+      --primary-color: #58cc02;
+      --primary-hover: #46a302;
+      --secondary-color: #1cb0f6;
+      --accent-color: #ffc800;
+      --text-color: #4b4b4b;
+      --border-color: #e5e5e5;
+      --error-color: #ff4b4b;
+      --success-color: #58cc02;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "din-round", "Microsoft YaHei", sans-serif;
+      background: #f7f7f7;
+      color: var(--text-color);
+      padding: 0;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary-color);
+    }
+
+    .score-info {
+      display: flex;
+      gap: 16px;
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .score-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .game-area {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px;
+      min-height: 400px;
+    }
+
+    .question-container {
+      margin-bottom: 24px;
+    }
+
+    .question-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--text-color);
+    }
+
+    .question-hanzi {
+      font-size: 64px;
+      font-weight: 800;
+      text-align: center;
+      color: var(--secondary-color);
+      margin: 20px 0;
+      padding: 20px;
+      background: #ddf4ff;
+      border-radius: 16px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .option-btn {
+      padding: 20px;
+      border: 3px solid var(--border-color);
+      border-radius: 16px;
+      background: white;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--border-color);
+    }
+
+    .option-btn:hover {
+      background: #f7f7f7;
+      transform: translateY(-2px);
+    }
+
+    .option-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 var(--border-color);
+    }
+
+    .option-btn.selected {
+      border-color: var(--secondary-color);
+      background: #ddf4ff;
+      color: var(--secondary-color);
+    }
+
+    .option-btn.correct {
+      border-color: var(--success-color);
+      background: #e8f5e9;
+      color: var(--success-color);
+    }
+
+    .option-btn.wrong {
+      border-color: var(--error-color);
+      background: #ffebee;
+      color: var(--error-color);
+    }
+
+    .option-btn.disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      padding: 16px 32px;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--border-color);
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-hover);
+      box-shadow: 0 4px 0 var(--primary-hover);
+    }
+
+    .btn-primary:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text-color);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 var(--border-color);
+    }
+
+    .result-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .result-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .result-score {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--primary-color);
+      margin: 24px 0;
+    }
+
+    .result-details {
+      font-size: 18px;
+      color: #777;
+      margin-bottom: 32px;
+    }
+
+    .celebration {
+      font-size: 64px;
+      margin: 20px 0;
+      animation: bounce 0.5s ease-in-out;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      font-size: 20px;
+      animation: particleFloat 1s ease-out forwards;
+    }
+
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) scale(0) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #777;
+    }
+
+    @media (max-width: 768px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+      .question-hanzi {
+        font-size: 48px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-title">🎮 配对游戏</div>
+    <div class="score-info">
+      <div class="score-item">
+        <span>题目:</span>
+        <span id="currentQuestion">0</span>/<span id="totalQuestions">0</span>
+      </div>
+      <div class="score-item">
+        <span>得分:</span>
+        <span id="currentScore">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="game-area" id="gameArea">
+    <div class="loading">正在加载题目...</div>
+  </div>
+</div>
+
+<script>
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+let questions = [];
+let currentQuestionIndex = 0;
+let answers = [];
+let score = 0;
+
+async function startGame() {
+  if (!currentUser) {
+    document.getElementById("gameArea").innerHTML = '<div class="result-screen"><div class="result-title">请先登录</div></div>';
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/game-match", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: currentUser.user_id, count: 10 })
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      document.getElementById("gameArea").innerHTML = `<div class="result-screen"><div class="result-title">${data.error || "加载失败"}</div></div>`;
+      return;
+    }
+
+    const data = await res.json();
+    questions = data.questions || [];
+    
+    if (questions.length === 0) {
+      document.getElementById("gameArea").innerHTML = '<div class="result-screen"><div class="result-title">请先添加一些生字</div></div>';
+      return;
+    }
+
+    answers = [];
+    currentQuestionIndex = 0;
+    score = 0;
+    
+    document.getElementById("totalQuestions").textContent = questions.length;
+    showQuestion();
+  } catch (err) {
+    console.error("加载题目失败：", err);
+    document.getElementById("gameArea").innerHTML = '<div class="result-screen"><div class="result-title">加载失败，请重试</div></div>';
+  }
+}
+
+function showQuestion() {
+  if (currentQuestionIndex >= questions.length) {
+    showResult();
+    return;
+  }
+
+  const question = questions[currentQuestionIndex];
+  const selectedPinyin = answers[currentQuestionIndex]?.selected_pinyin || null;
+
+  document.getElementById("currentQuestion").textContent = currentQuestionIndex + 1;
+  
+  const optionsHtml = question.options.map((pinyin, idx) => {
+    const isSelected = pinyin === selectedPinyin;
+    return `
+      <button class="option-btn ${isSelected ? 'selected' : ''}" 
+              onclick="selectOption('${pinyin.replace(/'/g, "\\'")}')"
+              data-pinyin="${pinyin}">
+        ${pinyin}
+      </button>
+    `;
+  }).join("");
+
+  document.getElementById("gameArea").innerHTML = `
+    <div class="question-container">
+      <div class="question-title">请选择 "${question.hanzi}" 的正确拼音：</div>
+      <div class="question-hanzi">${question.hanzi}</div>
+      <div class="options-grid">
+        ${optionsHtml}
+      </div>
+      <div class="controls">
+        <button class="btn btn-primary" onclick="nextQuestion()" ${!selectedPinyin ? 'disabled style="opacity:0.5"' : ''}>
+          ${currentQuestionIndex === questions.length - 1 ? '完成' : '下一题'}
+        </button>
+        <button class="btn btn-secondary" onclick="startGame()">重新开始</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectOption(pinyin) {
+  if (!answers[currentQuestionIndex]) {
+    answers[currentQuestionIndex] = {
+      word_id: questions[currentQuestionIndex].word_id,
+      selected_pinyin: pinyin
+    };
+  } else {
+    answers[currentQuestionIndex].selected_pinyin = pinyin;
+  }
+
+  // 更新UI
+  document.querySelectorAll(".option-btn").forEach(btn => {
+    btn.classList.remove("selected");
+    if (btn.dataset.pinyin === pinyin) {
+      btn.classList.add("selected");
+      // 添加点击动画
+      btn.style.transform = "scale(0.95)";
+      setTimeout(() => {
+        btn.style.transform = "";
+      }, 150);
+    }
+  });
+
+  // 启用下一题按钮
+  const nextBtn = document.querySelector(".btn-primary");
+  if (nextBtn) {
+    nextBtn.disabled = false;
+    nextBtn.style.opacity = "1";
+  }
+}
+
+function nextQuestion() {
+  if (!answers[currentQuestionIndex]?.selected_pinyin) {
+    return;
+  }
+  
+  currentQuestionIndex++;
+  showQuestion();
+}
+
+async function showResult() {
+  try {
+    const res = await fetch("/api/game-match/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: currentUser.user_id,
+        answers: answers
+      })
+    });
+
+    const data = await res.json();
+    
+    if (!res.ok) {
+      document.getElementById("gameArea").innerHTML = `<div class="result-screen"><div class="result-title">${data.error || "提交失败"}</div></div>`;
+      return;
+    }
+
+    const correctCount = data.correct_count || 0;
+    const totalCount = data.total_count || 0;
+    const finalScore = data.score || 0;
+    const expEarned = data.exp_earned || 0;
+    const isPerfect = correctCount === totalCount;
+
+    // 创建粒子效果
+    createParticles(isPerfect ? 30 : correctCount >= totalCount * 0.8 ? 20 : 10);
+
+    let celebration = "";
+    if (isPerfect) {
+      celebration = '<div class="celebration">🎉 完美！</div>';
+    } else if (correctCount >= totalCount * 0.8) {
+      celebration = '<div class="celebration">🌟 很棒！</div>';
+    } else if (correctCount >= totalCount * 0.6) {
+      celebration = '<div class="celebration">👍 不错！</div>';
+    }
+
+    document.getElementById("gameArea").innerHTML = `
+      <div class="result-screen">
+        ${celebration}
+        <div class="result-title">游戏结束</div>
+        <div class="result-score">${finalScore} 分</div>
+        <div class="result-details">
+          <div>答对: ${correctCount} / ${totalCount}</div>
+          <div>获得经验: +${expEarned} EXP</div>
+        </div>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="startGame()">再来一局</button>
+          <button class="btn btn-secondary" onclick="if(window.parent && window.parent.switchPage){window.parent.switchPage('chinese');}else{window.location.href='chinese.html';}">返回生字本</button>
+        </div>
+      </div>
+    `;
+
+    // 更新父页面的游戏数据
+    if (window.parent && typeof window.parent.updateGameStats === 'function') {
+      window.parent.updateGameStats();
+    }
+  } catch (err) {
+    console.error("提交答案失败：", err);
+    document.getElementById("gameArea").innerHTML = '<div class="result-screen"><div class="result-title">提交失败，请重试</div></div>';
+  }
+}
+
+function createParticles(count) {
+  const particles = ["⭐", "✨", "🎉", "🌟", "💫", "🎊"];
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement("div");
+    particle.className = "particle";
+    particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+    particle.style.left = Math.random() * 100 + "%";
+    particle.style.top = Math.random() * 100 + "%";
+    particle.style.animationDelay = Math.random() * 0.3 + "s";
+    document.body.appendChild(particle);
+    
+    setTimeout(() => {
+      particle.remove();
+    }, 1000);
+  }
+}
+
+// 页面加载时开始游戏
+if (currentUser) {
+  startGame();
+} else {
+  document.getElementById("gameArea").innerHTML = '<div class="result-screen"><div class="result-title">请先登录</div></div>';
+}
+</script>
+</body>
+</html>

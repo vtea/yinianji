@@ -1,117 +1,665 @@
 # 项目结构说明
 
-## 文件架构
+## 📋 项目概述
 
-### `/public` 目录
+**一年级学习本** - 一个专为一年级学生设计的多功能学习平台，采用 Duolingo 风格界面，支持语文、英语、数学等多个学习模块，并集成 AI 辅导功能。
 
-#### 1. **index.html** - 主入口文件
-- 包含：
-  - 登陆/注册页面（完全独立的两个面板）
-  - 主应用框架（导航栏、功能菜单、浮动按钮、模态框）
-  - iframe 容器用于加载各个模块
-  - 主框架的 JavaScript 函数（导航、添加项目、保存功能）
-  
-- 职责：
-  - 处理用户身份认证
-  - 切换各个学习模块
-  - 管理浮动添加按钮和模态框
-  - 调用各模块的保存功能
+## 🏗️ 技术栈
 
-#### 2. **chinese.html** - 语文模块（生字学习）
-- 包含：
-  - 生字卡片展示（拼音、朗读次数、日期）
-  - 朗读功能（与后端 `/api/speak` 集成）
-  - 删除生字功能
-  - 响应式布局
+- **后端**: Node.js + Express
+- **数据库**: SQLite3
+- **前端**: 原生 HTML/CSS/JavaScript（无框架依赖）
+- **部署**: Docker + Nginx
+- **安全**: bcrypt 密码加密、AES-256-GCM API Key 加密
 
-- 职责：
-  - 独立加载和展示用户的生字列表
-  - 处理朗读和删除操作
-  - 完全独立的样式和逻辑
+## 📁 项目文件结构
 
-#### 3. **math.html** - 数学模块（数学练习）
-- 目前：展示"开发中"界面
-- 架构已搭建，可独立开发数学相关功能
-- 包含基础样式和加载框架
+```
+yinianji-1/
+├── server.js                 # 后端服务器主文件
+├── package.json              # 项目依赖配置
+├── Dockerfile                # Docker 镜像构建文件
+├── docker-compose.yml        # Docker Compose 配置
+├── nginx.conf                # Nginx 配置文件
+├── nginx-docker.conf         # Docker 环境 Nginx 配置
+├── deploy.sh                 # 部署脚本
+├── docker-deploy-complete.sh # Docker 完整部署脚本
+├── .ai_key_secret            # AI Key 加密密钥（自动生成）
+├── words.db                  # SQLite 数据库文件
+├── public/                   # 前端静态文件目录
+│   ├── index.html           # 主入口页面（登录/注册/导航）
+│   ├── chinese.html         # 语文模块 - 生字学习
+│   ├── pinyin.html          # 语文模块 - 声母韵母学习
+│   ├── english.html          # 英语模块 - 英语课文学习
+│   ├── vocabulary.html       # 英语模块 - 单词本
+│   ├── ai-tutor.html         # AI 辅导模块
+│   └── math.html             # 数学模块（开发中）
+└── DEPLOY.md                 # 部署指南文档
+```
 
-#### 4. **english.html** - 英语模块（英语学习）
-- 目前：展示"开发中"界面
-- 架构已搭建，可独立开发英语相关功能
-- 包含基础样式和加载框架
+## 🎯 核心功能模块
 
-## 工作流程
+### 1. **用户认证系统** (`index.html`)
 
-### 用户登陆流程
-1. 用户在 `index.html` 的登陆面板输入账户密码
-2. 调用 `/api/login` 或 `/api/register`
-3. 登陆成功后显示主应用页面（导航栏 + 菜单 + iframe）
+#### 功能特性
+- ✅ 用户注册/登录
+- ✅ 密码修改
+- ✅ 会话持久化（localStorage）
+- ✅ 密码加密存储（bcrypt）
+- ✅ 用户菜单和账户管理
 
-### 切换模块流程
-1. 用户点击功能菜单（语文/数学/英语）
-2. `switchPage()` 函数执行
-3. 更新导航栏标题
+#### 主要组件
+- 登录/注册面板（可切换）
+- 用户菜单（账户、设置、退出）
+- 导航栏和统计信息显示
+
+---
+
+### 2. **语文模块**
+
+#### 2.1 生字学习 (`chinese.html`)
+
+**功能特性**:
+- ✅ 生字卡片展示（米字格样式）
+- ✅ 自动生成拼音（使用 `pinyin` 库）
+- ✅ 朗读功能（Web Speech API）
+- ✅ 朗读次数统计
+- ✅ 删除生字（保留删除历史）
+- ✅ 生字统计（不认识/已认识数量）
+- ✅ 响应式布局（移动端适配）
+
+**数据流程**:
+1. 用户添加生字 → `POST /api/words`
+2. 后端自动生成拼音并保存
+3. 前端展示生字卡片
+4. 点击卡片朗读 → `POST /api/speak` 更新计数
+5. 删除生字 → `POST /api/delete`（移至删除记录表）
+
+#### 2.2 声母韵母学习 (`pinyin.html`)
+
+**功能特性**:
+- ✅ 23 个声母学习
+- ✅ 39 个韵母学习
+- ✅ 点击朗读（带示例汉字）
+- ✅ 学习次数统计
+- ✅ 首次自动初始化学习记录
+
+**数据流程**:
+1. 首次访问 → `POST /api/pinyin-init` 初始化
+2. 点击拼音 → 朗读示例汉字 → `POST /api/pinyin-learn` 记录
+3. 显示学习次数统计
+
+---
+
+### 3. **英语模块**
+
+#### 3.1 英语课文学习 (`english.html`)
+
+**功能特性**:
+- ✅ 分级学习（beginner/intermediate/advanced）
+- ✅ 学习记录统计
+- ⚠️ 功能开发中（基础框架已搭建）
+
+#### 3.2 英语单词本 (`vocabulary.html`)
+
+**功能特性**:
+- ✅ 单词卡片展示（英文、音标、中文）
+- ✅ 自动查询单词信息（有道词典 + Dictionary API）
+- ✅ 播放次数统计
+- ✅ 音标显示/隐藏切换
+- ✅ 删除单词（保留删除历史）
+- ✅ 单词本统计（不认识/已认识数量）
+
+**数据流程**:
+1. 添加单词 → `POST /api/english-new-words`
+2. 自动查询翻译和音标（`GET /api/proxy/english/:word`）
+3. 点击卡片朗读 → `POST /api/english-new-words/speak` 更新计数
+4. 删除单词 → `DELETE /api/english-new-words`（移至删除记录表）
+
+---
+
+### 4. **AI 辅导模块** (`ai-tutor.html`)
+
+**功能特性**:
+- ✅ 多模型支持（Gemini Pro、Claude Haiku）
+- ✅ 文本对话
+- ✅ 图片上传（支持拍照/上传）
+- ✅ 语音对话（连续对话模式）
+- ✅ 自动朗读 AI 回复
+- ✅ 对话历史保存
+- ✅ 单条/全部删除历史
+- ✅ API Key 加密存储（AES-256-GCM）
+
+**核心功能**:
+1. **文本对话**: 用户输入问题 → AI 回复
+2. **图片识别**: 上传题目图片 → AI 识别并解答
+3. **语音对话**: 
+   - 开启语音模式 → 自动识别语音 → 发送给 AI → 自动朗读回复 → 继续监听
+   - 支持连续对话，无需手动操作
+4. **历史管理**: 所有对话自动保存，支持删除
+
+**安全机制**:
+- API Key 使用 AES-256-GCM 加密存储
+- 密钥文件权限限制（0o600）
+- 支持环境变量配置密钥
+
+---
+
+### 5. **数学模块** (`math.html`)
+
+- ⚠️ 开发中（基础框架已搭建）
+
+---
+
+## 🗄️ 数据库结构
+
+### 表结构说明
+
+#### 1. `users` - 用户表
+```sql
+- id (INTEGER PRIMARY KEY)
+- username (TEXT UNIQUE) - 用户名
+- password (TEXT) - 加密密码（bcrypt）
+- api_key_enc (TEXT) - 加密的 AI API Key
+- created_at (DATETIME) - 创建时间
+```
+
+#### 2. `words` - 生字表
+```sql
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - 用户ID（外键）
+- hanzi (TEXT) - 汉字
+- pinyin (TEXT) - 拼音
+- speak_count (INTEGER) - 朗读次数
+- created_at (DATETIME) - 添加时间
+- UNIQUE(user_id, hanzi) - 每个用户每个生字唯一
+```
+
+#### 3. `deleted_words` - 生字删除记录表
+```sql
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - 用户ID
+- hanzi (TEXT) - 汉字
+- pinyin (TEXT) - 拼音
+- speak_count (INTEGER) - 删除时的朗读次数
+- added_at (DATETIME) - 原添加时间
+- deleted_at (DATETIME) - 删除时间
+```
+
+#### 4. `pinyin_learn` - 声母韵母学习记录表
+```sql
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - 用户ID
+- pinyin (TEXT) - 拼音（声母或韵母）
+- type (TEXT) - 类型（'initial' 或 'final'）
+- learn_count (INTEGER) - 学习次数
+- created_at (DATETIME) - 创建时间
+- last_learned_at (DATETIME) - 最后学习时间
+- UNIQUE(user_id, pinyin, type)
+```
+
+#### 5. `english_learn` - 英语学习记录表
+```sql
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - 用户ID
+- word (TEXT) - 单词
+- level (TEXT) - 难度级别
+- learn_count (INTEGER) - 学习次数
+- created_at (DATETIME) - 创建时间
+- last_learned_at (DATETIME) - 最后学习时间
+- UNIQUE(user_id, word, level)
+```
+
+#### 6. `english_new_words` - 英语单词本表
+```sql
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - 用户ID
+- word (TEXT) - 单词
+- phonetic (TEXT) - 音标
+- chinese (TEXT) - 中文翻译
+- play_count (INTEGER) - 播放次数
+- created_at (DATETIME) - 添加时间
+- UNIQUE(user_id, word)
+```
+
+#### 7. `deleted_english_words` - 英语单词删除记录表
+```sql
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - 用户ID
+- word (TEXT) - 单词
+- phonetic (TEXT) - 音标
+- chinese (TEXT) - 中文翻译
+- play_count (INTEGER) - 删除时的播放次数
+- added_at (DATETIME) - 原添加时间
+- deleted_at (DATETIME) - 删除时间
+```
+
+#### 8. `ai_chat_history` - AI 对话历史表
+```sql
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - 用户ID
+- role (TEXT) - 角色（'user' 或 'ai'）
+- content (TEXT) - 消息内容
+- image_data (TEXT) - 图片数据（base64）
+- created_at (DATETIME) - 创建时间
+```
+
+---
+
+## 🔌 API 接口文档
+
+### 用户认证
+
+#### `POST /api/register` - 用户注册
+```json
+请求: { "username": "string", "password": "string" }
+响应: { "success": true, "message": "注册成功" }
+```
+
+#### `POST /api/login` - 用户登录
+```json
+请求: { "username": "string", "password": "string" }
+响应: { "success": true, "user_id": number, "username": "string" }
+```
+
+#### `POST /api/change-password` - 修改密码
+```json
+请求: { "user_id": number, "oldPassword": "string", "newPassword": "string" }
+响应: { "success": true }
+```
+
+---
+
+### 生字管理
+
+#### `GET /api/words/:user_id` - 获取生字列表
+```json
+响应: [
+  {
+    "id": number,
+    "hanzi": "字",
+    "pinyin": "zì",
+    "speak_count": number,
+    "created_at": "datetime"
+  }
+]
+```
+
+#### `POST /api/words` - 添加生字
+```json
+请求: { "user_id": number, "hanzi": "字" }
+响应: { "success": true, "prevDeleted": {...} | null }
+```
+
+#### `POST /api/speak` - 更新朗读次数
+```json
+请求: { "id": number }
+响应: { "success": true }
+```
+
+#### `POST /api/delete` - 删除生字
+```json
+请求: { "id": number }
+响应: 200 OK
+```
+
+#### `GET /api/word-stats/chinese/:user_id` - 生字统计
+```json
+响应: { "unknownCount": number, "knownCount": number }
+```
+
+---
+
+### 拼音学习
+
+#### `GET /api/pinyin/:user_id` - 获取学习记录
+```json
+响应: [
+  {
+    "id": number,
+    "pinyin": "b",
+    "type": "initial",
+    "learn_count": number,
+    "last_learned_at": "datetime"
+  }
+]
+```
+
+#### `GET /api/pinyin-list` - 获取拼音列表
+```json
+响应: {
+  "initials": ["b", "p", ...],
+  "finals": ["a", "o", ...]
+}
+```
+
+#### `POST /api/pinyin-init` - 初始化学习记录
+```json
+请求: { "user_id": number }
+响应: { "success": true }
+```
+
+#### `POST /api/pinyin-learn` - 更新学习次数
+```json
+请求: { "user_id": number, "pinyin": "b", "type": "initial" }
+响应: { "success": true }
+```
+
+---
+
+### 英语学习
+
+#### `GET /api/english/:user_id` - 获取学习记录
+```json
+响应: [
+  {
+    "id": number,
+    "word": "hello",
+    "level": "beginner",
+    "learn_count": number
+  }
+]
+```
+
+#### `POST /api/english-learn` - 更新学习记录
+```json
+请求: { "user_id": number, "word": "hello", "level": "beginner" }
+响应: { "success": true }
+```
+
+---
+
+### 英语单词本
+
+#### `GET /api/english-new-words/:user_id` - 获取单词本
+```json
+响应: [
+  {
+    "id": number,
+    "word": "hello",
+    "phonetic": "/həˈloʊ/",
+    "chinese": "你好",
+    "play_count": number,
+    "created_at": "datetime"
+  }
+]
+```
+
+#### `POST /api/english-new-words` - 添加单词
+```json
+请求: { "user_id": number, "word": "hello", "phonetic": "...", "chinese": "..." }
+响应: { "success": true, "prevDeleted": {...} | null }
+```
+
+#### `DELETE /api/english-new-words` - 删除单词
+```json
+请求: { "user_id": number, "word": "hello" }
+响应: { "success": true }
+```
+
+#### `POST /api/english-new-words/speak` - 更新播放次数
+```json
+请求: { "user_id": number, "word": "hello" }
+响应: { "success": true }
+```
+
+#### `GET /api/word-stats/english/:user_id` - 单词本统计
+```json
+响应: { "unknownCount": number, "knownCount": number }
+```
+
+#### `GET /api/proxy/english/:word` - 查询单词信息（代理）
+```json
+响应: { "chinese": "翻译", "phonetic": "音标" }
+```
+
+---
+
+### AI 辅导
+
+#### `GET /api/ai-key-status/:user_id` - 检查 API Key 配置
+```json
+响应: { "configured": boolean }
+```
+
+#### `POST /api/ai-key` - 保存 API Key（加密）
+```json
+请求: { "user_id": number, "apiKey": "string" }
+响应: { "success": true }
+```
+
+#### `POST /api/ai-tutor` - AI 对话
+```json
+请求: {
+  "user_id": number,
+  "model": "gemini-3-pro-image-preview",
+  "prompt": "问题文本",
+  "image": "base64图片数据（可选）"
+}
+响应: { "reply": "AI回复内容" }
+```
+
+#### `GET /api/ai-chat-history/:user_id` - 获取对话历史
+```json
+响应: [
+  {
+    "id": number,
+    "role": "user" | "ai",
+    "content": "消息内容",
+    "image_data": "base64（可选）",
+    "created_at": "datetime"
+  }
+]
+```
+
+#### `DELETE /api/ai-chat-history/:user_id` - 删除对话记录
+```json
+请求: { "id": number } // 可选，不传则清空全部
+响应: { "success": true }
+```
+
+---
+
+## 🔄 工作流程
+
+### 用户登录流程
+1. 用户在 `index.html` 输入用户名和密码
+2. 调用 `POST /api/login` 或 `POST /api/register`
+3. 登录成功后，将用户信息保存到 `localStorage`
+4. 显示主应用页面（导航栏 + 侧边栏/移动端菜单 + iframe 内容区）
+
+### 模块切换流程
+1. 用户点击功能菜单（语文/数学/英语/AI辅导等）
+2. `switchPage(page)` 函数执行
+3. 更新导航栏标题和统计信息
 4. 修改 iframe 的 `src` 属性加载对应 HTML 文件
 5. 对应的 HTML 页面独立加载和显示内容
+6. 根据页面类型显示/隐藏浮动添加按钮
 
 ### 添加项目流程
 1. 用户点击浮动按钮（➕）
 2. `openAddItemModal()` 根据当前页面动态生成输入框
+   - 生字本：单个汉字输入
+   - 单词本：单词、翻译、音标输入（支持自动查询）
 3. 用户填写信息并保存
-4. 调用对应的 `save{Module}Item()` 函数
+4. 调用对应的保存函数（`saveChineseItem()` / `saveEnglishItem()`）
 5. 后端保存成功后，重新加载 iframe 内容
+6. 更新统计信息
 
-## API 接口
+### 语音功能流程
+1. 用户在发音设置中选择语速和语音角色
+2. 设置保存到 `localStorage`
+3. 各模块调用 `speak(text, type)` 函数
+4. 使用 Web Speech API 朗读文本
+5. 根据设置应用语速和语音角色
 
-### 已使用
-- `POST /api/login` - 登陆
-- `POST /api/register` - 注册
-- `GET /api/words/:user_id` - 获取生字列表
-- `POST /api/words` - 添加生字
-- `POST /api/delete` - 删除项目
-- `POST /api/speak` - 更新朗读计数
+---
 
-### 待开发
-- 数学模块相关 API
-- 英语模块相关 API
+## 🎨 UI/UX 特性
 
-## 独立开发指南
+### 设计风格
+- **Duolingo 风格**: 圆角、阴影、活泼配色
+- **响应式设计**: 完美适配桌面端和移动端
+- **交互反馈**: 按钮点击动画、悬停效果
+- **颜色系统**:
+  - 主色: `#58cc02` (绿色)
+  - 次色: `#1cb0f6` (蓝色)
+  - 强调色: `#ffc800` (黄色)
 
-### 开发新的学习模块
+### 移动端优化
+- 侧边栏自动隐藏，改为下拉菜单
+- 触摸手势支持（下拉打开菜单）
+- 移动端专用布局和字体大小
+- 键盘弹出时自动调整布局
 
-以"数学"为例：
+### 桌面端特性
+- 可折叠侧边栏
+- 侧边栏状态持久化
+- 分组导航（语文、英语、工具）
 
-1. 编辑 `math.html`
-   - 修改 HTML 结构显示你的内容
-   - 添加相应的 CSS 样式
-   - 编写 `loadMathPage()` 函数加载数据
+---
 
-2. 在 `index.html` 中
-   - 修改 `saveMathItem()` 函数处理保存逻辑
-   - 如需调用新 API，在此处实现
+## 🔒 安全特性
 
-3. 后端（server.js）
-   - 添加相应的 API 端点
-   - 创建数据库表（如需要）
+### 密码安全
+- 使用 `bcrypt` 加密存储密码
+- 支持旧明文密码自动迁移
+- 密码修改需要验证旧密码
+
+### API Key 安全
+- 使用 AES-256-GCM 加密存储
+- 密钥文件权限限制（0o600）
+- 支持环境变量配置密钥
+- 加密密钥自动生成（`.ai_key_secret`）
+
+### 数据安全
+- SQLite 外键约束启用
+- 用户数据隔离（基于 user_id）
+- 删除操作保留历史记录
+
+---
+
+## 🚀 部署说明
+
+### Docker 部署（推荐）
+
+#### 构建镜像
+```bash
+docker build -t yinianji-1 .
+```
+
+#### 运行容器
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -v $(pwd)/words.db:/app/words.db \
+  -e PORT=3000 \
+  -e DB_PATH=/app/words.db \
+  yinianji-1
+```
+
+#### Docker Compose
+```bash
+docker-compose up -d
+```
+
+### 环境变量
+- `PORT`: 服务器端口（默认 3000）
+- `DB_PATH`: 数据库文件路径（默认 `words.db`）
+- `AI_KEY_SECRET`: AI Key 加密密钥（可选，自动生成）
+- `BCRYPT_ROUNDS`: 密码加密轮数（默认 10）
+
+### Nginx 配置
+项目包含 `nginx.conf` 和 `nginx-docker.conf` 配置文件，支持：
+- 静态文件服务
+- 反向代理
+- HTTPS 配置（需自行配置证书）
+
+---
+
+## 📝 开发指南
+
+### 添加新模块
+
+1. **创建 HTML 文件**
+   - 在 `public/` 目录创建新模块 HTML
+   - 使用统一的样式变量和设计风格
+   - 实现独立的加载和交互逻辑
+
+2. **在 `index.html` 中注册**
+   - 在侧边栏/移动端菜单添加导航项
+   - 在 `switchPage()` 函数中添加路由映射
+   - 如需添加功能，实现对应的保存函数
+
+3. **后端 API 开发**
+   - 在 `server.js` 中添加 API 端点
+   - 创建对应的数据库表（如需要）
    - 实现增删改查逻辑
 
-## 优势
+4. **数据库迁移**
+   - 在 `initDatabase()` 函数中添加表创建逻辑
+   - 支持旧数据迁移（如需要）
 
-✅ **代码组织清晰**
-- 每个模块独立成单个 HTML 文件
-- 易于维护和调试
-- 团队成员可并行开发不同模块
+### 代码规范
+- 使用 ES6+ 语法
+- 函数命名使用驼峰式
+- CSS 变量统一管理
+- 注释清晰，说明功能意图
 
-✅ **职责分离**
-- index.html：主框架和身份认证
-- 各模块 HTML：独立的展示和交互
-- 每个文件不超过 500 行代码
+---
 
-✅ **易于扩展**
-- 添加新模块只需创建新 HTML 文件
-- 无需修改现有代码
-- 模块之间完全独立
+## ✅ 项目优势
 
-✅ **性能优化**
-- 使用 iframe 实现模块隔离
-- 每个模块有独立的样式表（无污染）
-- 用户只加载所需的 HTML/CSS
+### 代码组织
+- ✅ 每个模块独立成单个 HTML 文件
+- ✅ 易于维护和调试
+- ✅ 团队成员可并行开发不同模块
+- ✅ 文件大小控制在合理范围
+
+### 职责分离
+- ✅ `index.html`: 主框架和身份认证
+- ✅ 各模块 HTML: 独立的展示和交互
+- ✅ `server.js`: 统一的 API 服务
+- ✅ 数据库: 清晰的数据结构
+
+### 易于扩展
+- ✅ 添加新模块只需创建新 HTML 文件
+- ✅ 无需修改现有代码
+- ✅ 模块之间完全独立
+- ✅ API 接口统一规范
+
+### 性能优化
+- ✅ 使用 iframe 实现模块隔离
+- ✅ 每个模块有独立的样式表（无污染）
+- ✅ 用户只加载所需的 HTML/CSS
+- ✅ 静态资源缓存优化
+
+### 用户体验
+- ✅ 响应式设计，完美适配各种设备
+- ✅ 流畅的动画和交互反馈
+- ✅ 语音功能增强学习体验
+- ✅ AI 辅导提供个性化帮助
+
+---
+
+## 📚 相关文档
+
+- `DEPLOY.md` - 详细部署指南
+- `README-DEV.md` - 开发环境配置
+- `server-deploy-guide.md` - 服务器部署指南
+
+---
+
+## 🔮 未来规划
+
+- [ ] 数学模块完整开发
+- [ ] 英语课文模块完善
+- [ ] 学习进度可视化
+- [ ] 学习报告生成
+- [ ] 多语言支持
+- [ ] 离线功能支持
+- [ ] 数据导出/导入
+
+---
+
+**最后更新**: 2024年

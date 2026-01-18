@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<title>一年级学习本 - Duolingo Style</title>
+<title>一年级 - Duolingo Style</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   * {
@@ -732,7 +732,7 @@
 
 <body>
   <div class="navbar" id="topNavbar">
-    <h1>🦉 学习本</h1>
+    <h1>🦉 一年级</h1>
     <div class="navbar-actions">
       <div class="word-stats" id="wordStats" style="display:none;">
         不认识 <strong id="unknownCount">0</strong> 个，认识 <strong id="knownCount">0</strong> 个
@@ -805,7 +805,7 @@
   <div id="auth-page">
     <div class="auth-container">
       <div class="auth-panel active" id="login-panel">
-        <h2>登录学习</h2>
+        <h2>一年级</h2>
         <div class="auth-error" id="login-error"></div>
         <form onsubmit="handleLogin(event)">
           <div class="form-group"><input type="text" id="login-username" placeholder="用户名" required /></div>
@@ -970,6 +970,21 @@ function updateWordStats() {
     .catch(() => {});
 }
 
+function updateGameStats() {
+  // 更新游戏统计（如果当前页面是生字页面，会通过iframe调用）
+  const frame = document.getElementById("contentFrame");
+  if (frame && frame.contentWindow) {
+    try {
+      if (typeof frame.contentWindow.updateGameStats === 'function') {
+        frame.contentWindow.updateGameStats();
+      }
+    } catch (e) {
+      // 跨域或iframe未加载完成时忽略错误
+      console.log("无法更新游戏统计：", e);
+    }
+  }
+}
+
 function formatDeletedHint(word, info, isChinese) {
   if (!info) return "";
   const addedAt = info.added_at ? new Date(info.added_at).toLocaleDateString() : "未知";
@@ -1052,9 +1067,12 @@ function switchPage(page) {
     math: 'math.html', 
     english: 'english.html', 
     vocabulary: 'vocabulary.html',
-    'ai-tutor': 'ai-tutor.html'
+    'ai-tutor': 'ai-tutor.html',
+    'match-game': 'chinese-match-game.html',
+    'listen-game': 'chinese-listen-game.html',
+    'spell-game': 'chinese-spell-game.html'
   };
-  document.getElementById("contentFrame").src = frameUrls[page];
+  document.getElementById("contentFrame").src = frameUrls[page] || frameUrls['chinese'];
   updateWordStatsVisibility(page);
   if (page === "chinese" || page === "vocabulary") {
     updateWordStats();
@@ -1066,7 +1084,8 @@ function switchPage(page) {
   
   // 处理悬浮按钮的显示/隐藏
   const fabBtn = document.getElementById("fabBtn");
-  if (page === 'pinyin' || page === 'ai-tutor' || page === 'math') {
+  if (page === 'pinyin' || page === 'ai-tutor' || page === 'math' || 
+      page === 'match-game' || page === 'listen-game' || page === 'spell-game') {
     fabBtn.style.display = "none";
   } else {
     fabBtn.style.display = "flex";

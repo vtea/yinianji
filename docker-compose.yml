@@ -7,7 +7,15 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - DB_PATH=/app/words.db
+      - DB_PATH=/data/words.db
     volumes:
-      - ./words.db:/app/words.db
+      # 使用命名 volume 确保数据持久化
+      - db_data:/data
+      # 如果需要访问日志，可以挂载日志目录
+      - ./logs:/app/logs
     restart: unless-stopped
+
+volumes:
+  # 命名 volume，确保数据在容器更新时不会丢失
+  db_data:
+    driver: local

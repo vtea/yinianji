@@ -175,25 +175,1024 @@
       font-weight: 800;
     }
 
+    /* 游戏化UI */
+    .game-header {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .progress-bar-container {
+      margin-bottom: 16px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--border-color);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .stat-item {
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--secondary-color);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #777;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .game-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .game-btn {
+      padding: 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      background: white;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--border-color);
+      text-align: center;
+    }
+
+    .game-btn:hover {
+      background: #f7f7f7;
+      transform: translateY(-2px);
+    }
+
+    .game-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 var(--border-color);
+    }
+
+    .game-btn.match {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .game-btn.listen {
+      border-color: var(--secondary-color);
+      color: var(--secondary-color);
+    }
+
+    .game-btn.spell {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    /* 掌握度标识 */
+    .mastery-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: white;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .mastery-0 { background: #ccc; }
+    .mastery-1 { background: #ff9800; }
+    .mastery-2 { background: #ffc107; }
+    .mastery-3 { background: #4caf50; }
+    .mastery-4 { background: #2196f3; }
+    .mastery-5 { background: #9c27b0; }
+
+    /* 已掌握生字样式 */
+    .word-wrapper.mastered-word {
+      background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+      border-color: var(--primary-color);
+      border-width: 3px;
+    }
+
+    .word-wrapper.mastered-word:hover {
+      background: linear-gradient(135deg, #c8e6c9 0%, #dcedc8 100%);
+    }
+
+    /* 成就系统 */
+    .achievement-badge {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border: 3px solid var(--accent-color);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      z-index: 10000;
+      animation: slideInRight 0.5s ease-out;
+      max-width: 300px;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .achievement-badge.hide {
+      animation: slideOutRight 0.5s ease-in forwards;
+    }
+
+    @keyframes slideOutRight {
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .achievement-icon {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .achievement-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent-color);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .achievement-desc {
+      font-size: 14px;
+      color: #777;
+      text-align: center;
+    }
+
+    .achievements-btn {
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #e6b800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: all 0.2s;
+    }
+
+    .achievements-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #e6b800;
+    }
+
+    .achievements-modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .achievements-modal.show {
+      display: flex;
+    }
+
+    .achievements-content {
+      background: white;
+      padding: 28px 24px;
+      border-radius: 24px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 12px 0 rgba(0,0,0,0.1);
+      border: 2px solid var(--border-color);
+    }
+
+    /* 熟练掌握弹窗样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .mastered-modal-content {
+      background: white;
+      padding: 28px 24px;
+      border-radius: 24px;
+      width: 90%;
+      max-width: 420px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 12px 0 rgba(0,0,0,0.1);
+      border: 2px solid var(--border-color);
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mastered-modal-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .mastered-modal-content::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .mastered-modal-content::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+
+    .mastered-modal-content::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    .achievements-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent-color);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+    }
+
+    .achievement-item {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .achievement-item.unlocked {
+      border-color: var(--accent-color);
+      background: #fffbf0;
+    }
+
+    .achievement-item.locked {
+      opacity: 0.5;
+      filter: grayscale(100%);
+    }
+
+    .achievement-item-icon {
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+
+    .achievement-item-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-color);
+      margin-bottom: 4px;
+    }
+
+    .achievement-item-desc {
+      font-size: 11px;
+      color: #777;
+    }
+
+    /* 粒子动画 */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      font-size: 20px;
+      animation: particleFloat 1s ease-out forwards;
+    }
+
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) scale(0);
+        opacity: 0;
+      }
+    }
+
+    /* 升级特效 */
+    .level-up-effect {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10001;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .level-up-text {
+      font-size: 64px;
+      font-weight: 800;
+      color: var(--primary-color);
+      animation: levelUpPulse 1s ease-out;
+    }
+
+    @keyframes levelUpPulse {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .game-header {
+        padding: 16px;
+      }
+      .progress-info {
+        font-size: 12px;
+      }
+
+      .mastered-modal-content {
+        max-height: calc(100vh - 80px);
+        padding: 20px 16px;
+        width: 95%;
+      }
+
+      .mastered-modal-content #masteredWord {
+        font-size: 48px !important;
+      }
+
+      .mastered-modal-content .btn {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      .stat-value {
+        font-size: 20px;
+      }
+      .stat-label {
+        font-size: 11px;
+      }
+      .game-buttons {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .game-btn {
+        padding: 12px;
+        font-size: 14px;
+      }
+      .achievements-btn {
+        bottom: 80px;
+        right: 20px;
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+      }
+      .achievement-badge {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: calc(100% - 20px);
+        padding: 16px;
+      }
+      .achievements-content {
+        width: 95%;
+        padding: 20px 16px;
+      }
+      .achievements-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     @media (max-width: 480px) {
       #list {
         grid-template-columns: repeat(2, 1fr);
+      }
+      .stats-row {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .game-header {
+        padding: 12px;
       }
     }
   </style>
 </head>
 <body>
 <div class="container">
+  <div class="game-header" id="gameHeader" style="display: none;">
+    <div class="progress-bar-container">
+      <div class="progress-info">
+        <span>等级 <span id="userLevel">1</span></span>
+        <span><span id="currentExp">0</span> / <span id="nextLevelExp">150</span> EXP</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-value" id="totalStars">0</div>
+        <div class="stat-label">⭐ 星星</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="consecutiveDays">0</div>
+        <div class="stat-label">🔥 连续</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalWords">0</div>
+        <div class="stat-label">📚 生字</div>
+      </div>
+    </div>
+    <div class="game-buttons">
+      <button class="game-btn match" onclick="startGame('match')">🎮 配对游戏</button>
+      <button class="game-btn listen" onclick="startGame('listen')">🎧 听音选字</button>
+      <button class="game-btn spell" onclick="startGame('spell')">✍️ 拼写游戏</button>
+    </div>
+  </div>
   <div id="list"></div>
+</div>
+
+<!-- 成就弹窗 -->
+<div class="achievement-badge" id="achievementBadge" style="display: none;">
+  <div class="achievement-icon" id="achievementIcon">🏆</div>
+  <div class="achievement-title" id="achievementTitle">成就解锁！</div>
+  <div class="achievement-desc" id="achievementDesc">恭喜你获得新成就</div>
+</div>
+
+<!-- 成就列表模态框 -->
+<div class="achievements-modal" id="achievementsModal" onclick="closeAchievementsModal(event)">
+  <div class="achievements-content" onclick="event.stopPropagation()">
+    <div class="achievements-title">🏆 我的成就</div>
+    <div class="achievements-grid" id="achievementsGrid"></div>
+    <div style="text-align: center; margin-top: 24px;">
+      <button class="btn btn-primary" onclick="closeAchievementsModal()" style="padding: 12px 32px;">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 成就按钮 -->
+<button class="achievements-btn" onclick="showAchievements()" title="查看成就">🏆</button>
+
+<!-- 熟练掌握提示弹窗 -->
+<div class="modal" id="masteredModal" onclick="closeModal('masteredModal', event)">
+  <div class="modal-content mastered-modal-content" onclick="event.stopPropagation()">
+    <div class="celebration" style="font-size: 48px; text-align: center; margin-bottom: 16px;">🎉</div>
+    <h3 class="modal-title" style="margin-top:0; font-size:24px; font-weight:800; color: var(--primary-color); text-align: center;">
+      恭喜！你已经熟练掌握
+    </h3>
+    <div style="text-align: center; margin: 20px 0;">
+      <div id="masteredWord" style="font-size: 64px; font-weight: 800; color: var(--secondary-color); margin: 10px 0;"></div>
+      <div id="masteredPinyin" style="font-size: 20px; color: #777; font-weight: 700;"></div>
+    </div>
+    <div style="background: #fffbf0; border: 2px solid var(--accent-color); border-radius: 16px; padding: 16px; margin: 20px 0; text-align: center;">
+      <div style="font-size: 16px; font-weight: 800; color: var(--text-color); margin-bottom: 8px;">奖励预览</div>
+      <div style="display: flex; justify-content: center; gap: 24px; font-size: 18px; font-weight: 800;">
+        <div style="color: var(--primary-color);">+50 EXP</div>
+        <div style="color: var(--accent-color);">+2 ⭐</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; margin-top: 24px; margin-bottom: 0;">
+      <button class="btn btn-secondary" onclick="closeModal('masteredModal')" style="flex: 1;">稍后再说</button>
+      <button class="btn btn-primary" id="moveToKnownBtn" onclick="moveToKnown()" style="flex: 1;">移到已认识</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
+// 从localStorage加载已显示的成就列表
+function loadShownAchievements() {
+  const saved = localStorage.getItem("shownAchievements");
+  return saved ? new Set(JSON.parse(saved)) : new Set();
+}
+
+// 保存已显示的成就列表到localStorage
+function saveShownAchievements(achievementIds) {
+  localStorage.setItem("shownAchievements", JSON.stringify(Array.from(achievementIds)));
+}
+
+let gameStats = null;
+
 function formatDate(dateString) {
   const date = new Date(dateString);
   return date.toLocaleDateString();
 }
+
+function startGame(gameType) {
+  const gameMap = {
+    'match': 'chinese-match-game.html',
+    'listen': 'chinese-listen-game.html',
+    'spell': 'chinese-spell-game.html'
+  };
+  
+  if (window.parent && window.parent.switchPage) {
+    // 如果是在iframe中，通过父窗口切换
+    const gameName = gameType + '-game';
+    window.parent.switchPage(gameName);
+  } else {
+    // 直接跳转
+    window.location.href = gameMap[gameType];
+  }
+}
+
+function loadGameStats() {
+  if (!currentUser) return;
+  
+  fetch(`/api/game-stats/${currentUser.user_id}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && !data.error) {
+        gameStats = data;
+        updateGameUI(data);
+      }
+    })
+    .catch(err => {
+      console.error("加载游戏数据失败：", err);
+    });
+}
+
+let previousLevel = null; // 初始化为null，首次加载时不触发升级动画
+
+function updateGameUI(stats) {
+  if (!stats) return;
+  
+  const currentLevel = stats.current_level || 1;
+  
+  // 检查是否升级（只在非首次加载时检查）
+  if (previousLevel !== null && currentLevel > previousLevel) {
+    showLevelUpEffect();
+    createParticles(30);
+  }
+  previousLevel = currentLevel;
+  
+  document.getElementById("userLevel").textContent = currentLevel;
+  document.getElementById("currentExp").textContent = stats.current_level_exp || 0;
+  document.getElementById("nextLevelExp").textContent = stats.exp_to_next_level || 150;
+  document.getElementById("totalStars").textContent = stats.total_stars || 0;
+  document.getElementById("consecutiveDays").textContent = stats.consecutive_days || 0;
+  
+  // 更新进度条
+  const expForCurrent = stats.exp_for_current_level || 0;
+  const expForNext = stats.exp_for_next_level || 150;
+  const currentExp = stats.current_level_exp || 0;
+  const expNeeded = expForNext - expForCurrent;
+  const progress = expNeeded > 0 
+    ? Math.min(100, Math.max(0, (currentExp / expNeeded) * 100))
+    : 100;
+  
+  const progressFill = document.getElementById("progressFill");
+  if (progressFill) {
+    progressFill.style.width = progress.toFixed(1) + "%";
+    progressFill.textContent = progress >= 5 ? Math.round(progress) + "%" : "";
+  }
+  
+  // 显示游戏头部
+  const gameHeader = document.getElementById("gameHeader");
+  if (gameHeader) {
+    gameHeader.style.display = "block";
+  }
+}
+
+function updateGameStats() {
+  loadGameStats();
+  checkNewAchievements();
+  checkNewMasteredWords();
+}
+
+let lastAchievements = loadShownAchievements(); // 已显示过的成就ID集合（从localStorage加载）
+let lastMasteredWords = new Set(); // 已掌握的生字ID集合
+
+let isCheckingAchievements = false;
+let isCheckingMastered = false;
+let currentMasteredWord = null; // 当前要处理的已掌握生字
+
+function checkNewAchievements() {
+  if (!currentUser || isCheckingAchievements) return;
+  isCheckingAchievements = true;
+  
+  // 先检查新成就
+  fetch(`/api/check-achievements/${currentUser.user_id}`)
+    .then(res => res.json())
+    .then(data => {
+      // 然后获取完整成就列表
+      return fetch(`/api/achievements/${currentUser.user_id}`)
+        .then(res => res.json())
+        .then(achievements => {
+          const unlockedIds = new Set(achievements.filter(a => a.unlocked).map(a => a.id));
+          // 只显示真正新解锁的成就（已解锁但之前没有显示过的）
+          const newAchievements = achievements.filter(a => a.unlocked && !lastAchievements.has(a.id));
+          
+          if (newAchievements.length > 0) {
+            newAchievements.forEach((achievement, index) => {
+              // 延迟显示，避免多个成就同时弹出
+              setTimeout(() => {
+                showAchievementUnlock(achievement);
+                // 标记为已显示
+                lastAchievements.add(achievement.id);
+                saveShownAchievements(lastAchievements);
+              }, index * 3500);
+            });
+          } else {
+            // 即使没有新成就，也更新已解锁的成就列表（用于同步）
+            // 但只更新已解锁的，不添加新的
+            const currentUnlocked = Array.from(unlockedIds);
+            const shown = Array.from(lastAchievements);
+            // 合并：保留已显示的，添加新解锁的（但不显示，因为可能之前已经显示过）
+            const merged = new Set([...shown, ...currentUnlocked]);
+            lastAchievements = merged;
+            saveShownAchievements(lastAchievements);
+          }
+          
+          isCheckingAchievements = false;
+        })
+        .catch(err => {
+          console.error("获取成就列表失败：", err);
+          isCheckingAchievements = false;
+        });
+    })
+    .catch(err => {
+      console.error("检查成就失败：", err);
+      isCheckingAchievements = false;
+    });
+}
+
+function showAchievementUnlock(achievement) {
+  const badge = document.getElementById("achievementBadge");
+  const icon = document.getElementById("achievementIcon");
+  const title = document.getElementById("achievementTitle");
+  const desc = document.getElementById("achievementDesc");
+  
+  if (badge && icon && title && desc) {
+    icon.textContent = achievement.icon || "🏆";
+    title.textContent = achievement.name || "成就解锁！";
+    desc.textContent = achievement.desc || "恭喜你获得新成就";
+    
+    badge.style.display = "block";
+    badge.classList.remove("hide");
+    
+    // 创建粒子效果
+    createParticles(20);
+    
+    // 3秒后自动隐藏
+    setTimeout(() => {
+      badge.classList.add("hide");
+      setTimeout(() => {
+        badge.style.display = "none";
+        badge.classList.remove("hide");
+      }, 500);
+    }, 3000);
+  }
+}
+
+function createParticles(count) {
+  const particles = ["⭐", "✨", "🎉", "🌟", "💫"];
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement("div");
+    particle.className = "particle";
+    particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+    particle.style.left = Math.random() * 100 + "%";
+    particle.style.top = Math.random() * 100 + "%";
+    particle.style.animationDelay = Math.random() * 0.3 + "s";
+    document.body.appendChild(particle);
+    
+    setTimeout(() => {
+      particle.remove();
+    }, 1000);
+  }
+}
+
+function showAchievements() {
+  if (!currentUser) return;
+  
+  fetch(`/api/achievements/${currentUser.user_id}`)
+    .then(res => res.json())
+    .then(achievements => {
+      const grid = document.getElementById("achievementsGrid");
+      if (!grid) return;
+      
+      grid.innerHTML = achievements.map(achievement => `
+        <div class="achievement-item ${achievement.unlocked ? 'unlocked' : 'locked'}">
+          <div class="achievement-item-icon">${achievement.icon || "🏆"}</div>
+          <div class="achievement-item-name">${achievement.name}</div>
+          <div class="achievement-item-desc">${achievement.desc}</div>
+        </div>
+      `).join("");
+      
+      document.getElementById("achievementsModal").classList.add("show");
+    })
+    .catch(err => {
+      console.error("加载成就失败：", err);
+      alert("加载成就失败");
+    });
+}
+
+function closeAchievementsModal(e) {
+  if (!e || e.target.id === "achievementsModal") {
+    document.getElementById("achievementsModal").classList.remove("show");
+  }
+}
+
+function closeModal(modalId, e) {
+  if (!e || e.target.id === modalId || !modalId.includes('event')) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove("show");
+      
+      // 恢复FAB按钮显示（如果存在）
+      if (window.parent) {
+        try {
+          const fabBtn = window.parent.document.getElementById("fabBtn");
+          if (fabBtn && window.parent.location.pathname.includes('chinese')) {
+            fabBtn.style.display = "flex";
+          }
+        } catch (err) {
+          // 跨域限制，忽略
+        }
+      }
+    }
+  }
+}
+
+function showLevelUpEffect() {
+  const effect = document.createElement("div");
+  effect.className = "level-up-effect";
+  effect.innerHTML = '<div class="level-up-text">🎉 升级啦！</div>';
+  document.body.appendChild(effect);
+  
+  setTimeout(() => {
+    effect.remove();
+  }, 1000);
+}
+
+// 检查新熟练掌握的生字
+function checkNewMasteredWords() {
+  if (!currentUser || isCheckingMastered) return;
+  isCheckingMastered = true;
+  
+  fetch(`/api/check-mastered/${currentUser.user_id}`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(masteredWords => {
+      if (!masteredWords || !Array.isArray(masteredWords)) {
+        isCheckingMastered = false;
+        return;
+      }
+      
+      const masteredIds = new Set(masteredWords.map(w => w.word_id));
+      const newMastered = masteredWords.filter(w => !lastMasteredWords.has(w.word_id));
+      
+      if (newMastered.length > 0) {
+        // 逐个显示提示（延迟显示，避免同时弹出多个）
+        newMastered.forEach((word, index) => {
+          setTimeout(() => {
+            showMasteredModal(word);
+          }, index * 4000);
+        });
+      }
+      
+      lastMasteredWords = masteredIds;
+      isCheckingMastered = false;
+    })
+    .catch(err => {
+      console.error("检查已掌握生字失败：", err);
+      isCheckingMastered = false;
+    });
+}
+
+// 显示熟练掌握提示弹窗
+function showMasteredModal(word) {
+  currentMasteredWord = word;
+  
+  const modal = document.getElementById("masteredModal");
+  const wordEl = document.getElementById("masteredWord");
+  const pinyinEl = document.getElementById("masteredPinyin");
+  
+  if (modal && wordEl && pinyinEl) {
+    wordEl.textContent = word.hanzi;
+    pinyinEl.textContent = word.pinyin || "";
+    modal.classList.add("show");
+    
+    // 隐藏FAB按钮（如果存在）
+    if (window.parent) {
+      try {
+        const fabBtn = window.parent.document.getElementById("fabBtn");
+        if (fabBtn) {
+          fabBtn.style.display = "none";
+        }
+      } catch (e) {
+        // 跨域限制，忽略
+      }
+    }
+    
+    // 创建庆祝粒子效果
+    createParticles(25);
+  }
+}
+
+// 移到已认识（删除已掌握的生字）
+function moveToKnown() {
+  if (!currentMasteredWord || !currentUser) return;
+  
+  const wordId = currentMasteredWord.word_id;
+  const hanzi = currentMasteredWord.hanzi;
+  
+  fetch("/api/delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: wordId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data && data.success) {
+      // 显示奖励动画
+      if (data.is_mastered) {
+        showRewardAnimation(data.exp_reward || 50, data.stars_reward || 2);
+      }
+      
+      // 关闭弹窗
+      closeModal('masteredModal');
+      currentMasteredWord = null;
+      
+      // 从已掌握列表中移除
+      lastMasteredWords.delete(wordId);
+      
+      // 重新加载页面
+      loadChinesePage();
+      updateGameStats();
+      
+      // 更新统计
+      if (window.parent && typeof window.parent.updateWordStats === 'function') {
+        window.parent.updateWordStats();
+      }
+    } else {
+      alert("操作失败，请重试");
+    }
+  })
+  .catch(err => {
+    console.error("删除失败：", err);
+    alert("操作失败，请重试");
+  });
+}
+
+// 显示奖励动画
+function showRewardAnimation(exp, stars) {
+  const rewardEl = document.createElement("div");
+  rewardEl.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 3px solid var(--accent-color);
+    border-radius: 24px;
+    padding: 32px;
+    text-align: center;
+    z-index: 10002;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    animation: rewardPop 1s ease-out forwards;
+  `;
+  rewardEl.innerHTML = `
+    <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+    <div style="font-size: 24px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">
+      获得奖励！
+    </div>
+    <div style="font-size: 20px; font-weight: 800; color: var(--text-color);">
+      <div style="color: var(--primary-color); margin-bottom: 8px;">+${exp} EXP</div>
+      <div style="color: var(--accent-color);">+${stars} ⭐</div>
+    </div>
+  `;
+  
+  document.body.appendChild(rewardEl);
+  
+  setTimeout(() => {
+    rewardEl.style.animation = "rewardFadeOut 0.5s ease-out forwards";
+    setTimeout(() => {
+      rewardEl.remove();
+    }, 500);
+  }, 2000);
+}
+
+// 添加奖励动画样式
+const style = document.createElement("style");
+style.textContent = `
+  @keyframes rewardPop {
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes rewardFadeOut {
+    to {
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(style);
 
 function speakChinese(hanzi, py, wordId) {
   if (!hanzi) return;
@@ -221,27 +1220,48 @@ function speakChinese(hanzi, py, wordId) {
     body: JSON.stringify({ id: wordId })
   }).then(() => {
     loadChinesePage();
+    // 检查是否有新掌握的生字
+    setTimeout(() => {
+      checkNewMasteredWords();
+    }, 500);
   });
 }
 
 function deleteChineseWord(event, word) {
   event.stopPropagation();
-  if (confirm(`确定要删除 "${word.hanzi}" 吗？`)) {
+  const isMastered = word.is_mastered || 0;
+  const confirmMsg = isMastered 
+    ? `确定要将 "${word.hanzi}" 移到已认识吗？\n（将获得 50 EXP + 2 星星奖励）`
+    : `确定要删除 "${word.hanzi}" 吗？`;
+    
+  if (confirm(confirmMsg)) {
     fetch("/api/delete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: word.id })
-    }).then(res => {
-      if (res.status === 200) {
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.success) {
+        // 如果删除的是已掌握的生字，显示奖励动画
+        if (data.is_mastered) {
+          showRewardAnimation(data.exp_reward || 50, data.stars_reward || 2);
+        }
+        
         if (currentUser) {
-          if (window.parent && window.parent.updateWordStats) {
+          if (window.parent && typeof window.parent.updateWordStats === 'function') {
             window.parent.updateWordStats();
           }
         }
         loadChinesePage();
+        updateGameStats();
       } else {
         alert("删除失败");
       }
+    })
+    .catch(err => {
+      console.error("删除失败：", err);
+      alert("删除失败");
     });
   }
 }
@@ -249,12 +1269,21 @@ function deleteChineseWord(event, word) {
 function loadChinesePage() {
   if (!currentUser) return;
 
+  // 加载游戏数据
+  loadGameStats();
+
   fetch(`/api/words/${currentUser.user_id}`)
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById("list");
       if (!list) return;
       list.innerHTML = "";
+
+      // 更新总生字数
+      const totalWordsEl = document.getElementById("totalWords");
+      if (totalWordsEl) {
+        totalWordsEl.textContent = data.length;
+      }
 
       if (data.length === 0) {
         list.innerHTML = "<div class='empty-message'>还没有添加任何生字，快去添加吧！</div>";
@@ -266,8 +1295,26 @@ function loadChinesePage() {
         wrapper.className = "word-wrapper";
 
         const date = formatDate(w.created_at);
+        const masteryLevel = w.mastery_level || 0;
+        const isMastered = w.is_mastered || 0;
+        
+        // 已掌握的生字添加特殊样式
+        if (isMastered) {
+          wrapper.classList.add("mastered-word");
+        }
+        
+        const masteryBadge = masteryLevel > 0 
+          ? `<div class="mastery-badge mastery-${masteryLevel}" title="掌握度 ${masteryLevel} 级">${masteryLevel}</div>`
+          : '';
+        
+        const masteredLabel = isMastered 
+          ? `<div class="mastered-label" style="position: absolute; top: 8px; right: 8px; background: var(--primary-color); color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 800;">已掌握</div>`
+          : '';
+        
         wrapper.innerHTML = `
-          <button class="remove-btn" type="button">✕</button>
+          <button class="remove-btn" type="button" ${isMastered ? 'title="移到已认识"' : ''}>${isMastered ? '✓' : '✕'}</button>
+          ${masteryBadge}
+          ${masteredLabel}
           <div class="word-pinyin" title="点击显示/隐藏拼音">${w.pinyin || ''}</div>
           <div class="word-display">
             <ruby>${w.hanzi}<rt>${w.pinyin || ''}</rt></ruby>
@@ -288,12 +1335,33 @@ function loadChinesePage() {
         
         // 点击卡片朗读
         wrapper.onclick = (e) => {
-          if (!e.target.classList.contains('word-pinyin')) {
+          if (!e.target.classList.contains('word-pinyin') && !e.target.classList.contains('remove-btn') && !e.target.classList.contains('mastery-badge')) {
             speakChinese(w.hanzi, w.pinyin, w.id);
+            // 添加点击动画
+            wrapper.style.transform = "scale(0.95)";
+            setTimeout(() => {
+              wrapper.style.transform = "";
+            }, 150);
           }
         };
         
-        wrapper.querySelector(".remove-btn").onclick = (e) => deleteChineseWord(e, w);
+        // 已掌握的生字，删除按钮显示不同提示
+        const removeBtn = wrapper.querySelector(".remove-btn");
+        if (isMastered) {
+          removeBtn.style.background = "var(--primary-color)";
+          removeBtn.style.color = "white";
+          removeBtn.title = "移到已认识（获得奖励）";
+        }
+        removeBtn.onclick = (e) => {
+          if (isMastered) {
+            // 已掌握的生字，直接移到已认识（给予奖励）
+            currentMasteredWord = { word_id: w.id, hanzi: w.hanzi, pinyin: w.pinyin };
+            moveToKnown();
+          } else {
+            // 普通删除
+            deleteChineseWord(e, w);
+          }
+        };
 
         list.appendChild(wrapper);
       });
@@ -301,6 +1369,41 @@ function loadChinesePage() {
 }
 
 loadChinesePage();
+
+// 初始化时先加载已显示的成就列表，然后检查新成就和已掌握生字
+function initializeAchievements() {
+  if (!currentUser) return;
+  
+  // 先获取当前已解锁的成就，初始化lastAchievements（避免显示已解锁的成就）
+  fetch(`/api/achievements/${currentUser.user_id}`)
+    .then(res => res.json())
+    .then(achievements => {
+      const unlockedIds = new Set(achievements.filter(a => a.unlocked).map(a => a.id));
+      // 合并已显示的成就和当前已解锁的成就
+      const merged = new Set([...lastAchievements, ...unlockedIds]);
+      lastAchievements = merged;
+      saveShownAchievements(lastAchievements);
+    })
+    .catch(err => {
+      console.error("初始化成就列表失败：", err);
+    })
+    .finally(() => {
+      // 延迟检查新成就和已掌握生字（避免与页面加载冲突）
+      setTimeout(() => {
+        checkNewAchievements();
+        checkNewMasteredWords();
+      }, 2000);
+    });
+}
+
+if (currentUser) {
+  initializeAchievements();
+}
+
+// 暴露给父窗口的函数
+if (window.parent) {
+  window.parent.updateGameStats = updateGameStats;
+}
 </script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 # 部署指南
 
+> ⚠️ **重要更新**：数据库持久化已优化！请查看 [DOCKER_DATA_GUIDE.md](./DOCKER_DATA_GUIDE.md) 了解如何迁移现有数据。
+
 ## 选项 1: Railway.app（推荐，最简单）
 
 ### 步骤：
