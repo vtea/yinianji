@@ -119,16 +119,6 @@
       width: 100%;
     }
 
-    .word-meta {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      font-size: 12px;
-      font-weight: 800;
-      color: #afafaf;
-      margin-top: 8px;
-    }
-
     .remove-btn {
       position: absolute;
       top: 12px;
@@ -227,11 +217,22 @@ function speakWord(english) {
 
 }
 
-async function removeWord(event, word) {
+async function removeWord(event, wordObj) {
   event.stopPropagation();
   if (!currentUser) return;
   
-  if (!confirm(`确定要从单词本中删除 "${word}" 吗？`)) return;
+  if (!confirm(`确定要从单词本中删除 "${wordObj.word}" 吗？`)) return;
+
+  if (currentUser) {
+    const deletedKey = `deletedEnglish_${currentUser.user_id}`;
+    const raw = localStorage.getItem(deletedKey);
+    const map = raw ? JSON.parse(raw) : {};
+    map[wordObj.word] = {
+      created_at: wordObj.created_at,
+      play_count: wordObj.play_count || 0
+    };
+    localStorage.setItem(deletedKey, JSON.stringify(map));
+  }
 
   try {
     const res = await fetch("/api/english-new-words", {
@@ -239,7 +240,7 @@ async function removeWord(event, word) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         user_id: currentUser.user_id, 
-        word: word 
+        word: wordObj.word 
       })
     });
     
@@ -256,14 +257,10 @@ function createWordCard(wordObj) {
   const card = document.createElement("div");
   card.className = "word-card";
   card.innerHTML = `
-    <button class="remove-btn" onclick="removeWord(event, '${wordObj.word}')">✕</button>
+    <button class="remove-btn" onclick="removeWord(event, ${JSON.stringify(wordObj).replace(/"/g, '&quot;')})">✕</button>
     <div class="word-english">${wordObj.word}</div>
     <div class="word-phonetic">${wordObj.phonetic || ''}</div>
     <div class="word-chinese">${wordObj.chinese || ''}</div>
-    <div class="word-meta">
-      <span class="play-count">🔊 ${wordObj.play_count || 0}</span>
-      <span>📅 ${date}</span>
-    </div>
   `;
   
   card.onclick = () => speakWord(wordObj.word);

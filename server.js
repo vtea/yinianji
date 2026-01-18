@@ -3,6 +3,10 @@ const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const path = require("path");
 const https = require("https");
+const fs = require("fs");
+const os = require("os");
+const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const { default: pinyin } = require("pinyin");
 
 const app = express();
@@ -21,6 +25,61 @@ const db = new sqlite3.Database(dbPath);
 // 启用外键约束
 db.run("PRAGMA foreign_keys = ON");
 
+const SECRET_FILE = path.join(__dirname, ".ai_key_secret");
+function loadOrCreateSecret() {
+  if (process.env.AI_KEY_SECRET) return process.env.AI_KEY_SECRET;
+  try {
+    if (fs.existsSync(SECRET_FILE)) {
+      return fs.readFileSync(SECRET_FILE, "utf8").trim();
+    }
+    const generated = crypto.randomBytes(32).toString("hex");
+    fs.writeFileSync(SECRET_FILE, generated, { mode: 0o600 });
+    return generated;
+  } catch (e) {
+    return "";
+  }
+}
+
+const API_KEY_SECRET = loadOrCreateSecret();
+const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || "10", 10);
+
+function isBcryptHash(value) {
+  return typeof value === "string" && value.startsWith("$2");
+}
+
+function encryptApiKey(plain) {
+  if (!API_KEY_SECRET) {
+    throw new Error("缺少 AI_KEY_SECRET 环境变量");
+  }
+  const key = crypto.createHash("sha256").update(API_KEY_SECRET).digest();
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  const encrypted = Buffer.concat([cipher.update(plain, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return [
+    iv.toString("base64"),
+    tag.toString("base64"),
+    encrypted.toString("base64")
+  ].join(".");
+}
+
+function decryptApiKey(payload) {
+  if (!API_KEY_SECRET) {
+    throw new Error("缺少 AI_KEY_SECRET 环境变量");
+  }
+  if (!payload) return "";
+  const [ivB64, tagB64, dataB64] = payload.split(".");
+  if (!ivB64 || !tagB64 || !dataB64) return "";
+  const key = crypto.createHash("sha256").update(API_KEY_SECRET).digest();
+  const iv = Buffer.from(ivB64, "base64");
+  const tag = Buffer.from(tagB64, "base64");
+  const data = Buffer.from(dataB64, "base64");
+  const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(tag);
+  const decrypted = Buffer.concat([decipher.update(data), decipher.final()]);
+  return decrypted.toString("utf8");
+}
+
 // 初始化数据库表
 function initDatabase() {
   db.serialize(() => {
@@ -35,6 +94,18 @@ function initDatabase() {
     `, (err) => {
       if (err) console.error("创建 users 表失败：", err);
       else console.log("✓ users 表已创建");
+    });
+
+    // 为 users 表添加 api_key_enc 字段
+    db.all("PRAGMA table_info(users)", (err, columns) => {
+      if (err) return;
+      const hasApiKeyEnc = columns && columns.some(col => col.name === "api_key_enc");
+      if (!hasApiKeyEnc) {
+        db.run("ALTER TABLE users ADD COLUMN api_key_enc TEXT", (err2) => {
+          if (err2) console.error("迁移 users 表失败：", err2);
+          else console.log("✓ users 表已添加 api_key_enc 列");
+        });
+      }
     });
 
     // 创建 words 表
@@ -139,6 +210,43 @@ function initDatabase() {
       else console.log("✓ english_new_words 表已创建");
     });
 
+    // 创建 deleted_words 表（生字删除记录）
+    db.run(`
+      CREATE TABLE IF NOT EXISTS deleted_words (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        hanzi TEXT NOT NULL,
+        pinyin TEXT,
+        speak_count INTEGER DEFAULT 0,
+        added_at DATETIME,
+        deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE(user_id, hanzi)
+      )
+    `, (err) => {
+      if (err) console.error("创建 deleted_words 表失败：", err);
+      else console.log("✓ deleted_words 表已创建");
+    });
+
+    // 创建 deleted_english_words 表（英语单词删除记录）
+    db.run(`
+      CREATE TABLE IF NOT EXISTS deleted_english_words (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        word TEXT NOT NULL,
+        phonetic TEXT,
+        chinese TEXT,
+        play_count INTEGER DEFAULT 0,
+        added_at DATETIME,
+        deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE(user_id, word)
+      )
+    `, (err) => {
+      if (err) console.error("创建 deleted_english_words 表失败：", err);
+      else console.log("✓ deleted_english_words 表已创建");
+    });
+
     // 创建 ai_chat_history 表
     db.run(`
       CREATE TABLE IF NOT EXISTS ai_chat_history (
@@ -184,20 +292,26 @@ app.post("/api/register", (req, res) => {
     return res.status(400).json({ error: "用户名至少 3 个字符，密码至少 6 个字符" });
   }
 
-  db.run(
-    "INSERT INTO users (username, password) VALUES (?, ?)",
-    [username, password],
-    (err) => {
-      if (err) {
-        if (err.message.includes("UNIQUE constraint failed")) {
-          return res.status(409).json({ error: "用户名已存在" });
-        }
-        console.error("注册失败：", err);
-        return res.sendStatus(500);
-      }
-      res.status(200).json({ success: true, message: "注册成功" });
+  bcrypt.hash(password, BCRYPT_ROUNDS, (hashErr, hashedPassword) => {
+    if (hashErr) {
+      console.error("密码加密失败：", hashErr);
+      return res.sendStatus(500);
     }
-  );
+    db.run(
+      "INSERT INTO users (username, password) VALUES (?, ?)",
+      [username, hashedPassword],
+      (err) => {
+        if (err) {
+          if (err.message.includes("UNIQUE constraint failed")) {
+            return res.status(409).json({ error: "用户名已存在" });
+          }
+          console.error("注册失败：", err);
+          return res.sendStatus(500);
+        }
+        res.status(200).json({ success: true, message: "注册成功" });
+      }
+    );
+  });
 });
 
 // 登录接口
@@ -209,8 +323,8 @@ app.post("/api/login", (req, res) => {
   }
 
   db.get(
-    "SELECT id, username FROM users WHERE username = ? AND password = ?",
-    [username, password],
+    "SELECT id, username, password FROM users WHERE username = ?",
+    [username],
     (err, row) => {
       if (err) {
         console.error("登录查询失败：", err);
@@ -221,7 +335,33 @@ app.post("/api/login", (req, res) => {
         return res.status(401).json({ error: "用户名或密码错误" });
       }
 
-      res.json({ success: true, user_id: row.id, username: row.username });
+      const stored = row.password || "";
+      if (isBcryptHash(stored)) {
+        bcrypt.compare(password, stored, (cmpErr, match) => {
+          if (cmpErr) {
+            console.error("密码校验失败：", cmpErr);
+            return res.status(500).json({ error: "查询失败" });
+          }
+          if (!match) {
+            return res.status(401).json({ error: "用户名或密码错误" });
+          }
+          res.json({ success: true, user_id: row.id, username: row.username });
+        });
+      } else {
+        if (stored !== password) {
+          return res.status(401).json({ error: "用户名或密码错误" });
+        }
+        // 旧明文密码，登录后迁移为加密存储
+        bcrypt.hash(password, BCRYPT_ROUNDS, (hashErr, hashedPassword) => {
+          if (!hashErr) {
+            db.run(
+              "UPDATE users SET password = ? WHERE id = ?",
+              [hashedPassword, row.id]
+            );
+          }
+          res.json({ success: true, user_id: row.id, username: row.username });
+        });
+      }
     }
   );
 });
@@ -263,6 +403,42 @@ app.get("/api/words/:user_id", (req, res) => {
   );
 });
 
+// 生字统计
+app.get("/api/word-stats/chinese/:user_id", (req, res) => {
+  const { user_id } = req.params;
+  if (!user_id || user_id === "undefined") {
+    return res.status(400).json({ error: "用户未登录" });
+  }
+
+  db.get("SELECT COUNT(*) as count FROM words WHERE user_id = ?", [user_id], (err, row) => {
+    if (err) return res.sendStatus(500);
+    const unknownCount = row ? row.count : 0;
+    db.get("SELECT COUNT(*) as count FROM deleted_words WHERE user_id = ?", [user_id], (err2, row2) => {
+      if (err2) return res.sendStatus(500);
+      const knownCount = row2 ? row2.count : 0;
+      res.json({ unknownCount, knownCount });
+    });
+  });
+});
+
+// 英语单词本统计
+app.get("/api/word-stats/english/:user_id", (req, res) => {
+  const { user_id } = req.params;
+  if (!user_id || user_id === "undefined") {
+    return res.status(400).json({ error: "用户未登录" });
+  }
+
+  db.get("SELECT COUNT(*) as count FROM english_new_words WHERE user_id = ?", [user_id], (err, row) => {
+    if (err) return res.sendStatus(500);
+    const unknownCount = row ? row.count : 0;
+    db.get("SELECT COUNT(*) as count FROM deleted_english_words WHERE user_id = ?", [user_id], (err2, row2) => {
+      if (err2) return res.sendStatus(500);
+      const knownCount = row2 ? row2.count : 0;
+      res.json({ unknownCount, knownCount });
+    });
+  });
+});
+
 // 添加生字
 app.post("/api/words", (req, res) => {
   const { user_id, hanzi } = req.body;
@@ -286,23 +462,46 @@ app.post("/api/words", (req, res) => {
         return res.status(409).json({ error: "生字已存在" });
       }
 
-      // 自动生成拼音
-      const py = pinyin(hanzi, {
-        style: pinyin.STYLE_TONE
-      })
-        .flat()
-        .join(" ");
-
-      db.run(
-        "INSERT INTO words (user_id, hanzi, pinyin, speak_count, created_at) VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP)",
-        [user_id, hanzi, py],
-        (err) => {
-          if (err) {
-            console.error("保存失败：", err);
-            return res.sendStatus(500);
+      db.get(
+        "SELECT hanzi, speak_count, added_at FROM deleted_words WHERE user_id = ? AND hanzi = ?",
+        [user_id, hanzi],
+        (err2, deletedRow) => {
+          if (err2) {
+            console.error("查询删除记录失败：", err2);
           }
-          console.log("保存成功：", hanzi, py);
-          res.status(200).json({ success: true });
+
+          // 自动生成拼音
+          const py = pinyin(hanzi, {
+            style: pinyin.STYLE_TONE
+          })
+            .flat()
+            .join(" ");
+
+          db.run(
+            "INSERT INTO words (user_id, hanzi, pinyin, speak_count, created_at) VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP)",
+            [user_id, hanzi, py],
+            (err3) => {
+              if (err3) {
+                console.error("保存失败：", err3);
+                return res.sendStatus(500);
+              }
+
+              if (deletedRow) {
+                db.run(
+                  "DELETE FROM deleted_words WHERE user_id = ? AND hanzi = ?",
+                  [user_id, hanzi]
+                );
+              }
+
+              console.log("保存成功：", hanzi, py);
+              res.status(200).json({
+                success: true,
+                prevDeleted: deletedRow
+                  ? { added_at: deletedRow.added_at, speak_count: deletedRow.speak_count }
+                  : null
+              });
+            }
+          );
         }
       );
     }
@@ -509,21 +708,51 @@ app.post("/api/english-new-words", (req, res) => {
     return res.status(400).json({ error: "缺少必要参数" });
   }
 
-  db.run(
-    `INSERT INTO english_new_words (user_id, word, phonetic, chinese)
-     VALUES (?, ?, ?, ?)
-     ON CONFLICT(user_id, word) DO UPDATE SET 
-       phonetic = excluded.phonetic,
-       chinese = excluded.chinese`,
-    [user_id, word, phonetic, chinese],
-    (err) => {
-      if (err) {
-        console.error("添加单词到单词本失败：", err);
-        return res.sendStatus(500);
-      }
-      res.json({ success: true });
+  db.get("SELECT id FROM english_new_words WHERE user_id = ? AND word = ?", [user_id, word], (err, existing) => {
+    if (err) {
+      console.error("查询失败：", err);
+      return res.sendStatus(500);
     }
-  );
+
+    db.get(
+      "SELECT word, play_count, added_at FROM deleted_english_words WHERE user_id = ? AND word = ?",
+      [user_id, word],
+      (err2, deletedRow) => {
+        if (err2) {
+          console.error("查询删除记录失败：", err2);
+        }
+
+        db.run(
+          `INSERT INTO english_new_words (user_id, word, phonetic, chinese)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(user_id, word) DO UPDATE SET 
+             phonetic = excluded.phonetic,
+             chinese = excluded.chinese`,
+          [user_id, word, phonetic, chinese],
+          (err3) => {
+            if (err3) {
+              console.error("添加单词到单词本失败：", err3);
+              return res.sendStatus(500);
+            }
+
+            if (deletedRow) {
+              db.run(
+                "DELETE FROM deleted_english_words WHERE user_id = ? AND word = ?",
+                [user_id, word]
+              );
+            }
+
+            res.json({
+              success: true,
+              prevDeleted: !existing && deletedRow
+                ? { added_at: deletedRow.added_at, play_count: deletedRow.play_count }
+                : null
+            });
+          }
+        );
+      }
+    );
+  });
 });
 
 // 从单词本中删除单词
@@ -534,15 +763,38 @@ app.delete("/api/english-new-words", (req, res) => {
     return res.status(400).json({ error: "缺少必要参数" });
   }
 
-  db.run(
-    "DELETE FROM english_new_words WHERE user_id = ? AND word = ?",
+  db.get(
+    "SELECT user_id, word, phonetic, chinese, play_count, created_at FROM english_new_words WHERE user_id = ? AND word = ?",
     [user_id, word],
-    (err) => {
+    (err, row) => {
       if (err) {
-        console.error("删除单词本单词失败：", err);
+        console.error("查询单词本单词失败：", err);
         return res.sendStatus(500);
       }
-      res.json({ success: true });
+
+      if (row) {
+        db.run(
+          `INSERT OR REPLACE INTO deleted_english_words (user_id, word, phonetic, chinese, play_count, added_at, deleted_at)
+           VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+          [row.user_id, row.word, row.phonetic, row.chinese, row.play_count || 0, row.created_at],
+          (err2) => {
+            if (err2) console.error("记录删除历史失败：", err2);
+            db.run(
+              "DELETE FROM english_new_words WHERE user_id = ? AND word = ?",
+              [user_id, word],
+              (err3) => {
+                if (err3) {
+                  console.error("删除单词本单词失败：", err3);
+                  return res.sendStatus(500);
+                }
+                res.json({ success: true });
+              }
+            );
+          }
+        );
+      } else {
+        res.json({ success: true });
+      }
     }
   );
 });
@@ -622,13 +874,28 @@ app.post("/api/delete", (req, res) => {
     return res.status(400).json({ error: "缺少 id 参数" });
   }
 
-  db.run("DELETE FROM words WHERE id = ?", [id], (err) => {
-    if (err) {
-      console.error("删除失败：", err);
+  db.get("SELECT user_id, hanzi, pinyin, speak_count, created_at FROM words WHERE id = ?", [id], (err, row) => {
+    if (err || !row) {
+      if (err) console.error("查询失败：", err);
       return res.sendStatus(500);
     }
-    console.log("删除成功：", id);
-    res.sendStatus(200);
+
+    db.run(
+      `INSERT OR REPLACE INTO deleted_words (user_id, hanzi, pinyin, speak_count, added_at, deleted_at)
+       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [row.user_id, row.hanzi, row.pinyin, row.speak_count || 0, row.created_at],
+      (err2) => {
+        if (err2) console.error("记录删除历史失败：", err2);
+        db.run("DELETE FROM words WHERE id = ?", [id], (err3) => {
+          if (err3) {
+            console.error("删除失败：", err3);
+            return res.sendStatus(500);
+          }
+          console.log("删除成功：", id);
+          res.sendStatus(200);
+        });
+      }
+    );
   });
 });
 
@@ -647,16 +914,71 @@ app.post("/api/change-password", (req, res) => {
     [user_id],
     (err, row) => {
       if (err || !row) return res.status(500).json({ error: "用户不存在" });
-      if (row.password !== oldPassword) return res.status(401).json({ error: "旧密码错误" });
+      const stored = row.password || "";
+      const verify = (ok) => {
+        if (!ok) return res.status(401).json({ error: "旧密码错误" });
+        bcrypt.hash(newPassword, BCRYPT_ROUNDS, (hashErr, hashedPassword) => {
+          if (hashErr) return res.status(500).json({ error: "更新失败" });
+          db.run(
+            "UPDATE users SET password = ? WHERE id = ?",
+            [hashedPassword, user_id],
+            (err2) => {
+              if (err2) return res.status(500).json({ error: "更新失败" });
+              res.json({ success: true });
+            }
+          );
+        });
+      };
 
-      db.run(
-        "UPDATE users SET password = ? WHERE id = ?",
-        [newPassword, user_id],
-        (err) => {
-          if (err) return res.status(500).json({ error: "更新失败" });
-          res.json({ success: true });
-        }
-      );
+      if (isBcryptHash(stored)) {
+        bcrypt.compare(oldPassword, stored, (cmpErr, match) => {
+          if (cmpErr) return res.status(500).json({ error: "更新失败" });
+          verify(match);
+        });
+      } else {
+        verify(stored === oldPassword);
+      }
+    }
+  );
+});
+
+// 获取 AI Key 是否配置
+app.get("/api/ai-key-status/:user_id", (req, res) => {
+  const { user_id } = req.params;
+  if (!user_id || user_id === "undefined") {
+    return res.status(400).json({ error: "用户未登录" });
+  }
+  db.get("SELECT api_key_enc FROM users WHERE id = ?", [user_id], (err, row) => {
+    if (err) {
+      console.error("查询 API Key 失败：", err);
+      return res.sendStatus(500);
+    }
+    res.json({ configured: !!(row && row.api_key_enc) });
+  });
+});
+
+// 保存 AI Key（加密）
+app.post("/api/ai-key", (req, res) => {
+  const { user_id, apiKey } = req.body;
+  if (!user_id || !apiKey) {
+    return res.status(400).json({ error: "缺少必要参数" });
+  }
+  let encrypted;
+  try {
+    encrypted = encryptApiKey(apiKey);
+  } catch (e) {
+    console.error("API Key 加密失败：", e);
+    return res.status(500).json({ error: e.message || "加密失败" });
+  }
+  db.run(
+    "UPDATE users SET api_key_enc = ? WHERE id = ?",
+    [encrypted, user_id],
+    (err) => {
+      if (err) {
+        console.error("保存 API Key 失败：", err);
+        return res.sendStatus(500);
+      }
+      res.json({ success: true });
     }
   );
 });
@@ -664,10 +986,27 @@ app.post("/api/change-password", (req, res) => {
 // AI 辅导代理接口
 app.post("/api/ai-tutor", async (req, res) => {
   const { user_id, model, prompt, image } = req.body;
-  const API_KEY = "sk-lvPJFVhX6BJzny89SUvx37NpC1n2514pT2ttdJdwPfAK04RB"; // 替换为你的有效 API Key
+  if (!user_id) {
+    return res.status(400).json({ error: "缺少用户信息" });
+  }
+  let API_KEY = "";
+  try {
+    API_KEY = await new Promise((resolve, reject) => {
+      db.get("SELECT api_key_enc FROM users WHERE id = ?", [user_id], (err, row) => {
+        if (err) return reject(err);
+        resolve(row && row.api_key_enc ? decryptApiKey(row.api_key_enc) : "");
+      });
+    });
+  } catch (e) {
+    console.error("读取 API Key 失败：", e);
+    return res.status(500).json({ error: "读取 API Key 失败" });
+  }
   const API_URL = "https://api.aass.cc/v1/chat/completions";
 
   try {
+    if (!API_KEY) {
+      return res.status(400).json({ error: "缺少 API Key，请在账户中配置" });
+    }
     // 保存用户消息
     if (user_id) {
       db.run("INSERT INTO ai_chat_history (user_id, role, content, image_data) VALUES (?, ?, ?, ?)", [user_id, 'user', prompt || '', image || null]);
@@ -706,7 +1045,10 @@ app.post("/api/ai-tutor", async (req, res) => {
     });
 
     const data = await response.json();
-    if (data.error) throw new Error(data.error.message || "API Error");
+    if (data.error) {
+      const msg = data.error.message || "API Error";
+      throw new Error(msg);
+    }
     
     const reply = data.choices[0].message.content;
 
@@ -717,8 +1059,9 @@ app.post("/api/ai-tutor", async (req, res) => {
 
     res.json({ reply });
   } catch (error) {
+    const message = error && error.message ? error.message : "AI 老师暂时不在位，请检查网络或配置";
     console.error("AI Proxy Error:", error);
-    res.status(500).json({ error: "AI 老师暂时不在位，请检查网络或配置" });
+    res.status(500).json({ error: message });
   }
 });
 

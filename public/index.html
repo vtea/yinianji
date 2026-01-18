@@ -5,6 +5,10 @@
 <title>一年级学习本 - Duolingo Style</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   :root {
     --primary-color: #58cc02;
     --primary-hover: #46a302;
@@ -51,6 +55,24 @@
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  .word-stats {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    background: #f7f7f7;
+    border: 2px solid var(--border-color);
+    font-weight: 800;
+    font-size: 13px;
+    color: #777;
+    white-space: nowrap;
+  }
+
+  .word-stats strong {
+    color: var(--secondary-color);
   }
 
   /* 移动端下拉菜单：默认在桌面隐藏 */
@@ -268,6 +290,8 @@
     overflow: auto;
   }
 
+  #auth-page.show-flex { display: flex; }
+
 
   .auth-container {
     max-width: 400px;
@@ -378,26 +402,29 @@
 
   .modal-content {
     background: white;
-    padding: 32px;
+    padding: 28px 24px;
     border-radius: 24px;
     width: 90%;
-    max-width: 450px;
+    max-width: 420px;
     position: relative;
     box-shadow: 0 12px 0 rgba(0,0,0,0.1);
     border: 2px solid var(--border-color);
+    max-height: 85vh;
+    overflow-y: auto;
   }
 
   /* 设置项样式 */
   .setting-group {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     text-align: left;
+    width: 100%;
   }
 
   .setting-label {
     display: block;
     font-weight: 800;
-    font-size: 16px;
-    margin-bottom: 12px;
+    font-size: 15px;
+    margin-bottom: 10px;
     color: var(--text-color);
   }
 
@@ -411,12 +438,117 @@
     font-weight: 700;
     color: var(--text-color);
     cursor: pointer;
-    appearance: none;
+  }
+
+  /* 自定义下拉选择器 */
+  .custom-select {
+    position: relative;
+    width: 100%;
+  }
+
+  .custom-select-trigger {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 2px solid var(--border-color);
+    background: #f7f7f7;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .custom-select-trigger span:first-child {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .custom-select-trigger span:last-child {
+    flex-shrink: 0;
+  }
+  
+  .custom-select-trigger:active {
+    background: #e8e8e8;
+  }
+  
+  .custom-select-dropdown {
+    position: fixed;
+    left: 5%;
+    right: 5%;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: white;
+    border: 3px solid var(--border-color);
+    border-radius: 16px;
+    margin-top: 8px;
+    display: none;
+    z-index: 10000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  
+  .custom-select-dropdown.show {
+    display: block;
+  }
+  
+  .custom-select-option {
+    padding: 18px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-color);
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .custom-select-option:last-child {
+    border-bottom: none;
+  }
+  
+  .custom-select-option:active {
+    background: #e8f5ff;
+  }
+  
+  .custom-select-option.selected {
+    background: #ddf4ff;
+    color: var(--secondary-color);
   }
 
   .setting-range {
     width: 100%;
     margin-top: 8px;
+    cursor: pointer;
+  }
+
+  .ai-config-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .ai-config-input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 14px;
+    border: 2px solid var(--border-color);
+    background: #f7f7f7;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .ai-config-link {
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    background: white;
+    font-weight: 800;
     cursor: pointer;
   }
 
@@ -544,6 +676,51 @@
       box-shadow: 0 4px 0 #84d8ff;
     }
 
+    /* 移动端模态框优化 */
+    .modal-content {
+      width: 90%;
+      max-width: 360px;
+      padding: 18px 16px;
+      max-height: 80vh;
+    }
+
+    .modal-content h3,
+    .modal-title {
+      font-size: 18px !important;
+      word-break: break-word;
+    }
+
+    /* 移动端自定义选择器优化 */
+    .custom-select-trigger {
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    .custom-select-dropdown {
+      max-height: 50vh;
+      left: 2.5%;
+      right: 2.5%;
+    }
+
+    .custom-select-option {
+      padding: 14px 12px;
+      font-size: 13px;
+    }
+    
+    .auth-submit-btn {
+      font-size: 16px;
+      padding: 14px;
+    }
+
+    .setting-label {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .setting-group {
+      margin-bottom: 18px;
+    }
+
   }
 
 
@@ -557,12 +734,16 @@
   <div class="navbar" id="topNavbar">
     <h1>🦉 学习本</h1>
     <div class="navbar-actions">
+      <div class="word-stats" id="wordStats" style="display:none;">
+        不认识 <strong id="unknownCount">0</strong> 个，认识 <strong id="knownCount">0</strong> 个
+      </div>
       <button class="user-menu-btn mobile-menu-btn" onclick="toggleMobileMenu()" id="mobileMenuBtn">☰ 菜单</button>
       <div style="position: relative;">
         <button class="user-menu-btn" onclick="toggleUserMenu()" id="userMenuBtn">👤 账户</button>
         <div class="user-menu" id="userMenu">
           <div class="user-info-item" id="usernameDisplay"></div>
           <div class="user-menu-item" onclick="openPronunciationSettings()">🔊 发音设置</div>
+          <div class="user-menu-item" onclick="openAiConfigModal()">🤖 AI 配置 <span id="aiKeyStatusBadge" style="color:#afafaf;"></span></div>
           <div class="user-menu-item" onclick="openChangePasswordModal()">🔑 修改密码</div>
           <div class="user-menu-item" onclick="logout()" style="color: #ff4b4b; border-top: 2px solid var(--border-color);">🚪 退出登录</div>
         </div>
@@ -659,7 +840,7 @@
   <!-- 发音设置模态框 -->
   <div class="modal" id="settingsModal" onclick="closeModal('settingsModal', event)">
     <div class="modal-content" onclick="event.stopPropagation()">
-      <h3 style="margin-top:0; font-size:24px; font-weight:800; color: var(--secondary-color);">🔊 发音设置</h3>
+      <h3 class="modal-title" style="margin-top:0; font-size:24px; font-weight:800; color: var(--secondary-color);">🔊 发音设置</h3>
       
       <div class="setting-group">
         <label class="setting-label">发音语速</label>
@@ -673,9 +854,15 @@
 
       <div class="setting-group">
         <label class="setting-label">首选发音角色</label>
-        <select id="voiceSelect" class="setting-select" onchange="updateVoiceSettings()">
-          <option value="default">系统默认</option>
-        </select>
+        <div class="custom-select" id="voiceSelectContainer">
+          <div class="custom-select-trigger" onclick="toggleVoiceDropdown(event)">
+            <span id="selectedVoice">系统默认</span>
+            <span>▼</span>
+          </div>
+          <div class="custom-select-dropdown" id="voiceDropdown">
+            <!-- 选项将由JavaScript动态生成 -->
+          </div>
+        </div>
       </div>
 
       <button class="auth-submit-btn" onclick="closeModal('settingsModal')">完成</button>
@@ -696,6 +883,25 @@
         <input type="password" id="confirm-password" placeholder="确认新密码" required />
       </div>
       <button class="auth-submit-btn" onclick="handleChangePassword()">更新密码</button>
+    </div>
+  </div>
+
+  <!-- AI 配置模态框 -->
+  <div class="modal" id="aiConfigModal" onclick="closeModal('aiConfigModal', event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h3 style="margin-top:0; font-size:24px; font-weight:800; color: var(--secondary-color);">🤖 AI 配置</h3>
+      <div class="setting-group">
+        <label class="setting-label">API Key</label>
+        <div class="ai-config-row">
+          <input type="password" id="aiApiKeyInput" class="ai-config-input" placeholder="请输入你的 API Key" />
+          <button class="ai-config-link" onclick="openAiKeyPage()">获取 Key</button>
+        </div>
+        <label style="margin-top:8px; font-size:12px; font-weight:700; color:#888; display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" id="aiKeyShowToggle" onchange="toggleAiKeyVisibility()"> 显示 Key
+        </label>
+        <div id="aiKeyStatusText" style="margin-top:6px; font-size:12px; font-weight:700; color:#888;"></div>
+      </div>
+      <button class="auth-submit-btn" onclick="saveAiConfig()">保存</button>
     </div>
   </div>
 
@@ -725,6 +931,7 @@ function showAppPage() {
   if (navbar) navbar.style.display = "flex";
 
   updateUserMenu();
+  refreshAiKeyStatus();
   switchPage("chinese");
 }
 
@@ -737,6 +944,38 @@ function showAuthPage() {
   const navbar = document.getElementById("topNavbar");
   if (navbar) navbar.style.display = "none";
   closeMobileMenu();
+}
+
+function updateWordStatsVisibility(page) {
+  const statsEl = document.getElementById("wordStats");
+  if (!statsEl) return;
+  const shouldShow = page === "chinese" || page === "vocabulary";
+  statsEl.style.display = shouldShow ? "flex" : "none";
+}
+
+function updateWordStats() {
+  if (!currentUser) return;
+  const unknownEl = document.getElementById("unknownCount");
+  const knownEl = document.getElementById("knownCount");
+  if (!unknownEl || !knownEl) return;
+  const type = currentPage === "vocabulary" ? "english" : "chinese";
+
+  fetch(`/api/word-stats/${type}/${currentUser.user_id}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data || data.error) return;
+      unknownEl.textContent = String(data.unknownCount || 0);
+      knownEl.textContent = String(data.knownCount || 0);
+    })
+    .catch(() => {});
+}
+
+function formatDeletedHint(word, info, isChinese) {
+  if (!info) return "";
+  const addedAt = info.added_at ? new Date(info.added_at).toLocaleDateString() : "未知";
+  const count = isChinese ? (info.speak_count || 0) : (info.play_count || 0);
+  const label = "朗读次数";
+  return `提示：${word} 以前添加过。\n添加时间：${addedAt}\n${label}：${count}`;
 }
 
 
@@ -816,6 +1055,10 @@ function switchPage(page) {
     'ai-tutor': 'ai-tutor.html'
   };
   document.getElementById("contentFrame").src = frameUrls[page];
+  updateWordStatsVisibility(page);
+  if (page === "chinese" || page === "vocabulary") {
+    updateWordStats();
+  }
   
   // 切换页面时自动关闭用户菜单/移动端菜单
   document.getElementById("userMenu").classList.remove("show");
@@ -934,6 +1177,66 @@ function openChangePasswordModal() {
   toggleUserMenu();
 }
 
+function openAiKeyPage() {
+  window.open("https://api.aass.cc", "_blank");
+}
+
+function openAiConfigModal() {
+  const input = document.getElementById("aiApiKeyInput");
+  if (input) input.value = "";
+  const toggle = document.getElementById("aiKeyShowToggle");
+  if (toggle) toggle.checked = false;
+  toggleAiKeyVisibility();
+  refreshAiKeyStatus();
+  document.getElementById("aiConfigModal").classList.add("show");
+  document.getElementById("userMenu").classList.remove("show");
+}
+
+function toggleAiKeyVisibility() {
+  const input = document.getElementById("aiApiKeyInput");
+  const toggle = document.getElementById("aiKeyShowToggle");
+  if (!input || !toggle) return;
+  input.type = toggle.checked ? "text" : "password";
+}
+
+function refreshAiKeyStatus() {
+  if (!currentUser) return;
+  fetch(`/api/ai-key-status/${currentUser.user_id}`)
+    .then(res => res.json())
+    .then(data => {
+      const configured = !!(data && data.configured);
+      const badge = document.getElementById("aiKeyStatusBadge");
+      const text = document.getElementById("aiKeyStatusText");
+      if (badge) badge.textContent = configured ? "(已配置)" : "(未配置)";
+      if (text) text.textContent = configured ? "当前已配置 API Key（为安全起见不显示）" : "当前未配置 API Key";
+    })
+    .catch(() => {});
+}
+
+function saveAiConfig() {
+  const input = document.getElementById("aiApiKeyInput");
+  if (!input) return;
+  const key = input.value.trim();
+  if (!key) return alert("请输入 API Key");
+  fetch("/api/ai-key", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: currentUser.user_id, apiKey: key })
+  }).then(res => {
+    if (res.ok) {
+      closeModal('aiConfigModal');
+      alert("已保存 API Key");
+      refreshAiKeyStatus();
+    } else {
+      res.json().then(data => {
+        const text = document.getElementById("aiKeyStatusText");
+        if (text) text.textContent = data.error || "保存失败";
+        alert(data.error || "保存失败");
+      }).catch(() => alert("保存失败"));
+    }
+  });
+}
+
 async function handleChangePassword() {
   const oldPassword = document.getElementById("old-password").value;
   const newPassword = document.getElementById("new-password").value;
@@ -998,17 +1301,29 @@ let voiceSettings = {
 
 function initVoiceList() {
   const synth = window.speechSynthesis;
-  const select = document.getElementById("voiceSelect");
+  const dropdown = document.getElementById("voiceDropdown");
   
   function populateVoices() {
     const voices = synth.getVoices();
-    select.innerHTML = '<option value="default">系统默认</option>';
+    dropdown.innerHTML = '';
+    
+    // 添加系统默认选项
+    const defaultOption = document.createElement('div');
+    defaultOption.className = 'custom-select-option';
+    defaultOption.textContent = '系统默认';
+    defaultOption.dataset.value = 'default';
+    defaultOption.onclick = () => selectVoice('default', '系统默认');
+    dropdown.appendChild(defaultOption);
+    
+    // 添加其他语音选项
     voices.forEach(voice => {
       if (voice.lang.includes('zh') || voice.lang.includes('en')) {
-        const option = document.createElement('option');
-        option.value = voice.name;
+        const option = document.createElement('div');
+        option.className = 'custom-select-option';
         option.textContent = `${voice.name} (${voice.lang})`;
-        select.appendChild(option);
+        option.dataset.value = voice.name;
+        option.onclick = () => selectVoice(voice.name, `${voice.name} (${voice.lang})`);
+        dropdown.appendChild(option);
       }
     });
     
@@ -1017,7 +1332,12 @@ function initVoiceList() {
     if (saved) {
       voiceSettings = JSON.parse(saved);
       document.getElementById("voiceRate").value = voiceSettings.rate;
-      document.getElementById("voiceSelect").value = voiceSettings.voiceName || 'default';
+      const voiceName = voiceSettings.voiceName || 'default';
+      const selectedOption = Array.from(dropdown.children).find(el => el.dataset.value === voiceName);
+      if (selectedOption) {
+        document.getElementById("selectedVoice").textContent = selectedOption.textContent;
+        selectedOption.classList.add('selected');
+      }
     }
   }
 
@@ -1027,9 +1347,63 @@ function initVoiceList() {
   populateVoices();
 }
 
+function toggleVoiceDropdown(event) {
+  if (event) event.stopPropagation();
+  const dropdown = document.getElementById("voiceDropdown");
+  const trigger = event.currentTarget;
+  
+  if (dropdown.classList.contains('show')) {
+    dropdown.classList.remove('show');
+  } else {
+    // 获取trigger的位置，定位dropdown
+    const rect = trigger.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    
+    // 计算dropdown应该显示的位置
+    let top = rect.bottom + 8;
+    
+    // 确保dropdown不会超出屏幕底部
+    const dropdownMaxHeight = Math.min(viewportHeight * 0.5, 400);
+    if (top + dropdownMaxHeight > viewportHeight) {
+      // 如果下方空间不够，显示在trigger上方
+      top = Math.max(8, rect.top - dropdownMaxHeight - 8);
+    }
+    
+    dropdown.style.top = top + 'px';
+    dropdown.style.maxHeight = dropdownMaxHeight + 'px';
+    dropdown.classList.add('show');
+  }
+}
+
+function selectVoice(value, text) {
+  // 更新显示的文本
+  document.getElementById("selectedVoice").textContent = text;
+  
+  // 更新选中状态
+  const dropdown = document.getElementById("voiceDropdown");
+  Array.from(dropdown.children).forEach(el => el.classList.remove('selected'));
+  const selectedOption = Array.from(dropdown.children).find(el => el.dataset.value === value);
+  if (selectedOption) selectedOption.classList.add('selected');
+  
+  // 保存设置
+  voiceSettings.voiceName = value;
+  localStorage.setItem("voiceSettings", JSON.stringify(voiceSettings));
+  
+  // 关闭下拉菜单
+  dropdown.classList.remove('show');
+}
+
+// 点击页面其他地方关闭下拉菜单
+document.addEventListener('click', function(event) {
+  const dropdown = document.getElementById("voiceDropdown");
+  const container = document.getElementById("voiceSelectContainer");
+  if (dropdown && container && !container.contains(event.target)) {
+    dropdown.classList.remove('show');
+  }
+});
+
 function updateVoiceSettings() {
   voiceSettings.rate = parseFloat(document.getElementById("voiceRate").value);
-  voiceSettings.voiceName = document.getElementById("voiceSelect").value;
   localStorage.setItem("voiceSettings", JSON.stringify(voiceSettings));
 }
 
@@ -1054,7 +1428,20 @@ async function autoFetchEnglishInfo() {
 function saveChineseItem() {
   const hanzi = document.getElementById("addItemInput").value.trim();
   fetch("/api/words", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: currentUser.user_id, hanzi })})
-  .then(res => { if(res.ok) { closeModal('addItemModal'); document.getElementById("contentFrame").src = "chinese.html"; } });
+  .then(res => {
+    if (res.ok) {
+      return res.json().then(data => {
+        if (data && data.prevDeleted) {
+          alert(formatDeletedHint(hanzi, data.prevDeleted, true));
+        }
+        closeModal('addItemModal');
+        document.getElementById("contentFrame").src = "chinese.html";
+        updateWordStats();
+      });
+    } else if (res.status === 409) {
+      alert("这个生字已经在生字本里了");
+    }
+  });
 }
 
 function saveEnglishItem() {
@@ -1062,7 +1449,18 @@ function saveEnglishItem() {
   const chinese = document.getElementById("addItemInput2").value.trim();
   const phonetic = document.getElementById("addItemPhonetic").value.trim();
   fetch("/api/english-new-words", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: currentUser.user_id, word, chinese, phonetic })})
-  .then(res => { if(res.ok) { closeModal('addItemModal'); document.getElementById("contentFrame").src = currentPage==='vocabulary'?'vocabulary.html':'english.html'; } });
+  .then(res => {
+    if (res.ok) {
+      return res.json().then(data => {
+        if (data && data.prevDeleted) {
+          alert(formatDeletedHint(word, data.prevDeleted, false));
+        }
+        closeModal('addItemModal');
+        document.getElementById("contentFrame").src = currentPage==='vocabulary'?'vocabulary.html':'english.html';
+        updateWordStats();
+      });
+    }
+  });
 }
 
 // 统一发音系统 (由 iframe 调用)

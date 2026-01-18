@@ -350,7 +350,7 @@ async function toggleVocab(event, wordObj) {
   const isAdding = !userVocab.has(wordObj.english);
   const url = "/api/english-new-words";
   const method = isAdding ? "POST" : "DELETE";
-  
+
   try {
     const res = await fetch(url, {
       method: method,
@@ -365,11 +365,17 @@ async function toggleVocab(event, wordObj) {
     
     if (res.ok) {
       if (isAdding) {
-        userVocab.add(wordObj.english);
-      } else {
-        userVocab.delete(wordObj.english);
+        const data = await res.json().catch(() => null);
+        if (data && data.prevDeleted) {
+          const addedAt = data.prevDeleted.added_at ? new Date(data.prevDeleted.added_at).toLocaleDateString() : "未知";
+          const count = data.prevDeleted.play_count || 0;
+          alert(`提示：这个单词以前添加过。\n添加时间：${addedAt}\n朗读次数：${count}`);
+        }
       }
-      renderLevel(currentLevel);
+      loadUserVocab();
+      if (window.parent && window.parent.updateWordStats) {
+        window.parent.updateWordStats();
+      }
     }
   } catch (err) {
     console.error("操作失败：", err);
