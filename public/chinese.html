@@ -118,6 +118,20 @@
       background: #ddf4ff;
       padding: 4px 12px;
       border-radius: 12px;
+      opacity: 0;
+      filter: blur(8px);
+      transition: all 0.3s;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .word-pinyin.show {
+      opacity: 1;
+      filter: blur(0);
+    }
+    
+    .word-pinyin:hover {
+      background: #b3e5fc;
     }
 
     .word-info {
@@ -254,7 +268,7 @@ function loadChinesePage() {
         const date = formatDate(w.created_at);
         wrapper.innerHTML = `
           <button class="remove-btn" type="button">✕</button>
-          <div class="word-pinyin">${w.pinyin || ''}</div>
+          <div class="word-pinyin" title="点击显示/隐藏拼音">${w.pinyin || ''}</div>
           <div class="word-display">
             <ruby>${w.hanzi}<rt>${w.pinyin || ''}</rt></ruby>
           </div>
@@ -264,7 +278,21 @@ function loadChinesePage() {
           </div>
         `;
 
-        wrapper.onclick = () => speakChinese(w.hanzi, w.pinyin, w.id);
+        const pinyinEl = wrapper.querySelector(".word-pinyin");
+        
+        // 点击拼音切换显示/隐藏
+        pinyinEl.onclick = (e) => {
+          e.stopPropagation();
+          pinyinEl.classList.toggle('show');
+        };
+        
+        // 点击卡片朗读
+        wrapper.onclick = (e) => {
+          if (!e.target.classList.contains('word-pinyin')) {
+            speakChinese(w.hanzi, w.pinyin, w.id);
+          }
+        };
+        
         wrapper.querySelector(".remove-btn").onclick = (e) => deleteChineseWord(e, w);
 
         list.appendChild(wrapper);

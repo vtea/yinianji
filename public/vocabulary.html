@@ -107,6 +107,20 @@
       font-size: 14px;
       color: #afafaf;
       font-weight: 500;
+      opacity: 0;
+      filter: blur(6px);
+      transition: all 0.3s;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .word-phonetic.show {
+      opacity: 1;
+      filter: blur(0);
+    }
+    
+    .word-phonetic:hover {
+      color: var(--secondary-color);
     }
 
     .word-chinese {
@@ -259,11 +273,24 @@ function createWordCard(wordObj) {
   card.innerHTML = `
     <button class="remove-btn" onclick="removeWord(event, ${JSON.stringify(wordObj).replace(/"/g, '&quot;')})">✕</button>
     <div class="word-english">${wordObj.word}</div>
-    <div class="word-phonetic">${wordObj.phonetic || ''}</div>
+    <div class="word-phonetic" title="点击显示/隐藏音标">${wordObj.phonetic || ''}</div>
     <div class="word-chinese">${wordObj.chinese || ''}</div>
   `;
   
-  card.onclick = () => speakWord(wordObj.word);
+  const phoneticEl = card.querySelector(".word-phonetic");
+  
+  // 点击音标切换显示/隐藏
+  phoneticEl.onclick = (e) => {
+    e.stopPropagation();
+    phoneticEl.classList.toggle('show');
+  };
+  
+  // 点击卡片朗读
+  card.onclick = (e) => {
+    if (!e.target.classList.contains('word-phonetic')) {
+      speakWord(wordObj.word);
+    }
+  };
   
   return card;
 }

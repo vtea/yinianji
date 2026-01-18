@@ -136,6 +136,20 @@
       font-size: 14px;
       color: #afafaf;
       font-weight: 500;
+      opacity: 0;
+      filter: blur(6px);
+      transition: all 0.3s;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .word-phonetic.show {
+      opacity: 1;
+      filter: blur(0);
+    }
+    
+    .word-phonetic:hover {
+      color: var(--secondary-color);
     }
 
     .word-chinese {
@@ -420,12 +434,27 @@ function createWordCard(wordObj, learnCount = 0) {
   card.innerHTML = `
     <button class="add-vocab-btn ${isInVocab ? 'active' : ''}" onclick="toggleVocab(event, ${JSON.stringify(wordObj).replace(/"/g, '&quot;')})">📖</button>
     <div class="word-english">${wordObj.english}</div>
-    <div class="word-phonetic">${wordObj.phonetic || ''}</div>
+    <div class="word-phonetic" title="点击显示/隐藏音标">${wordObj.phonetic || ''}</div>
     <div class="word-chinese">${wordObj.chinese || ''}</div>
     <div class="learn-count">🔊 ${learnCount}</div>
   `;
   
-  card.onclick = () => {
+  const phoneticEl = card.querySelector(".word-phonetic");
+  
+  // 点击音标切换显示/隐藏
+  phoneticEl.onclick = (e) => {
+    e.stopPropagation();
+    phoneticEl.classList.toggle('show');
+  };
+  
+  // 点击卡片朗读和记录学习
+  card.onclick = (e) => {
+    // 如果点击的是音标或添加按钮，不执行朗读
+    if (e.target.classList.contains('word-phonetic') || 
+        e.target.classList.contains('add-vocab-btn')) {
+      return;
+    }
+    
     speakWord(wordObj.english);
     recordLearn(wordObj.english);
     card.classList.add("learned");
