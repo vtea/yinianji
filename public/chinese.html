@@ -383,7 +383,7 @@
 
     .achievements-btn {
       position: fixed;
-      bottom: 100px;
+      bottom: 110px;
       right: 30px;
       width: 56px;
       height: 56px;
@@ -397,7 +397,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 100;
+      z-index: 101;
       transition: all 0.2s;
     }
 
@@ -632,7 +632,7 @@
         font-size: 14px;
       }
       .achievements-btn {
-        bottom: 80px;
+        bottom: 90px;
         right: 20px;
         width: 48px;
         height: 48px;
@@ -655,8 +655,44 @@
     }
 
     @media (max-width: 480px) {
+      .achievements-btn {
+        bottom: 80px;
+        right: 16px;
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+      }
+      .game-header {
+        padding: 12px;
+      }
+      .progress-bar {
+        height: 16px;
+      }
+      .progress-info {
+        font-size: 11px;
+      }
+      .stat-value {
+        font-size: 18px;
+      }
+      .stat-label {
+        font-size: 10px;
+      }
+      .game-buttons {
+        gap: 6px;
+      }
+      .game-btn {
+        padding: 10px;
+        font-size: 13px;
+      }
       #list {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .word-wrapper {
+        padding: 12px;
+      }
+      .word-display {
+        font-size: 32px;
       }
       .stats-row {
         flex-wrap: wrap;

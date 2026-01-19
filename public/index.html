@@ -230,6 +230,13 @@
     width: 100%;
     height: 100%;
     border: none;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    #contentFrame {
+      -webkit-overflow-scrolling: touch;
+    }
   }
 
   /* 用户菜单 */
@@ -385,6 +392,26 @@
   }
 
   .fab:active { transform: translateY(4px); box-shadow: 0 0 0; }
+
+  @media (max-width: 768px) {
+    .fab {
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      font-size: 28px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .fab {
+      bottom: 16px;
+      right: 16px;
+      width: 52px;
+      height: 52px;
+      font-size: 24px;
+    }
+  }
 
   /* 模态框 */
   .modal {

@@ -33,6 +33,18 @@
       padding: 24px;
     }
 
+    @media (max-width: 768px) {
+      .container {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 8px;
+      }
+    }
+
     .header {
       background: white;
       border: 2px solid var(--border-color);
@@ -94,6 +106,22 @@
       padding: 20px;
       background: #ddf4ff;
       border-radius: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .pinyin-display {
+        font-size: 24px;
+        margin: 16px 0;
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .pinyin-display {
+        font-size: 20px;
+        margin: 12px 0;
+        padding: 12px;
+      }
     }
 
     .play-btn {
@@ -282,16 +310,79 @@
     }
 
     @media (max-width: 768px) {
-      .options-grid {
-        grid-template-columns: 1fr;
-      }
-      .option-btn {
-        font-size: 36px;
-        padding: 24px 16px;
-      }
       .header {
+        padding: 16px;
+        margin-bottom: 16px;
+        border-radius: 16px;
         flex-direction: column;
         align-items: flex-start;
+      }
+      .header-title {
+        font-size: 20px;
+      }
+      .score-info {
+        font-size: 14px;
+        gap: 12px;
+      }
+      .game-area {
+        padding: 16px;
+        border-radius: 16px;
+        min-height: 300px;
+      }
+      .question-title {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+      .options-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .option-btn {
+        font-size: 28px;
+        padding: 16px;
+      }
+      .play-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+      }
+      .header-title {
+        font-size: 18px;
+      }
+      .score-info {
+        font-size: 12px;
+        gap: 8px;
+      }
+      .game-area {
+        padding: 12px;
+        border-radius: 12px;
+        min-height: 250px;
+      }
+      .question-title {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      .options-grid {
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .option-btn {
+        font-size: 24px;
+        padding: 12px;
+      }
+      .play-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
       }
     }
   </style>
