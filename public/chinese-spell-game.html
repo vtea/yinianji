@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>拼写游戏 - 生字学习</title>
   <style>
     :root {
@@ -25,6 +25,8 @@
       padding: 0;
       margin: 0;
       min-height: 100vh;
+      /* 安全区域适配，避免被浏览器栏遮挡 */
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     .container {
@@ -125,9 +127,11 @@
 
     @media (max-width: 480px) {
       .game-area {
-        padding: 12px;
+        padding: 8px;
         border-radius: 12px;
-        min-height: 250px;
+        min-height: auto;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
       }
     }
 
@@ -164,9 +168,9 @@
 
     @media (max-width: 480px) {
       .pinyin-display {
-        font-size: 20px;
-        margin: 12px 0;
-        padding: 12px;
+        font-size: 16px;
+        margin: 6px 0;
+        padding: 8px;
       }
     }
 
@@ -176,6 +180,20 @@
       align-items: center;
       gap: 20px;
       margin: 30px 0;
+    }
+
+    @media (max-width: 768px) {
+      .input-area {
+        gap: 16px;
+        margin: 20px 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .input-area {
+        gap: 12px;
+        margin: 12px 0;
+      }
     }
 
     .input-box {
@@ -192,6 +210,23 @@
       align-items: center;
       justify-content: center;
       position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .input-box {
+        width: 150px;
+        height: 150px;
+        font-size: 90px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .input-box {
+        width: 120px;
+        height: 120px;
+        font-size: 70px;
+        border-width: 2px;
+      }
     }
 
     .input-box::before {
@@ -235,6 +270,18 @@
       position: relative;
     }
 
+    @media (max-width: 768px) {
+      .input-box input {
+        font-size: 90px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .input-box input {
+        font-size: 70px;
+      }
+    }
+
     .input-box.correct {
       border-color: var(--success-color);
       background: #e8f5e9;
@@ -257,6 +304,33 @@
       justify-content: center;
       gap: 16px;
       margin-top: 32px;
+      margin-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 768px) {
+      .controls {
+        margin-top: 20px;
+        margin-bottom: calc(16px + env(safe-area-inset-bottom));
+        gap: 12px;
+      }
+      .btn {
+        padding: 12px 20px;
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .controls {
+        margin-top: 16px;
+        margin-bottom: calc(12px + env(safe-area-inset-bottom));
+        gap: 8px;
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+      }
     }
 
     .btn {
@@ -300,12 +374,15 @@
     .result-screen {
       text-align: center;
       padding: 40px 20px;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
     .result-title {
       font-size: 32px;
       font-weight: 800;
       margin-bottom: 16px;
+      color: var(--text-color);
     }
 
     .result-score {
@@ -318,7 +395,8 @@
     .result-details {
       font-size: 18px;
       color: #777;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
+      line-height: 1.8;
     }
 
     .celebration {
@@ -332,6 +410,153 @@
       50% { transform: translateY(-20px); }
     }
 
+    .wrong-answers-section {
+      margin: 24px 0;
+      padding: 16px;
+      background: #fff9e6;
+      border-radius: 12px;
+      text-align: left;
+    }
+
+    .wrong-answers-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ff8800;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .wrong-answer-item {
+      margin-bottom: 12px;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border: 2px solid #ffc107;
+    }
+
+    .wrong-answer-hanzi {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary-color);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .wrong-answer-info {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .wrong-answer-selected {
+      color: #dc3545;
+      margin-bottom: 4px;
+    }
+
+    .wrong-answer-correct {
+      color: #28a745;
+    }
+
+    @media (max-width: 768px) {
+      .result-screen {
+        padding: 24px 16px;
+      }
+
+      .result-title {
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+
+      .result-score {
+        font-size: 36px;
+        margin: 16px 0;
+      }
+
+      .result-details {
+        font-size: 15px;
+        margin-bottom: 20px;
+      }
+
+      .celebration {
+        font-size: 48px;
+        margin: 12px 0;
+      }
+
+      .wrong-answers-section {
+        margin: 20px 0;
+        padding: 12px;
+      }
+
+      .wrong-answers-title {
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+
+      .wrong-answer-item {
+        margin-bottom: 10px;
+        padding: 10px;
+      }
+
+      .wrong-answer-hanzi {
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+
+      .wrong-answer-info {
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .result-screen {
+        padding: 20px 12px;
+      }
+
+      .result-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+
+      .result-score {
+        font-size: 32px;
+        margin: 12px 0;
+      }
+
+      .result-details {
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+
+      .celebration {
+        font-size: 40px;
+        margin: 10px 0;
+      }
+
+      .wrong-answers-section {
+        margin: 16px 0;
+        padding: 10px;
+      }
+
+      .wrong-answers-title {
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+
+      .wrong-answer-item {
+        margin-bottom: 8px;
+        padding: 8px;
+      }
+
+      .wrong-answer-hanzi {
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+
+      .wrong-answer-info {
+        font-size: 11px;
+      }
+    }
+
     .loading {
       text-align: center;
       padding: 60px 20px;
@@ -341,46 +566,102 @@
     }
 
     @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      }
+      .game-area {
+        padding: 10px;
+        min-height: auto;
+        margin-bottom: calc(16px + env(safe-area-inset-bottom));
+      }
       .header {
         flex-direction: column;
         align-items: flex-start;
+        padding: 10px;
+        margin-bottom: 10px;
       }
-      .question-title {
-        font-size: 18px;
-        margin-bottom: 12px;
-      }
-      .input-area {
-        gap: 16px;
-        margin: 20px 0;
-      }
-      .input-box {
-        width: 140px;
-        height: 140px;
-        font-size: 70px;
-        border-radius: 12px;
-      }
-      .input-box input {
-        font-size: 70px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .question-title {
+      .header-title {
         font-size: 16px;
+      }
+      .score-info {
+        font-size: 12px;
+        gap: 8px;
+      }
+      .question-title {
+        font-size: 15px;
         margin-bottom: 8px;
       }
       .input-area {
         gap: 12px;
-        margin: 16px 0;
+        margin: 12px 0;
       }
       .input-box {
-        width: 120px;
-        height: 120px;
+        width: 130px;
+        height: 130px;
+        font-size: 80px;
+        border-radius: 12px;
+      }
+      .input-box input {
+        font-size: 80px;
+        font-size: 60px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 6px;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom));
+      }
+      .header {
+        padding: 8px 10px;
+        margin-bottom: 8px;
+      }
+      .header-title {
+        font-size: 14px;
+      }
+      .score-info {
+        font-size: 10px;
+        gap: 6px;
+      }
+      .game-area {
+        padding: 6px;
+        border-radius: 12px;
+        min-height: auto;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        margin-bottom: 0;
+      }
+      .question-title {
+        font-size: 12px;
+        margin-bottom: 5px;
+      }
+      .question-container {
+        margin-bottom: 8px;
+      }
+      .input-area {
+        gap: 6px;
+        margin: 6px 0;
+      }
+      .input-box {
+        width: 100px;
+        height: 100px;
         font-size: 60px;
         border-radius: 10px;
+        border-width: 2px;
       }
       .input-box input {
         font-size: 60px;
+      }
+      .controls {
+        margin-top: 10px;
+        margin-bottom: 0;
+        padding-bottom: max(60px, env(safe-area-inset-bottom));
+      }
+      .btn {
+        padding: 10px;
+        font-size: 13px;
+        border-radius: 10px;
       }
     }
   </style>
@@ -407,7 +688,17 @@
 </div>
 
 <script>
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+// 安全获取用户信息
+let currentUser = null;
+try {
+  const userStr = localStorage.getItem("currentUser");
+  if (userStr) {
+    currentUser = JSON.parse(userStr);
+  }
+} catch (err) {
+  console.error("解析用户信息失败：", err);
+  currentUser = null;
+}
 let questions = [];
 let currentQuestionIndex = 0;
 let answers = [];
@@ -623,6 +914,7 @@ async function showResult() {
     const finalScore = data.score || 0;
     const expEarned = data.exp_earned || 0;
     const isPerfect = correctCount === totalCount;
+    const results = data.results || [];
 
     let celebration = "";
     if (isPerfect) {
@@ -631,6 +923,28 @@ async function showResult() {
       celebration = '<div class="celebration">🌟 很棒！</div>';
     } else if (correctCount >= totalCount * 0.6) {
       celebration = '<div class="celebration">👍 不错！</div>';
+    }
+
+    // 生成错误题目详细信息
+    let wrongAnswersHtml = "";
+    const wrongAnswers = results.filter(item => !item.correct);
+
+    if (wrongAnswers.length > 0) {
+      wrongAnswersHtml = `
+        <div class="wrong-answers-section">
+          <div class="wrong-answers-title">📝 错误题目详情</div>
+          ${wrongAnswers.map(item => `
+            <div class="wrong-answer-item">
+              <div class="wrong-answer-hanzi">${item.correct_hanzi}</div>
+              <div class="wrong-answer-info">
+                <div style="color: #999; margin-bottom: 4px;">拼音：${item.pinyin}</div>
+                <div class="wrong-answer-selected">❌ 你写的：${item.input_hanzi || '未填写'}</div>
+                <div class="wrong-answer-correct">✓ 正确答案：${item.correct_hanzi}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
     }
 
     document.getElementById("gameArea").innerHTML = `
@@ -642,6 +956,7 @@ async function showResult() {
           <div>答对: ${correctCount} / ${totalCount}</div>
           <div>获得经验: +${expEarned} EXP</div>
         </div>
+        ${wrongAnswersHtml}
         <div class="controls">
           <button class="btn btn-primary" onclick="startGame()">再来一局</button>
           <button class="btn btn-secondary" onclick="if(window.parent && window.parent.switchPage){window.parent.switchPage('chinese');}else{window.location.href='chinese.html';}">返回生字本</button>

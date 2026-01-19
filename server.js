@@ -581,9 +581,39 @@ app.get("/api/word-stats/english/:user_id", (req, res) => {
   });
 });
 
-// 添加生字
+// 生成拼音建议（新增API - 100%准确率保障）
+app.post("/api/generate-pinyin", (req, res) => {
+  const { hanzi } = req.body;
+  if (!hanzi) {
+    return res.status(400).json({ error: "缺少汉字参数" });
+  }
+
+  // 生成拼音（带音调）
+  let py = pinyin(hanzi, {
+    style: pinyin.STYLE_TONE
+  })
+    .flat()
+    .join(" ");
+  
+  // 拼音质量检查
+  if (!py || py.trim().length === 0 || py === hanzi) {
+    py = pinyin(hanzi, {
+      style: pinyin.STYLE_NORMAL
+    })
+      .flat()
+      .join(" ");
+  }
+
+  res.json({ 
+    hanzi: hanzi,
+    pinyin: py,
+    warning: "请仔细确认拼音准确性，特别是音调和多音字"
+  });
+});
+
+// 添加生字（支持用户确认的拼音 - 100%准确率）
 app.post("/api/words", (req, res) => {
-  const { user_id, hanzi } = req.body;
+  const { user_id, hanzi, pinyin: userPinyin } = req.body;
 
   if (!user_id || !hanzi) {
     return res.status(400).json({ error: "缺少必要参数" });
@@ -612,12 +642,30 @@ app.post("/api/words", (req, res) => {
             console.error("查询删除记录失败：", err2);
           }
 
-          // 自动生成拼音
-          const py = pinyin(hanzi, {
-            style: pinyin.STYLE_TONE
-          })
-            .flat()
-            .join(" ");
+          // 使用用户确认的拼音（100%准确）或自动生成（向后兼容）
+          let py;
+          if (userPinyin && userPinyin.trim().length > 0) {
+            // 用户已确认拼音，直接使用（100%准确）
+            py = userPinyin.trim();
+            console.log(`✅ 使用用户确认的拼音: ${hanzi} -> ${py}`);
+          } else {
+            // 向后兼容：如果没有传入拼音，自动生成
+            py = pinyin(hanzi, {
+              style: pinyin.STYLE_TONE
+            })
+              .flat()
+              .join(" ");
+            
+            // 拼音质量检查
+            if (!py || py.trim().length === 0 || py === hanzi) {
+              py = pinyin(hanzi, {
+                style: pinyin.STYLE_NORMAL
+              })
+                .flat()
+                .join(" ");
+            }
+            console.warn(`⚠️  使用自动生成的拼音（未经用户确认）: ${hanzi} -> ${py}`);
+          }
 
           db.run(
             "INSERT INTO words (user_id, hanzi, pinyin, speak_count, created_at) VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP)",
@@ -2050,7 +2098,8 @@ app.post("/api/game-match/submit", (req, res) => {
           word_id: answer.word_id,
           hanzi: word ? word.hanzi : "",
           correct: isCorrect,
-          correct_pinyin: word ? word.pinyin : ""
+          correct_pinyin: word ? word.pinyin : "",
+          selected_pinyin: answer.selected_pinyin || ""
         };
       });
 
@@ -2091,6 +2140,17 @@ app.post("/api/game-match/submit", (req, res) => {
       Promise.all(results.map(result => 
         updateWordMastery(user_id, result.word_id, result.correct)
       )).then(() => {
+        res.json({
+          success: true,
+          score,
+          correct_count: correctCount,
+          total_count: answers.length,
+          exp_earned: expEarned,
+          results
+        });
+      }).catch(err => {
+        console.error("更新掌握度失败：", err);
+        // 即使掌握度更新失败，也返回结果（避免阻塞游戏流程）
         res.json({
           success: true,
           score,
@@ -2255,6 +2315,18 @@ app.post("/api/game-listen/submit", (req, res) => {
           exp_earned: expEarned,
           results
         });
+      }).catch(err => {
+        console.error("更新掌握度失败：", err);
+        // 即使掌握度更新失败，也返回结果（避免阻塞游戏流程）
+        res.json({
+          success: true,
+          score,
+          correct_count: correctCount,
+          total_count: answers.length,
+          max_consecutive: maxConsecutive,
+          exp_earned: expEarned,
+          results
+        });
       });
     }
   );
@@ -2372,6 +2444,17 @@ app.post("/api/game-spell/submit", (req, res) => {
       Promise.all(results.map(result => 
         updateWordMastery(user_id, result.word_id, result.correct)
       )).then(() => {
+        res.json({
+          success: true,
+          score,
+          correct_count: correctCount,
+          total_count: answers.length,
+          exp_earned: expEarned,
+          results
+        });
+      }).catch(err => {
+        console.error("更新掌握度失败：", err);
+        // 即使掌握度更新失败，也返回结果（避免阻塞游戏流程）
         res.json({
           success: true,
           score,

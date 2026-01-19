@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>语文 - 生字学习</title>
   <style>
     :root {
@@ -20,6 +20,8 @@
       color: var(--text-color);
       padding: 0;
       margin: 0;
+      /* 安全区域适配，避免被浏览器栏遮挡 */
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     .container {
@@ -786,12 +788,27 @@
 </div>
 
 <script>
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+// 安全获取用户信息
+let currentUser = null;
+try {
+  const userStr = localStorage.getItem("currentUser");
+  if (userStr) {
+    currentUser = JSON.parse(userStr);
+  }
+} catch (err) {
+  console.error("解析用户信息失败：", err);
+  currentUser = null;
+}
 
 // 从localStorage加载已显示的成就列表
 function loadShownAchievements() {
-  const saved = localStorage.getItem("shownAchievements");
-  return saved ? new Set(JSON.parse(saved)) : new Set();
+  try {
+    const saved = localStorage.getItem("shownAchievements");
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  } catch (err) {
+    console.error("加载已显示成就失败：", err);
+    return new Set();
+  }
 }
 
 // 保存已显示的成就列表到localStorage
@@ -827,7 +844,12 @@ function loadGameStats() {
   if (!currentUser) return;
   
   fetch(`/api/game-stats/${currentUser.user_id}`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
       if (data && !data.error) {
         gameStats = data;
@@ -884,7 +906,10 @@ function updateGameUI(stats) {
 function updateGameStats() {
   loadGameStats();
   checkNewAchievements();
-  checkNewMasteredWords();
+  // 延迟检查新掌握的生字，确保数据库已更新
+  setTimeout(() => {
+    checkNewMasteredWords();
+  }, 500);
 }
 
 let lastAchievements = loadShownAchievements(); // 已显示过的成就ID集合（从localStorage加载）
@@ -900,12 +925,26 @@ function checkNewAchievements() {
   
   // 先检查新成就
   fetch(`/api/check-achievements/${currentUser.user_id}`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
       // 然后获取完整成就列表
       return fetch(`/api/achievements/${currentUser.user_id}`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
         .then(achievements => {
+          if (!achievements || !Array.isArray(achievements)) {
+            isCheckingAchievements = false;
+            return;
+          }
           const unlockedIds = new Set(achievements.filter(a => a.unlocked).map(a => a.id));
           // 只显示真正新解锁的成就（已解锁但之前没有显示过的）
           const newAchievements = achievements.filter(a => a.unlocked && !lastAchievements.has(a.id));
@@ -993,8 +1032,16 @@ function showAchievements() {
   if (!currentUser) return;
   
   fetch(`/api/achievements/${currentUser.user_id}`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(achievements => {
+      if (!achievements || !Array.isArray(achievements)) {
+        return;
+      }
       const grid = document.getElementById("achievementsGrid");
       if (!grid) return;
       
@@ -1128,13 +1175,18 @@ function moveToKnown() {
   const wordId = currentMasteredWord.word_id;
   const hanzi = currentMasteredWord.hanzi;
   
-  fetch("/api/delete", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: wordId })
-  })
-  .then(res => res.json())
-  .then(data => {
+    fetch("/api/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: wordId })
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
     if (data && data.success) {
       // 显示奖励动画
       if (data.is_mastered) {
@@ -1236,8 +1288,15 @@ function speakChinese(hanzi, py, wordId) {
   if (window.parent && window.parent.speak) {
     window.parent.speak(`${hanzi}，拼音：${py}`, 'chinese');
   } else {
-    const saved = localStorage.getItem("voiceSettings");
-    const voiceSettings = saved ? JSON.parse(saved) : { rate: 0.8 };
+    let voiceSettings = { rate: 0.8 };
+    try {
+      const saved = localStorage.getItem("voiceSettings");
+      if (saved) {
+        voiceSettings = JSON.parse(saved);
+      }
+    } catch (err) {
+      console.error("解析语音设置失败：", err);
+    }
     const u = new SpeechSynthesisUtterance(`${hanzi}，拼音：${py}`);
     u.lang = "zh-CN";
     u.rate = voiceSettings.rate;
@@ -1276,7 +1335,12 @@ function deleteChineseWord(event, word) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: word.id })
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
       if (data && data.success) {
         // 如果删除的是已掌握的生字，显示奖励动画
@@ -1309,8 +1373,16 @@ function loadChinesePage() {
   loadGameStats();
 
   fetch(`/api/words/${currentUser.user_id}`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
+      if (!data || !Array.isArray(data)) {
+        data = [];
+      }
       const list = document.getElementById("list");
       if (!list) return;
       list.innerHTML = "";
@@ -1412,8 +1484,16 @@ function initializeAchievements() {
   
   // 先获取当前已解锁的成就，初始化lastAchievements（避免显示已解锁的成就）
   fetch(`/api/achievements/${currentUser.user_id}`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(achievements => {
+      if (!achievements || !Array.isArray(achievements)) {
+        return;
+      }
       const unlockedIds = new Set(achievements.filter(a => a.unlocked).map(a => a.id));
       // 合并已显示的成就和当前已解锁的成就
       const merged = new Set([...lastAchievements, ...unlockedIds]);

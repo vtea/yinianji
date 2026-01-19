@@ -1320,7 +1320,25 @@ function openAddItemModal() {
   const title = document.getElementById("modalTitle");
   if (currentPage === 'chinese') {
     title.textContent = "添加生字";
-    area.innerHTML = '<div class="form-group"><input type="text" id="addItemInput" placeholder="请输入生字" maxlength="1"></div><button class="auth-submit-btn" onclick="saveChineseItem()">保存</button>';
+    area.innerHTML = `
+      <div class="form-group">
+        <label style="display:block; margin-bottom:8px; font-weight:700; color:var(--text-color);">生字</label>
+        <input type="text" id="addItemInput" placeholder="请输入生字" maxlength="5" onblur="generatePinyin()" style="font-size:24px; text-align:center;">
+      </div>
+      <div class="form-group" id="pinyinConfirmArea" style="display:none; margin-top:16px; padding:16px; background:#f0f8ff; border-radius:12px;">
+        <label style="display:block; margin-bottom:8px; font-weight:700; color:var(--text-color);">拼音（请仔细确认）</label>
+        <div style="margin-bottom:12px;">
+          <input type="text" id="pinyinInput" placeholder="自动生成的拼音" style="font-size:18px; text-align:center; border:2px solid var(--accent-color);">
+        </div>
+        <div style="font-size:13px; color:#666; margin-bottom:12px; line-height:1.5;">
+          ⚠️ <strong>请务必确认拼音准确</strong><br>
+          • 注意音调是否正确<br>
+          • 多音字请选择正确读音<br>
+          • 多个字用空格分隔
+        </div>
+        <button class="auth-submit-btn" onclick="saveChineseItemWithPinyin()" style="width:100%;">确认添加</button>
+      </div>
+    `;
   } else if (currentPage === 'english' || currentPage === 'vocabulary') {
     title.textContent = "添加英语单词";
     area.innerHTML = '<div class="form-group"><input type="text" id="addItemInput" placeholder="单词" onblur="autoFetchEnglishInfo()"><input type="text" id="addItemInput2" placeholder="翻译"><input type="text" id="addItemPhonetic" placeholder="音标"></div><button class="auth-submit-btn" onclick="saveEnglishItem()">保存</button>';
@@ -1471,9 +1489,73 @@ async function autoFetchEnglishInfo() {
   } catch (e) {}
 }
 
-function saveChineseItem() {
+// 生成拼音建议
+async function generatePinyin() {
   const hanzi = document.getElementById("addItemInput").value.trim();
-  fetch("/api/words", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: currentUser.user_id, hanzi })})
+  if (!hanzi) return;
+  
+  // 显示拼音确认区域
+  const pinyinArea = document.getElementById("pinyinConfirmArea");
+  const pinyinInput = document.getElementById("pinyinInput");
+  
+  if (!pinyinArea || !pinyinInput) return;
+  
+  try {
+    // 请求后端生成拼音
+    const res = await fetch("/api/generate-pinyin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hanzi })
+    });
+    
+    const data = await res.json();
+    if (data && data.pinyin) {
+      pinyinInput.value = data.pinyin;
+      pinyinArea.style.display = "block";
+      pinyinInput.focus();
+      pinyinInput.select();
+    }
+  } catch (err) {
+    console.error("生成拼音失败：", err);
+    pinyinArea.style.display = "block";
+    pinyinInput.value = "";
+    pinyinInput.focus();
+  }
+}
+
+// 保存生字（带拼音确认）
+function saveChineseItemWithPinyin() {
+  const hanzi = document.getElementById("addItemInput").value.trim();
+  const pinyin = document.getElementById("pinyinInput").value.trim();
+  
+  if (!hanzi) {
+    alert("请输入生字");
+    return;
+  }
+  
+  if (!pinyin) {
+    alert("请输入或确认拼音");
+    document.getElementById("pinyinInput").focus();
+    return;
+  }
+  
+  // 简单验证拼音格式（包含拼音字符）
+  const pinyinRegex = /^[a-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜüA-Z\s]+$/;
+  if (!pinyinRegex.test(pinyin)) {
+    if (!confirm("拼音格式可能不正确，是否继续？")) {
+      return;
+    }
+  }
+  
+  fetch("/api/words", { 
+    method: "POST", 
+    headers: { "Content-Type": "application/json" }, 
+    body: JSON.stringify({ 
+      user_id: currentUser.user_id, 
+      hanzi: hanzi,
+      pinyin: pinyin  // 使用用户确认的拼音
+    })
+  })
   .then(res => {
     if (res.ok) {
       return res.json().then(data => {
@@ -1486,7 +1568,15 @@ function saveChineseItem() {
       });
     } else if (res.status === 409) {
       alert("这个生字已经在生字本里了");
+    } else {
+      res.json().then(data => {
+        alert(data.error || "添加失败");
+      }).catch(() => alert("添加失败"));
     }
+  })
+  .catch(err => {
+    console.error("添加失败：", err);
+    alert("添加失败，请重试");
   });
 }
 
