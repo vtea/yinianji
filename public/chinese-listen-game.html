@@ -2,29 +2,39 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
   <title>听音选字游戏 - 生字学习</title>
   <style>
     :root {
       --primary-color: #58cc02;
       --primary-hover: #46a302;
+      --primary-gradient: linear-gradient(180deg, #58cc02 0%, #46a302 100%);
       --secondary-color: #1cb0f6;
+      --secondary-gradient: linear-gradient(180deg, #1cb0f6 0%, #0e8ac7 100%);
       --accent-color: #ffc800;
-      --text-color: #4b4b4b;
+      --accent-gradient: linear-gradient(180deg, #ffd700 0%, #ffc800 100%);
+      --text-color: #3c3c3c;
       --border-color: #e5e5e5;
       --error-color: #ff4b4b;
+      --error-gradient: linear-gradient(180deg, #ff6b6b 0%, #ff4b4b 100%);
       --success-color: #58cc02;
+      --success-gradient: linear-gradient(180deg, #6dd802 0%, #58cc02 100%);
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
     }
 
     * { box-sizing: border-box; }
 
     body {
       font-family: "din-round", "Microsoft YaHei", sans-serif;
-      background: #f7f7f7;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
       color: var(--text-color);
       padding: 0;
       margin: 0;
       min-height: 100vh;
+      min-height: 100dvh; /* 使用动态视口高度，考虑浏览器工具栏 */
+      overflow-x: hidden;
       /* 安全区域适配，避免被浏览器栏遮挡 */
       padding-bottom: env(safe-area-inset-bottom);
     }
@@ -33,14 +43,35 @@
       max-width: 1000px;
       margin: 0 auto;
       padding: 24px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+      min-height: 100dvh;
+      gap: 16px;
     }
 
-    @media (max-width: 768px) {
+    /* iPad横屏和大平板 */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .container {
+        padding: 20px;
+      }
+    }
+
+    /* iPad竖屏和小平板 */
+    @media (max-width: 768px) and (min-width: 601px) {
+      .container {
+        padding: 16px;
+      }
+    }
+
+    /* 大手机 */
+    @media (max-width: 600px) and (min-width: 481px) {
       .container {
         padding: 12px;
       }
     }
 
+    /* 小手机 */
     @media (max-width: 480px) {
       .container {
         padding: 8px;
@@ -48,8 +79,9 @@
     }
 
     .header {
-      background: white;
-      border: 2px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border: none;
       border-radius: 24px;
       padding: 20px;
       margin-bottom: 24px;
@@ -58,6 +90,7 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
+      box-shadow: var(--card-shadow);
     }
 
     .header-title {
@@ -80,11 +113,18 @@
     }
 
     .game-area {
-      background: white;
-      border: 2px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border: none;
       border-radius: 24px;
       padding: 24px;
       min-height: 400px;
+      box-shadow: var(--card-shadow);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .game-area:hover {
+      box-shadow: var(--hover-shadow);
     }
 
     @media (max-width: 480px) {
@@ -120,68 +160,159 @@
       }
     }
 
+    .pinyin-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
     .pinyin-display {
       font-size: 32px;
       font-weight: 800;
       text-align: center;
-      color: var(--secondary-color);
-      margin: 20px 0;
-      padding: 20px;
-      background: #ddf4ff;
-      border-radius: 16px;
+      color: white;
+      flex: 1;
+      padding: 16px 20px;
+      background: var(--secondary-gradient);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(28, 176, 246, 0.3);
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+      max-width: 300px;
     }
 
-    @media (max-width: 768px) {
+    .pinyin-display::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { transform: translate(-50%, -50%) rotate(0deg); opacity: 0.5; }
+      50% { transform: translate(-30%, -30%) rotate(180deg); opacity: 0.8; }
+    }
+
+    /* iPad横屏和大平板 */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .pinyin-container {
+        gap: 10px;
+        margin: 14px 0;
+      }
       .pinyin-display {
-        font-size: 24px;
-        margin: 16px 0;
-        padding: 16px;
+        font-size: 26px;
+        padding: 14px 18px;
+        border-radius: 15px;
+        max-width: 280px;
+      }
+      .play-btn {
+        width: 56px;
+        height: 56px;
+        font-size: 26px;
       }
     }
 
-    @media (max-width: 480px) {
+    /* iPad竖屏和小平板 */
+    @media (max-width: 768px) and (min-width: 601px) {
+      .pinyin-container {
+        gap: 10px;
+        margin: 12px 0;
+      }
       .pinyin-display {
-        font-size: 16px;
-        margin: 6px 0;
-        padding: 8px;
+        font-size: 24px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        max-width: 260px;
+      }
+      .play-btn {
+        width: 52px;
+        height: 52px;
+        font-size: 24px;
+      }
+    }
+
+    /* 大手机 */
+    @media (max-width: 600px) and (min-width: 481px) {
+      .pinyin-container {
+        gap: 8px;
+        margin: 10px 0;
+      }
+      .pinyin-display {
+        font-size: 20px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 220px;
+      }
+      .play-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+      }
+    }
+
+    /* 小手机 */
+    @media (max-width: 480px) {
+      .pinyin-container {
+        gap: 6px;
+        margin: 8px 0;
+        flex-direction: column;
+      }
+      .pinyin-display {
+        font-size: 18px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        max-width: 100%;
+      }
+      .play-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
       }
     }
 
     .play-btn {
-      width: 80px;
-      height: 80px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      background: var(--primary-color);
+      background: var(--accent-gradient);
       color: white;
       border: none;
-      font-size: 36px;
+      font-size: 28px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 20px auto;
-      box-shadow: 0 6px 0 var(--primary-hover);
-      transition: all 0.2s;
+      flex-shrink: 0;
+      box-shadow: 0 6px 20px rgba(255, 200, 0, 0.4), 0 4px 0 #e6b800;
+      transition: all 0.3s ease;
+      position: relative;
+      animation: pulse 2s infinite;
     }
 
-    @media (max-width: 768px) {
-      .play-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 28px;
-        margin: 12px auto;
-      }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); box-shadow: 0 8px 32px rgba(255, 200, 0, 0.6), 0 6px 0 #e6b800; }
     }
 
-    @media (max-width: 480px) {
-      .play-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-        margin: 6px auto;
-        box-shadow: 0 3px 0 var(--primary-hover);
-      }
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: inherit;
+      filter: blur(20px);
+      opacity: 0.5;
+      z-index: -1;
     }
+
 
     .play-btn:hover {
       transform: translateY(-2px);
@@ -210,13 +341,15 @@
       margin-top: 24px;
     }
 
-    @media (max-width: 768px) {
+    /* 大手机 */
+    @media (max-width: 600px) and (min-width: 481px) {
       .options-grid {
         gap: 12px;
-        margin-top: 16px;
+        margin-top: 14px;
       }
     }
 
+    /* 小手机 */
     @media (max-width: 480px) {
       .options-grid {
         gap: 8px;
@@ -226,24 +359,61 @@
 
     .option-btn {
       padding: 30px 20px;
-      border: 3px solid var(--border-color);
-      border-radius: 16px;
+      border: none;
+      border-radius: 20px;
       background: white;
       font-size: 48px;
       font-weight: 800;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 0 var(--border-color);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1), inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
     }
 
-    @media (max-width: 768px) {
+    .option-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      transition: left 0.5s;
+    }
+
+    .option-btn:hover::before {
+      left: 100%;
+    }
+
+    /* iPad横屏和大平板 */
+    @media (max-width: 1024px) and (min-width: 769px) {
       .option-btn {
-        padding: 20px 16px;
-        font-size: 32px;
+        padding: 26px 18px;
+        font-size: 42px;
+        border-radius: 15px;
+      }
+    }
+
+    /* iPad竖屏和小平板 */
+    @media (max-width: 768px) and (min-width: 601px) {
+      .option-btn {
+        padding: 24px 16px;
+        font-size: 38px;
+        border-radius: 14px;
+      }
+    }
+
+    /* 大手机 */
+    @media (max-width: 600px) and (min-width: 481px) {
+      .option-btn {
+        padding: 18px 12px;
+        font-size: 30px;
         border-radius: 12px;
       }
     }
 
+    /* 小手机 */
     @media (max-width: 480px) {
       .option-btn {
         padding: 10px 6px;
@@ -255,44 +425,48 @@
     }
 
     .option-btn:hover {
-      background: #f7f7f7;
-      transform: translateY(-2px);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), inset 0 -3px 0 rgba(0, 0, 0, 0.1);
     }
 
     .option-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 var(--border-color);
+      transform: translateY(-1px) scale(0.98);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
     }
 
     .option-btn.selected {
-      border-color: var(--secondary-color);
-      background: #ddf4ff;
-      color: var(--secondary-color);
+      background: linear-gradient(135deg, #1cb0f6 0%, #0e8ac7 100%);
+      color: white;
+      box-shadow: 0 8px 24px rgba(28, 176, 246, 0.4), inset 0 -3px 0 rgba(14, 138, 199, 0.3);
+      transform: scale(1.05);
     }
 
     .option-btn.correct {
-      border-color: var(--success-color);
-      background: #e8f5e9;
-      color: var(--success-color);
-      animation: correctPulse 0.5s;
+      background: var(--success-gradient);
+      color: white;
+      box-shadow: 0 8px 24px rgba(88, 204, 2, 0.4);
+      animation: correctPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .option-btn.wrong {
-      border-color: var(--error-color);
-      background: #ffebee;
-      color: var(--error-color);
-      animation: shake 0.5s;
+      background: var(--error-gradient);
+      color: white;
+      box-shadow: 0 8px 24px rgba(255, 75, 75, 0.4);
+      animation: shake 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     @keyframes correctPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+      0% { transform: scale(1); }
+      25% { transform: scale(1.1) rotate(2deg); }
+      50% { transform: scale(1.05) rotate(-2deg); }
+      75% { transform: scale(1.08); }
+      100% { transform: scale(1.05); }
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-8px) rotate(-2deg); }
+      20%, 40%, 60%, 80% { transform: translateX(8px) rotate(2deg); }
     }
 
     .option-btn.disabled {
@@ -303,9 +477,11 @@
     .controls {
       display: flex;
       justify-content: center;
-      gap: 16px;
-      margin-top: 32px;
-      margin-bottom: calc(20px + env(safe-area-inset-bottom));
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+      margin-bottom: calc(16px + env(safe-area-inset-bottom));
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -319,52 +495,71 @@
       box-shadow: 0 4px 0 var(--border-color);
     }
 
-    @media (max-width: 768px) {
+    /* 大手机 */
+    @media (max-width: 600px) and (min-width: 481px) {
       .controls {
-        margin-top: 20px;
-        margin-bottom: calc(16px + env(safe-area-inset-bottom));
-        gap: 12px;
+        margin-top: 18px;
+        margin-bottom: calc(14px + env(safe-area-inset-bottom));
+        gap: 10px;
       }
       .btn {
-        padding: 12px 20px;
+        padding: 12px 18px;
         font-size: 15px;
       }
     }
 
+    /* 小手机 */
     @media (max-width: 480px) {
       .controls {
         margin-top: 16px;
         margin-bottom: calc(12px + env(safe-area-inset-bottom));
         gap: 8px;
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
       }
       .btn {
-        width: 100%;
-        padding: 12px;
+        flex: 1;
+        min-width: 120px;
+        padding: 10px;
         font-size: 14px;
       }
     }
 
     .btn-primary {
-      background: var(--primary-color);
+      background: var(--primary-gradient);
       color: white;
-      border-color: var(--primary-hover);
-      box-shadow: 0 4px 0 var(--primary-hover);
+      border: none;
+      box-shadow: 0 6px 20px rgba(88, 204, 2, 0.3), 0 4px 0 var(--primary-hover);
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(88, 204, 2, 0.4), 0 4px 0 var(--primary-hover);
     }
 
     .btn-primary:active {
-      transform: translateY(4px);
-      box-shadow: 0 0 0;
+      transform: translateY(2px);
+      box-shadow: 0 2px 8px rgba(88, 204, 2, 0.2), 0 0 0;
     }
 
     .btn-secondary {
       background: white;
       color: var(--text-color);
+      border: 2px solid #e5e5e5;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #f8f8f8;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
     }
 
     .btn-secondary:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 var(--border-color);
+      transform: translateY(0px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     .result-screen {
@@ -453,7 +648,8 @@
       color: #28a745;
     }
 
-    @media (max-width: 768px) {
+    /* 大手机结果页 */
+    @media (max-width: 600px) and (min-width: 481px) {
       .result-screen {
         padding: 24px 16px;
       }
@@ -561,39 +757,98 @@
       color: #777;
     }
 
-    @media (max-width: 768px) {
+    /* 平板专用优化 - 紧凑合理布局，确保所有内容可见 */
+    @media (min-width: 601px) and (max-width: 1024px) {
       .container {
-        padding: 10px;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        padding: 8px !important;
+        gap: 8px !important;
+        min-height: 100vh !important;
+        min-height: 100dvh !important;
+        grid-template-rows: auto 1fr !important;
       }
+
       .header {
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 16px;
-        flex-direction: column;
-        align-items: flex-start;
+        padding: 10px 12px !important;
+        margin-bottom: 0 !important;
+        border-radius: 12px !important;
       }
+
       .header-title {
-        font-size: 16px;
+        font-size: 18px !important;
       }
+
       .score-info {
-        font-size: 12px;
-        gap: 8px;
+        font-size: 13px !important;
+        gap: 10px !important;
       }
+
       .game-area {
-        padding: 10px;
-        border-radius: 16px;
-        min-height: auto;
-        margin-bottom: calc(16px + env(safe-area-inset-bottom));
+        padding: 12px !important;
+        display: grid !important;
+        grid-template-rows: auto auto auto 1fr auto !important;
+        gap: 8px !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        overflow: visible !important;
       }
+      
+      .question-container {
+        margin-bottom: 0 !important;
+      }
+
       .question-title {
-        font-size: 15px;
-        margin-bottom: 8px;
+        font-size: 14px !important;
+        margin-bottom: 6px !important;
+        line-height: 1.3 !important;
       }
+
+      .pinyin-container {
+        gap: 8px !important;
+        margin: 6px 0 !important;
+      }
+
+      .pinyin-display {
+        font-size: 18px !important;
+        padding: 8px 12px !important;
+        border-radius: 12px !important;
+        letter-spacing: 1px !important;
+        max-width: 240px !important;
+      }
+
+      .play-btn {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 20px !important;
+        box-shadow: 0 4px 12px rgba(255, 200, 0, 0.3) !important;
+      }
+      
       .options-grid {
-        grid-template-columns: 1fr;
-        gap: 8px;
-        margin-top: 10px;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin-top: 0 !important;
+        align-content: start !important;
+      }
+      
+      .option-btn {
+        padding: 14px 10px !important;
+        font-size: 28px !important;
+        border-radius: 12px !important;
+        min-height: 60px !important;
+      }
+      
+      .controls {
+        margin-top: 8px !important;
+        margin-bottom: 0 !important;
+        gap: 8px !important;
+        padding-top: 4px !important;
+        flex-direction: row !important;
+      }
+
+      .btn {
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        border-radius: 10px !important;
+        flex: 0 0 auto !important;
       }
     }
 
@@ -797,8 +1052,10 @@ function showQuestion() {
   document.getElementById("gameArea").innerHTML = `
     <div class="question-container">
       <div class="question-title">请听读音，选择正确的汉字：</div>
-      <div class="pinyin-display">${question.pinyin}</div>
-      <button class="play-btn" id="playBtn" onclick="playSound()">🔊</button>
+      <div class="pinyin-container">
+        <div class="pinyin-display">${question.pinyin}</div>
+        <button class="play-btn" id="playBtn" onclick="playSound()">🔊</button>
+      </div>
       <div class="options-grid">
         ${optionsHtml}
       </div>

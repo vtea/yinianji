@@ -2,29 +2,39 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
   <title>拼写游戏 - 生字学习</title>
   <style>
     :root {
       --primary-color: #58cc02;
       --primary-hover: #46a302;
+      --primary-gradient: linear-gradient(180deg, #58cc02 0%, #46a302 100%);
       --secondary-color: #1cb0f6;
+      --secondary-gradient: linear-gradient(180deg, #1cb0f6 0%, #0e8ac7 100%);
       --accent-color: #ffc800;
-      --text-color: #4b4b4b;
+      --accent-gradient: linear-gradient(180deg, #ffd700 0%, #ffc800 100%);
+      --text-color: #3c3c3c;
       --border-color: #e5e5e5;
       --error-color: #ff4b4b;
+      --error-gradient: linear-gradient(180deg, #ff6b6b 0%, #ff4b4b 100%);
       --success-color: #58cc02;
+      --success-gradient: linear-gradient(180deg, #6dd802 0%, #58cc02 100%);
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
     }
 
     * { box-sizing: border-box; }
 
     body {
       font-family: "din-round", "Microsoft YaHei", sans-serif;
-      background: #f7f7f7;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
       color: var(--text-color);
       padding: 0;
       margin: 0;
       min-height: 100vh;
+      min-height: 100dvh; /* 使用动态视口高度，考虑浏览器工具栏 */
+      overflow-x: hidden;
       /* 安全区域适配，避免被浏览器栏遮挡 */
       padding-bottom: env(safe-area-inset-bottom);
     }
@@ -33,14 +43,35 @@
       max-width: 1000px;
       margin: 0 auto;
       padding: 24px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+      min-height: 100dvh;
+      gap: 16px;
     }
 
-    @media (max-width: 768px) {
+    /* iPad横屏和大平板 */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .container {
+        padding: 20px;
+      }
+    }
+
+    /* iPad竖屏和小平板 */
+    @media (max-width: 768px) and (min-width: 601px) {
+      .container {
+        padding: 16px;
+      }
+    }
+
+    /* 大手机 */
+    @media (max-width: 600px) and (min-width: 481px) {
       .container {
         padding: 12px;
       }
     }
 
+    /* 小手机 */
     @media (max-width: 480px) {
       .container {
         padding: 8px;
@@ -48,8 +79,9 @@
     }
 
     .header {
-      background: white;
-      border: 2px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border: none;
       border-radius: 24px;
       padding: 20px;
       margin-bottom: 24px;
@@ -58,6 +90,7 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
+      box-shadow: var(--card-shadow);
     }
 
     .header-title {
@@ -73,11 +106,28 @@
       font-size: 16px;
     }
 
-    @media (max-width: 768px) {
+    /* iPad横屏和大平板 */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .header {
+        padding: 18px;
+        margin-bottom: 20px;
+        border-radius: 20px;
+      }
+      .header-title {
+        font-size: 22px;
+      }
+      .score-info {
+        font-size: 15px;
+        gap: 14px;
+      }
+    }
+
+    /* iPad竖屏和小平板 */
+    @media (max-width: 768px) and (min-width: 601px) {
       .header {
         padding: 16px;
-        margin-bottom: 16px;
-        border-radius: 16px;
+        margin-bottom: 18px;
+        border-radius: 18px;
       }
       .header-title {
         font-size: 20px;
@@ -88,6 +138,23 @@
       }
     }
 
+    /* 大手机 */
+    @media (max-width: 600px) and (min-width: 481px) {
+      .header {
+        padding: 14px;
+        margin-bottom: 14px;
+        border-radius: 14px;
+      }
+      .header-title {
+        font-size: 19px;
+      }
+      .score-info {
+        font-size: 13px;
+        gap: 10px;
+      }
+    }
+
+    /* 小手机 */
     @media (max-width: 480px) {
       .header {
         padding: 12px;
@@ -110,21 +177,48 @@
     }
 
     .game-area {
-      background: white;
-      border: 2px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border: none;
       border-radius: 24px;
       padding: 24px;
       min-height: 400px;
+      box-shadow: var(--card-shadow);
+      transition: box-shadow 0.3s ease;
     }
 
-    @media (max-width: 768px) {
+    .game-area:hover {
+      box-shadow: var(--hover-shadow);
+    }
+
+    /* iPad横屏和大平板 */
+    @media (max-width: 1024px) and (min-width: 769px) {
       .game-area {
-        padding: 16px;
-        border-radius: 16px;
+        padding: 20px;
+        border-radius: 20px;
+        min-height: 380px;
+      }
+    }
+
+    /* iPad竖屏和小平板 */
+    @media (max-width: 768px) and (min-width: 601px) {
+      .game-area {
+        padding: 18px;
+        border-radius: 18px;
+        min-height: 350px;
+      }
+    }
+
+    /* 大手机 */
+    @media (max-width: 600px) and (min-width: 481px) {
+      .game-area {
+        padding: 14px;
+        border-radius: 14px;
         min-height: 300px;
       }
     }
 
+    /* 小手机 */
     @media (max-width: 480px) {
       .game-area {
         padding: 8px;
@@ -151,11 +245,31 @@
       font-size: 32px;
       font-weight: 800;
       text-align: center;
-      color: var(--secondary-color);
+      color: white;
       margin: 20px 0;
-      padding: 20px;
-      background: #ddf4ff;
-      border-radius: 16px;
+      padding: 24px;
+      background: var(--secondary-gradient);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(28, 176, 246, 0.3);
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pinyin-display::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { transform: translate(-50%, -50%) rotate(0deg); opacity: 0.5; }
+      50% { transform: translate(-30%, -30%) rotate(180deg); opacity: 0.8; }
     }
 
     @media (max-width: 768px) {
@@ -199,8 +313,8 @@
     .input-box {
       width: 200px;
       height: 200px;
-      border: 3px solid var(--border-color);
-      border-radius: 16px;
+      border: none;
+      border-radius: 24px;
       font-size: 120px;
       font-weight: 800;
       text-align: center;
@@ -210,6 +324,13 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 0 0 3px var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    .input-box:focus-within {
+      box-shadow: 0 12px 32px rgba(28, 176, 246, 0.3), inset 0 0 0 3px var(--secondary-color);
+      transform: scale(1.02);
     }
 
     @media (max-width: 768px) {
@@ -283,13 +404,112 @@
     }
 
     .input-box.correct {
-      border-color: var(--success-color);
-      background: #e8f5e9;
+      background: var(--success-gradient);
+      color: white;
+      box-shadow: 0 12px 32px rgba(88, 204, 2, 0.4);
+      animation: correctBounce 0.6s ease;
     }
 
     .input-box.wrong {
-      border-color: var(--error-color);
-      background: #ffebee;
+      background: var(--error-gradient);
+      color: white;
+      box-shadow: 0 12px 32px rgba(255, 75, 75, 0.4);
+      animation: wrongShake 0.6s ease;
+    }
+
+    @keyframes correctBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1) rotate(5deg); }
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      25%, 75% { transform: translateX(-10px) rotate(-3deg); }
+      50% { transform: translateX(10px) rotate(3deg); }
+    }
+
+    /* 平板专用优化 - 紧凑合理布局，确保所有内容可见 */
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .container {
+        padding: 8px !important;
+        gap: 8px !important;
+        min-height: 100vh !important;
+        min-height: 100dvh !important;
+        grid-template-rows: auto 1fr !important;
+      }
+
+      .header {
+        padding: 10px 12px !important;
+        margin-bottom: 0 !important;
+        border-radius: 12px !important;
+      }
+
+      .header-title {
+        font-size: 18px !important;
+      }
+
+      .score-info {
+        font-size: 13px !important;
+        gap: 10px !important;
+      }
+
+      .game-area {
+        padding: 12px !important;
+        display: grid !important;
+        grid-template-rows: auto auto auto 1fr auto !important;
+        gap: 8px !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        overflow: visible !important;
+      }
+      
+      .question-container {
+        margin-bottom: 0 !important;
+      }
+
+      .question-title {
+        font-size: 14px !important;
+        margin-bottom: 6px !important;
+        line-height: 1.3 !important;
+      }
+
+      .pinyin-display {
+        font-size: 20px !important;
+        padding: 10px 12px !important;
+        margin: 4px 0 !important;
+        border-radius: 12px !important;
+      }
+      
+      .input-area {
+        margin: 8px 0 !important;
+        gap: 12px !important;
+      }
+
+      .input-box {
+        width: 120px !important;
+        height: 120px !important;
+        font-size: 80px !important;
+        border-radius: 12px !important;
+      }
+
+      .input-box input {
+        font-size: 80px !important;
+      }
+      
+      .controls {
+        margin-top: 8px !important;
+        margin-bottom: 0 !important;
+        gap: 8px !important;
+        padding-top: 4px !important;
+        flex-direction: row !important;
+      }
+
+      .btn {
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        border-radius: 10px !important;
+        flex: 0 0 auto !important;
+      }
     }
 
     .correct-answer {
@@ -324,11 +544,13 @@
         margin-top: 16px;
         margin-bottom: calc(12px + env(safe-area-inset-bottom));
         gap: 8px;
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
       }
       .btn {
-        width: 100%;
-        padding: 12px;
+        flex: 1;
+        min-width: 120px;
+        padding: 10px;
         font-size: 14px;
       }
     }
