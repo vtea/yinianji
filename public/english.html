@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>英语 - 词汇学习</title>
+  <!-- Tailwind CSS -->
+  <link href="/output.css?v=4.0.0" rel="stylesheet">
   <style>
+    /* 只保留 Tailwind 无法实现的特殊样式 */
     :root {
       --primary-color: #58cc02;
       --primary-hover: #46a302;
@@ -16,98 +19,12 @@
 
     body {
       font-family: "din-round", "Microsoft YaHei", sans-serif;
-      background: #ffffff;
-      color: var(--text-color);
-      padding: 0;
-      margin: 0;
     }
 
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .level-selector {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 32px;
-      flex-wrap: wrap;
-      background: #f7f7f7;
-      padding: 12px;
-      border-radius: 24px;
-    }
-
-    .level-btn {
-      padding: 12px 24px;
-      border: 2px solid transparent;
-      background: transparent;
-      border-radius: 16px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 800;
-      color: #afafaf;
-      transition: all 0.2s;
-    }
-
-    .level-btn:hover {
-      color: var(--text-color);
-    }
-
-    .level-btn.active {
-      background: white;
-      color: var(--secondary-color);
-      box-shadow: 0 4px 0 var(--border-color);
-      transform: translateY(4px);
-    }
-
-
-    .vocab-btn {
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #e5a500;
-      transition: all 0.1s;
-    }
-
-    .vocab-btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 0 0;
-    }
-
-    .section-title {
-      font-size: 28px;
-      font-weight: 800;
-      text-align: center;
-      margin: 40px 0 24px;
-      color: var(--text-color);
-    }
-
-    .word-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 24px;
-    }
+    /* 交互动画 - level-btn和vocab-btn样式已移至styles.css */
 
     .word-card {
-      background: white;
-      border: 2px solid var(--border-color);
-      border-radius: 20px;
-      padding: 24px 16px;
-      cursor: pointer;
       transition: all 0.2s;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      position: relative;
-      box-shadow: 0 4px 0 var(--border-color);
     }
 
     .word-card:hover {
@@ -126,40 +43,19 @@
       box-shadow: 0 4px 0 var(--primary-color);
     }
 
-    .word-english {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--secondary-color);
-    }
-
+    /* 音标显示交互 */
     .word-phonetic {
-      font-size: 14px;
-      color: #afafaf;
-      font-weight: 500;
-      opacity: 0;
-      filter: blur(6px);
+      display: none;
       transition: all 0.3s;
-      cursor: pointer;
-      user-select: none;
+      pointer-events: none;
     }
     
     .word-phonetic.show {
-      opacity: 1;
-      filter: blur(0);
-    }
-    
-    .word-phonetic:hover {
-      color: var(--secondary-color);
+      display: inline-block !important;
     }
 
+    /* 中文显示交互 */
     .word-chinese {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text-color);
-      background: #f1f1f1;
-      padding: 4px 12px;
-      border-radius: 10px;
-      opacity: 0;
       transition: opacity 0.2s;
     }
 
@@ -168,49 +64,7 @@
       opacity: 1;
     }
 
-    .add-vocab-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid var(--border-color);
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .add-vocab-btn.active {
-      background: var(--accent-color);
-      border-color: var(--accent-color);
-      color: white;
-      box-shadow: 0 2px 0 #e5a500;
-    }
-
-    .learn-count {
-      font-size: 12px;
-      font-weight: 800;
-      color: #afafaf;
-    }
-
-    .empty-message {
-      text-align: center;
-      color: #afafaf;
-      padding: 60px 16px;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    @media (max-width: 480px) {
-      .word-list {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
+    /* 添加按钮状态 - 样式已移至styles.css */
   </style>
 </head>
 <body>
@@ -220,9 +74,23 @@
 </div>
 
 <script>
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+// 安全获取用户信息
+let currentUser = null;
+try {
+  const userStr = localStorage.getItem("currentUser");
+  if (userStr) {
+    currentUser = JSON.parse(userStr);
+  }
+} catch (err) {
+  console.error("解析用户信息失败：", err);
+  currentUser = null;
+}
+
 let userVocab = new Set();
 let currentLevel = 'beginner';
+
+// 保存已显示的音标状态
+let shownPhoneticSet = new Set();
 
 // 英语词汇库
 const englishVocabulary = {
@@ -346,14 +214,30 @@ const englishVocabulary = {
 };
 
 async function loadUserVocab() {
-  if (!currentUser) return;
+  if (!currentUser) {
+    renderLevel(currentLevel);
+    return;
+  }
   try {
     const res = await fetch(`/api/english-new-words/${currentUser.user_id}`);
+    
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    
     const words = await res.json();
-    userVocab = new Set(words.map(w => w.word));
+    
+    if (!Array.isArray(words)) {
+      userVocab = new Set();
+    } else {
+      userVocab = new Set(words.map(w => w.word));
+    }
+    
     renderLevel(currentLevel);
   } catch (err) {
     console.error("加载单词本失败：", err);
+    userVocab = new Set();
+    renderLevel(currentLevel);
   }
 }
 
@@ -433,35 +317,62 @@ function createWordCard(wordObj, learnCount = 0) {
   card.className = "word-card" + (learnCount > 0 ? " learned" : "");
   card.innerHTML = `
     <button class="add-vocab-btn ${isInVocab ? 'active' : ''}" onclick="toggleVocab(event, ${JSON.stringify(wordObj).replace(/"/g, '&quot;')})">📖</button>
-    <div class="word-english">${wordObj.english}</div>
-    <div class="word-phonetic" title="点击显示/隐藏音标">${wordObj.phonetic || ''}</div>
+    <div class="word-content-wrapper">
+      <div class="word-english">${wordObj.english}</div>
+      <div class="word-phonetic" data-phonetic="${wordObj.phonetic || ''}">${wordObj.phonetic || ''}</div>
+    </div>
     <div class="word-chinese">${wordObj.chinese || ''}</div>
     <div class="learn-count">🔊 ${learnCount}</div>
   `;
   
   const phoneticEl = card.querySelector(".word-phonetic");
+  const addVocabBtn = card.querySelector(".add-vocab-btn");
   
-  // 点击音标切换显示/隐藏
-  phoneticEl.onclick = (e) => {
-    e.stopPropagation();
-    phoneticEl.classList.toggle('show');
-  };
+  // 恢复之前显示的音标状态
+  if (phoneticEl && shownPhoneticSet.has(wordObj.english)) {
+    phoneticEl.classList.add('show');
+    phoneticEl.style.display = 'inline-block';
+    phoneticEl.style.backgroundColor = '#e3f2fd';
+    phoneticEl.style.color = '#1976d2';
+  }
   
-  // 点击卡片朗读和记录学习
-  card.onclick = (e) => {
-    // 如果点击的是音标或添加按钮，不执行朗读
-    if (e.target.classList.contains('word-phonetic') || 
-        e.target.classList.contains('add-vocab-btn')) {
+  // 点击卡片朗读、显示音标和记录学习
+  card.addEventListener('click', function(e) {
+    // 如果点击的是添加按钮，不执行其他操作
+    if (e.target.classList.contains('add-vocab-btn') || 
+        e.target.closest('.add-vocab-btn')) {
       return;
     }
     
+    // 显示音标（一直显示，不自动隐藏）
+    const currentPhoneticEl = card.querySelector(".word-phonetic");
+    
+    if (currentPhoneticEl) {
+      // 确保音标有内容
+      const phoneticText = currentPhoneticEl.getAttribute('data-phonetic') || wordObj.phonetic || '';
+      if (phoneticText) {
+        currentPhoneticEl.textContent = phoneticText;
+      }
+      
+      // 直接显示 - 使用display控制
+      currentPhoneticEl.classList.add('show');
+      currentPhoneticEl.style.display = 'inline-block';
+      currentPhoneticEl.style.backgroundColor = '#e3f2fd';
+      currentPhoneticEl.style.color = '#1976d2';
+      
+      // 保存到已显示集合
+      shownPhoneticSet.add(wordObj.english);
+    }
+    
+    // 朗读和记录学习
     speakWord(wordObj.english);
     recordLearn(wordObj.english);
     card.classList.add("learned");
     const countEl = card.querySelector(".learn-count");
-    const count = parseInt(countEl.textContent.match(/\d+/)[0]);
+    const countMatch = countEl.textContent.match(/\d+/);
+    const count = countMatch ? parseInt(countMatch[0]) : 0;
     countEl.textContent = `🔊 ${count + 1}`;
-  };
+  });
   
   return card;
 }
@@ -529,10 +440,11 @@ function initLevelSelector() {
 
 // 初始化
 if (currentUser) {
+  initLevelSelector();
   loadUserVocab();
+} else {
   initLevelSelector();
   renderLevel('beginner');
-} else {
   document.getElementById("contentArea").innerHTML = '<div class="empty-message">请先登录</div>';
 }
 </script>

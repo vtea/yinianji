@@ -1,0 +1,1059 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义组件 - 保留项目特色样式 */
+@layer components {
+  /* ===== 导航栏 ===== */
+  .navbar {
+    @apply bg-white text-gray-700 px-6 h-[70px] flex justify-between items-center 
+           border-b-2 border-gray-200 sticky top-0 z-[1000];
+  }
+  
+  .navbar h1 {
+    @apply text-2xl font-extrabold text-[#58cc02] m-0 tracking-tight;
+  }
+  
+  .navbar-actions {
+    @apply flex items-center gap-3;
+  }
+  
+  .word-stats {
+    @apply flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gray-100 
+           border-2 border-gray-200 font-extrabold text-xs text-gray-500 whitespace-nowrap;
+  }
+  
+  .word-stats strong {
+    @apply text-[#1cb0f6];
+  }
+  
+  /* ===== 侧边栏 ===== */
+  .sidebar {
+    @apply w-60 px-4 py-6 border-r-2 border-gray-200 flex flex-col gap-2 relative bg-white;
+  }
+  
+  .sidebar-toggle {
+    @apply absolute -right-[15px] top-6 w-[30px] h-[30px] bg-white border-2 border-gray-200 
+           rounded-full flex items-center justify-center cursor-pointer z-10 
+           shadow-sm text-xs font-extrabold text-gray-400 transition-all duration-200;
+  }
+  
+  .nav-group {
+    @apply mb-3 flex flex-col gap-1;
+  }
+  
+  .nav-group-title {
+    @apply text-[11px] font-extrabold text-gray-400 px-4 py-2 uppercase tracking-wider;
+  }
+  
+  .sub-nav {
+    @apply flex flex-col gap-1 pl-3 border-l-2 border-gray-100 ml-3;
+  }
+  
+  .nav-item {
+    @apply px-4 py-3.5 rounded-2xl cursor-pointer font-extrabold text-base 
+           flex items-center gap-4 text-gray-500 border-2 border-transparent 
+           uppercase whitespace-nowrap overflow-hidden;
+  }
+  
+  /* ===== 布局 ===== */
+  .main-layout {
+    @apply flex max-w-7xl mx-auto min-h-[calc(100vh-72px)];
+  }
+  
+  .content-area {
+    @apply flex-1 bg-white p-0 overflow-hidden;
+  }
+  
+  #contentFrame {
+    @apply w-full h-full border-none block;
+  }
+  
+  /* ===== 用户菜单 ===== */
+  .user-menu-btn {
+    @apply px-4 py-2 rounded-xl border-2 border-gray-200 bg-white font-extrabold 
+           cursor-pointer text-gray-700 shadow-[0_2px_0_#e5e5e5];
+  }
+  
+  .user-menu {
+    @apply absolute top-[50px] right-0 bg-white border-2 border-gray-200 
+           rounded-2xl shadow-lg z-[100] min-w-[200px] py-2;
+  }
+  
+  .user-info-item {
+    @apply px-4 py-4 border-b-2 border-gray-200 font-extrabold text-gray-700;
+  }
+  
+  .user-menu-item {
+    @apply px-4 py-3 cursor-pointer font-bold text-gray-500;
+  }
+  
+  /* ===== 登录注册 ===== */
+  #auth-page {
+    @apply fixed inset-0 min-h-screen items-center justify-center 
+           p-6 bg-gray-100 z-[2000] overflow-auto;
+    display: none; /* 默认隐藏，通过 show-flex 类控制显示 */
+  }
+  
+  #auth-page.show-flex {
+    display: flex;
+  }
+  
+  .auth-container {
+    @apply max-w-md w-full text-center;
+  }
+  
+  .auth-panel {
+    @apply bg-white border-2 border-gray-200 rounded-3xl px-6 py-7 
+           shadow-[0_6px_0_#e5e5e5];
+  }
+  
+  .auth-panel h2 {
+    @apply text-[32px] font-extrabold m-0 mb-6;
+  }
+  
+  .auth-toggle {
+    @apply mt-4 font-bold text-gray-500;
+  }
+  
+  .auth-toggle a {
+    @apply text-[#1cb0f6] font-extrabold cursor-pointer no-underline;
+  }
+  
+  .form-group input {
+    @apply w-full px-4 py-4 border-2 border-gray-200 rounded-2xl bg-gray-100 
+           text-base font-bold mb-3 box-border;
+  }
+  
+  .auth-submit-btn {
+    @apply w-full px-4 py-4 rounded-2xl border-none bg-[#1cb0f6] text-white 
+           font-extrabold text-[17px] shadow-[0_4px_0_#1899d6] cursor-pointer 
+           mt-3 uppercase;
+  }
+  
+  .auth-error {
+    @apply text-red-500 font-bold mb-4;
+  }
+  
+  /* ===== 浮动按钮 ===== */
+  .fab {
+    @apply fixed bottom-[30px] right-[30px] w-16 h-16 bg-[#58cc02] text-white 
+           border-none rounded-full text-[32px] cursor-pointer 
+           shadow-[0_6px_0_#46a302] flex items-center justify-center z-[100] 
+           transition-all duration-100;
+  }
+  
+  /* ===== 模态框 ===== */
+  .modal {
+    @apply fixed z-[2000] inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm;
+  }
+  
+  .modal-content {
+    @apply bg-white px-6 py-7 rounded-3xl w-[90%] max-w-[420px] relative 
+           shadow-[0_12px_0_rgba(0,0,0,0.1)] border-2 border-gray-200 
+           max-h-[85vh] overflow-y-auto;
+  }
+  
+  /* ===== 设置 ===== */
+  .setting-group {
+    @apply mb-5 text-left w-full;
+  }
+  
+  .setting-label {
+    @apply block font-extrabold text-[15px] mb-2.5 text-gray-700;
+  }
+  
+  .setting-select {
+    @apply w-full px-3.5 py-3.5 rounded-2xl border-2 border-gray-200 bg-gray-100 
+           text-base font-bold text-gray-700 cursor-pointer;
+  }
+  
+  .custom-select {
+    @apply relative w-full;
+  }
+  
+  .custom-select-trigger {
+    @apply w-full px-3.5 py-3 rounded-xl border-2 border-gray-200 bg-gray-100 
+           text-sm font-bold text-gray-700 cursor-pointer flex justify-between 
+           items-center gap-2;
+  }
+  
+  .custom-select-trigger span:first-child {
+    @apply flex-1 overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+  
+  .custom-select-trigger span:last-child {
+    @apply flex-shrink-0;
+  }
+  
+  .custom-select-dropdown {
+    @apply fixed left-[5%] right-[5%] max-h-[60vh] overflow-y-auto bg-white 
+           border-[3px] border-gray-200 rounded-2xl mt-2 z-[10000] 
+           shadow-[0_8px_24px_rgba(0,0,0,0.25)];
+  }
+  
+  .custom-select-option {
+    @apply px-4 py-4 text-base font-bold text-gray-700 cursor-pointer 
+           border-b border-gray-100 overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+  
+  .setting-range {
+    @apply w-full mt-2 cursor-pointer;
+  }
+  
+  .ai-config-row {
+    @apply flex gap-2;
+  }
+  
+  .ai-config-input {
+    @apply flex-1 px-3 py-3 rounded-xl border-2 border-gray-200 bg-gray-100 
+           text-sm font-bold;
+  }
+  
+  .ai-config-link {
+    @apply px-3 py-2.5 rounded-xl border-2 border-gray-200 bg-white 
+           font-extrabold cursor-pointer;
+  }
+  
+  /* ===== 移动端菜单 ===== */
+  .mobile-menu-backdrop {
+    @apply fixed inset-0 bg-black/40 z-[1490] backdrop-blur-sm;
+  }
+  
+  .mobile-menu-sheet {
+    @apply block fixed top-[60px] left-0 right-0 bg-white border-b-2 border-gray-200 
+           z-[1500] px-3 pt-2 pb-5 max-h-[80vh] overflow-y-auto 
+           shadow-[0_10px_25px_rgba(0,0,0,0.1)];
+  }
+  
+  .mobile-menu-handle {
+    @apply w-10 h-1 rounded-full bg-gray-200 mx-auto mb-3;
+  }
+  
+  .mobile-menu-grid {
+    @apply grid grid-cols-3 gap-3;
+  }
+  
+  .mobile-menu-item {
+    @apply border-2 border-gray-200 bg-white rounded-[18px] px-1 py-3 
+           font-extrabold text-gray-500 shadow-[0_4px_0_#e5e5e5] 
+           flex flex-col items-center justify-center gap-1.5 min-h-[80px];
+  }
+  
+  /* ===== 游戏卡片 ===== */
+  .game-card {
+    @apply bg-white backdrop-blur-lg rounded-2xl shadow-lg;
+    background-color: rgba(255, 255, 255, 0.98);
+  }
+  
+  /* ===== 按钮 ===== */
+  /* 按钮样式在下方"按钮通用样式"部分统一定义 */
+  
+  /* ===== 拼音显示框 ===== */
+  .pinyin-box {
+    @apply bg-gradient-to-r from-blue-400 to-blue-600 text-white 
+           font-bold rounded-xl text-center shadow-lg relative overflow-hidden;
+  }
+  
+  /* ===== 拼音列表 ===== */
+  .pinyin-list {
+    @apply grid gap-3 mb-8;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  /* ===== 拼音按钮 ===== */
+  .pinyin-btn {
+    @apply relative bg-white border-2 border-gray-200 rounded-2xl p-4 
+           cursor-pointer shadow-[0_4px_0_#e5e5e5] text-center 
+           transition-all flex flex-col items-center justify-center 
+           min-h-[100px];
+  }
+  
+  .pinyin-btn:hover {
+    @apply bg-blue-50 border-blue-300 transform -translate-y-0.5;
+    box-shadow: 0 6px 0 #84d8ff;
+  }
+  
+  .pinyin-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0;
+  }
+  
+  .pinyin-text {
+    @apply text-3xl font-extrabold text-blue-600 mb-2;
+  }
+  
+  .pinyin-btn .learn-count {
+    @apply text-xs font-bold text-gray-500 flex items-center gap-1;
+  }
+  
+  /* ===== 播放按钮 ===== */
+  .play-button {
+    @apply rounded-full bg-gradient-to-b from-yellow-400 to-yellow-500 
+           text-white shadow-lg flex-shrink-0 transition-all
+           active:scale-95 relative cursor-pointer
+           hover:-translate-y-0.5;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  
+  /* ===== 选项按钮 ===== */
+  .option-button {
+    @apply bg-white rounded-xl font-bold shadow-md 
+           active:scale-95 transition-all cursor-pointer relative overflow-hidden
+           hover:-translate-y-1 hover:scale-105;
+  }
+  
+  /* ===== 容器布局 ===== */
+  .container {
+    @apply max-w-[1200px] mx-auto p-6 pb-24;
+  }
+  
+  /* ===== 页面头部（普通页面） ===== */
+  .header {
+    @apply flex justify-between items-center mb-6;
+  }
+  
+  /* AI辅导页面的header会覆盖上面的样式 */
+  
+  .section-title {
+    @apply text-3xl font-extrabold text-gray-700;
+  }
+  
+  /* ===== 等级选择器菜单 ===== */
+  .level-selector {
+    @apply flex flex-wrap items-center gap-2 mb-6 p-4 bg-white 
+           border-2 border-gray-200 rounded-2xl shadow-[0_4px_0_#e5e5e5];
+  }
+  
+  .level-btn {
+    @apply px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white 
+           font-extrabold cursor-pointer text-gray-700 
+           shadow-[0_4px_0_#e5e5e5] text-base transition-all;
+  }
+  
+  .level-btn:hover {
+    @apply bg-gray-50 transform -translate-y-0.5;
+    box-shadow: 0 6px 0 #e5e5e5;
+  }
+  
+  .level-btn.active {
+    @apply bg-blue-100 border-blue-400 text-blue-600;
+    box-shadow: 0 4px 0 #84d8ff;
+  }
+  
+  .level-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0;
+  }
+  
+  .vocab-btn {
+    @apply px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white 
+           font-extrabold cursor-pointer text-gray-700 
+           shadow-[0_4px_0_#e5e5e5] text-base transition-all;
+  }
+  
+  .vocab-btn:hover {
+    @apply bg-gray-50 transform -translate-y-0.5;
+    box-shadow: 0 6px 0 #e5e5e5;
+  }
+  
+  .vocab-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0;
+  }
+  
+  /* ===== 添加单词按钮 ===== */
+  .add-vocab-btn {
+    @apply absolute top-3 left-3 w-10 h-10 rounded-full border-2 
+           border-gray-200 bg-white font-extrabold cursor-pointer 
+           shadow-[0_2px_0_#e5e5e5] flex items-center justify-center 
+           text-lg transition-all;
+  }
+  
+  .add-vocab-btn:hover {
+    @apply bg-gray-50 transform -translate-y-0.5;
+    box-shadow: 0 4px 0 #e5e5e5;
+  }
+  
+  .add-vocab-btn.active {
+    @apply bg-yellow-400 border-yellow-400 text-white;
+    box-shadow: 0 2px 0 #e5a500;
+  }
+  
+  .add-vocab-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0;
+  }
+  
+  /* ===== 学习次数显示 ===== */
+  .learn-count {
+    @apply absolute bottom-3 right-3 text-xs font-bold text-gray-500 
+           flex items-center gap-1;
+  }
+  
+  .back-btn {
+    @apply px-5 py-3 rounded-2xl border-2 border-gray-200 bg-white 
+           font-extrabold cursor-pointer text-gray-700 
+           shadow-[0_4px_0_#e5e5e5] text-base;
+  }
+  
+  /* ===== AI 辅导页面 ===== */
+  .header {
+    @apply bg-white border-b-2 border-gray-200 px-6 py-4 
+           flex justify-between items-center sticky top-0 z-50;
+  }
+  
+  .header-title {
+    @apply text-xl font-extrabold text-[#58cc02] flex items-center gap-2;
+  }
+  
+  .model-selector {
+    @apply flex items-center gap-3 overflow-x-auto;
+    scrollbar-width: none;
+  }
+  
+  .model-selector::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .voice-toggle {
+    @apply flex items-center gap-2 px-3 py-2 rounded-xl border-2 
+           border-gray-200 bg-white font-bold text-sm text-gray-700 
+           cursor-pointer whitespace-nowrap;
+  }
+  
+  .model-btn {
+    @apply px-4 py-2 rounded-xl border-2 border-gray-200 bg-white 
+           font-bold text-sm text-gray-700 cursor-pointer 
+           shadow-[0_2px_0_#e5e5e5] transition-all whitespace-nowrap;
+  }
+  
+  .model-btn:hover {
+    @apply bg-gray-50 transform -translate-y-0.5;
+    box-shadow: 0 4px 0 #e5e5e5;
+  }
+  
+  .model-btn.active {
+    @apply border-blue-400 text-blue-600 bg-blue-50;
+    box-shadow: 0 2px 0 #84d8ff;
+  }
+  
+  .model-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0;
+  }
+  
+  #chat-container {
+    @apply flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50;
+    height: calc(100vh - 140px);
+  }
+  
+  .message {
+    @apply rounded-2xl p-4 max-w-[85%] relative;
+    word-wrap: break-word;
+  }
+  
+  .ai-message {
+    @apply bg-white border-2 border-gray-200 self-start;
+    box-shadow: 0 2px 0 #e5e5e5;
+  }
+  
+  .user-message {
+    @apply bg-blue-100 border-2 border-blue-300 text-blue-900 
+           self-end ml-auto;
+    box-shadow: 0 2px 0 #84d8ff;
+  }
+  
+  .message-content {
+    @apply flex items-center;
+  }
+  
+  .delete-msg-btn {
+    @apply absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white 
+           rounded-full flex items-center justify-center cursor-pointer 
+           font-extrabold text-sm shadow-lg;
+    display: none;
+  }
+  
+  .message:hover .delete-msg-btn {
+    display: flex;
+  }
+  
+  .input-area {
+    @apply bg-white border-t-2 border-gray-200 p-4 sticky bottom-0 z-40;
+  }
+  
+  .preview-area {
+    @apply mb-3;
+  }
+  
+  .img-preview {
+    @apply max-w-full rounded-xl cursor-pointer;
+  }
+  
+  .input-row {
+    @apply flex items-end gap-2;
+  }
+  
+  .input-box {
+    @apply flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 
+           bg-gray-50 text-base font-bold resize-none outline-none 
+           focus:border-blue-400 focus:bg-white;
+    max-height: 120px;
+  }
+  
+  .icon-btn {
+    @apply w-10 h-10 rounded-xl border-2 border-gray-200 bg-white 
+           font-extrabold cursor-pointer flex items-center justify-center 
+           shadow-[0_2px_0_#e5e5e5] transition-all text-lg;
+  }
+  
+  .icon-btn:hover {
+    @apply bg-gray-50 transform -translate-y-0.5;
+    box-shadow: 0 4px 0 #e5e5e5;
+  }
+  
+  .icon-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0;
+  }
+  
+  .icon-btn.recording {
+    @apply bg-red-100 border-red-400 text-red-600;
+    animation: pulse 1.5s infinite;
+  }
+  
+  .send-btn {
+    @apply bg-green-500 border-green-600 text-white;
+    box-shadow: 0 2px 0 #46a302;
+  }
+  
+  .send-btn:hover {
+    @apply bg-green-600;
+    box-shadow: 0 4px 0 #46a302;
+  }
+  
+  .loading-dots::after {
+    content: '.';
+    animation: dots 1s steps(5, end) infinite;
+  }
+  
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+  }
+  
+  .recharge-tip {
+    @apply mt-3 pt-3 border-t border-gray-200;
+  }
+  
+  .recharge-btn {
+    @apply px-4 py-2 rounded-xl bg-yellow-400 text-white font-bold 
+           cursor-pointer shadow-[0_2px_0_#e6b800] transition-all;
+  }
+  
+  .recharge-btn:hover {
+    @apply bg-yellow-500 transform -translate-y-0.5;
+    box-shadow: 0 4px 0 #e6b800;
+  }
+  
+  .recharge-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0;
+  }
+  
+  /* ===== 游戏头部 ===== */
+  .game-header {
+    @apply bg-white border-2 border-gray-200 rounded-3xl p-6 mb-6 
+           shadow-[0_6px_0_#e5e5e5];
+  }
+  
+  .progress-bar-container {
+    @apply mb-4;
+  }
+  
+  .progress-info {
+    @apply flex justify-between items-center mb-2 font-extrabold 
+           text-sm text-gray-600;
+  }
+  
+  .progress-bar {
+    @apply w-full h-5 bg-gray-200 rounded-full overflow-hidden 
+           border-2 border-gray-300 relative;
+  }
+  
+  .progress-fill {
+    @apply h-full flex items-center justify-center text-white 
+           font-extrabold text-xs;
+  }
+  
+  .stats-row {
+    @apply grid grid-cols-3 gap-4 mb-4;
+  }
+  
+  .stat-item {
+    @apply text-center;
+  }
+  
+  .stat-value {
+    @apply text-2xl font-extrabold text-gray-700 mb-1;
+  }
+  
+  .stat-label {
+    @apply text-sm font-bold text-gray-500;
+  }
+  
+  .game-buttons {
+    @apply grid grid-cols-3 gap-3;
+  }
+  
+  .game-btn {
+    @apply px-4 py-3 rounded-2xl border-[3px] bg-white font-extrabold 
+           cursor-pointer text-center shadow-[0_4px_0_#e5e5e5];
+  }
+  
+  /* ===== 生字卡片 ===== */
+  .word-wrapper {
+    @apply relative bg-white border-2 border-gray-200 rounded-2xl p-4 
+           cursor-pointer shadow-[0_4px_0_#e5e5e5];
+  }
+  
+  .word-display {
+    @apply text-[72px] font-extrabold text-gray-700 text-center 
+           flex items-center justify-center;
+    position: relative !important; /* 确保米字格伪元素正确定位 */
+    margin: 8px auto; /* 居中显示 */
+    width: 120px !important; /* 固定宽度 */
+    height: 120px !important; /* 固定高度，与宽度相同形成正方形 */
+    background-color: white !important; /* 确保背景是白色，米字格线条才能清晰 */
+    border-radius: 4px; /* 轻微圆角 */
+  }
+  
+  /* 米字格背景 - 使用伪元素 */
+  .word-display::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-image:
+      linear-gradient(#ddd 1px, transparent 1px),
+      linear-gradient(90deg, #ddd 1px, transparent 1px),
+      linear-gradient(45deg, #eee 1px, transparent 1px),
+      linear-gradient(-45deg, #eee 1px, transparent 1px) !important;
+    background-size:
+      100% 1px,
+      1px 100%,
+      141.42% 141.42%,
+      141.42% 141.42% !important;
+    background-position:
+      50% 50%,
+      50% 50%,
+      50% 50%,
+      50% 50% !important;
+    background-repeat: no-repeat !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
+  
+  .word-display ruby {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .word-display rt {
+    display: none;
+  }
+  
+  /* 拼音和文字的容器（生字本和单词本共用） */
+  .word-content-wrapper {
+    @apply flex flex-col items-center my-4;
+  }
+  
+  .word-pinyin {
+    @apply px-3 py-1.5 rounded-xl text-sm font-extrabold mb-2;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    display: none;
+    pointer-events: none;
+    min-height: 1.5rem;
+    width: auto;
+    white-space: nowrap;
+  }
+  
+  .word-pinyin.show {
+    display: inline-block !important;
+    background-color: #e3f2fd !important;
+    color: #1976d2 !important;
+  }
+  
+  .word-info {
+    @apply flex justify-between items-center text-xs font-bold 
+           text-gray-500 mt-2;
+  }
+  
+  .remove-btn {
+    @apply absolute top-3 right-3 w-8 h-8 bg-red-500 text-white 
+           rounded-full border-none font-extrabold text-base 
+           cursor-pointer shadow-[0_2px_0_#d32f2f] flex items-center 
+           justify-center;
+  }
+  
+  .mastery-badge {
+    @apply absolute top-3 left-3 w-8 h-8 text-white rounded-full 
+           border-2 border-white font-extrabold text-sm 
+           shadow-lg flex items-center justify-center;
+  }
+  
+  /* ===== 单词卡片 ===== */
+  .word-list {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  
+  .word-card {
+    @apply relative bg-white border-2 border-gray-200 rounded-2xl p-6 
+           cursor-pointer shadow-[0_4px_0_#e5e5e5];
+  }
+  
+  .word-english {
+    @apply text-3xl font-extrabold text-gray-700 text-center;
+    margin-bottom: 8px;
+  }
+  
+  .word-phonetic {
+    @apply text-base font-bold text-blue-500 
+           px-3 py-1.5 rounded-lg;
+    display: none;
+    pointer-events: none;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    margin-bottom: 0;
+  }
+  
+  .word-phonetic.show {
+    display: inline-block !important;
+    background-color: #e3f2fd !important;
+    color: #1976d2 !important;
+  }
+  
+  .word-chinese {
+    @apply text-lg font-bold text-gray-600 text-center;
+  }
+  
+  /* ===== 成就系统 ===== */
+  .achievements-btn {
+    @apply fixed bottom-[110px] right-[30px] w-16 h-16 bg-yellow-400 
+           text-white border-none rounded-full text-[32px] 
+           cursor-pointer shadow-[0_6px_0_#e6b800] flex items-center 
+           justify-center z-[99];
+  }
+  
+  .achievement-badge {
+    @apply fixed bottom-[110px] right-[30px] bg-white border-2 
+           border-yellow-400 rounded-2xl px-5 py-4 shadow-xl z-[999] 
+           min-w-[250px];
+  }
+  
+  .achievement-icon {
+    @apply text-4xl text-center mb-2;
+  }
+  
+  .achievement-title {
+    @apply text-lg font-extrabold text-gray-700 mb-1 text-center;
+  }
+  
+  .achievement-desc {
+    @apply text-sm font-bold text-gray-500 text-center;
+  }
+  
+  .achievements-modal {
+    @apply fixed inset-0 bg-black/50 z-[2000] flex items-center 
+           justify-center backdrop-blur-sm;
+  }
+  
+  .achievements-content {
+    @apply bg-white rounded-3xl px-6 py-7 w-[90%] max-w-[600px] 
+           shadow-[0_12px_0_rgba(0,0,0,0.1)] border-2 border-gray-200 
+           max-h-[85vh] overflow-y-auto;
+  }
+  
+  .achievements-title {
+    @apply text-2xl font-extrabold text-gray-700 mb-6 text-center;
+  }
+  
+  .achievements-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  
+  .achievement-item {
+    @apply bg-white border-2 border-gray-200 rounded-2xl p-4 
+           text-center shadow-[0_4px_0_#e5e5e5];
+  }
+  
+  .achievement-item-icon {
+    @apply text-4xl mb-2;
+  }
+  
+  .achievement-item-name {
+    @apply font-extrabold text-sm text-gray-700 mb-1;
+  }
+  
+  .achievement-item-desc {
+    @apply text-xs font-bold text-gray-500;
+  }
+  
+  /* ===== 空状态 ===== */
+  .empty-message {
+    @apply text-center py-12 text-xl font-bold text-gray-400;
+  }
+  
+  /* ===== 粒子动画 ===== */
+  .particle {
+    @apply fixed text-3xl pointer-events-none z-[9999];
+  }
+  
+  /* ===== 生字列表网格 ===== */
+  #list {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  
+  /* ===== 已掌握标签 ===== */
+  .mastered-label {
+    @apply absolute top-2 right-2 bg-green-500 text-white px-2 py-1 
+           rounded-xl text-xs font-extrabold;
+  }
+  
+  .mastered-word .word-display {
+    @apply text-green-600;
+  }
+  
+  /* ===== 按钮通用样式 ===== */
+  .btn {
+    @apply px-6 py-3 rounded-2xl border-none font-extrabold 
+           text-base cursor-pointer transition-all;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-b from-green-500 to-green-600 text-white 
+           px-4 py-2 rounded-xl font-bold shadow-lg;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+  }
+  
+  .btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #46a302;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-gray-700 px-4 py-2 rounded-xl font-bold shadow-md;
+    transition: all 0.2s;
+  }
+  
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    background-color: #f9fafb;
+  }
+  
+  .btn-secondary:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #e5e5e5;
+  }
+  
+  /* ===== 模态框通用样式 ===== */
+  .modal-content {
+    @apply bg-white px-6 py-7 rounded-3xl w-[90%] max-w-[420px] 
+           relative shadow-[0_12px_0_rgba(0,0,0,0.1)] 
+           border-2 border-gray-200 max-h-[85vh] overflow-y-auto;
+  }
+  
+  .modal-title {
+    @apply text-2xl font-extrabold text-gray-700 text-center;
+  }
+  
+  .celebration {
+    @apply text-5xl text-center mb-4;
+  }
+  
+  /* ===== 升级特效 ===== */
+  .level-up-effect {
+    @apply fixed inset-0 flex items-center justify-center 
+           pointer-events-none z-[10000];
+  }
+  
+  .level-up-text {
+    @apply text-5xl font-extrabold text-yellow-400 
+           drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)];
+  }
+  
+  /* ===== 移动端适配 ===== */
+  @media (max-width: 768px) {
+    .container {
+      @apply p-4 pb-20;
+    }
+    
+    .section-title {
+      @apply text-2xl;
+    }
+    
+    .level-selector {
+      @apply p-3 gap-1.5;
+    }
+    
+    .level-btn,
+    .vocab-btn {
+      @apply px-3 py-2 text-sm;
+    }
+    
+    .back-btn {
+      @apply px-4 py-2 text-sm;
+    }
+    
+    .game-header {
+      @apply p-4 mb-4;
+    }
+    
+    .game-buttons {
+      @apply grid-cols-1 gap-2;
+    }
+    
+    #list {
+      @apply gap-3;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+    
+    .word-wrapper {
+      @apply p-3;
+    }
+    
+    .word-display {
+      @apply text-5xl min-h-[100px];
+    }
+    
+    .word-list {
+      @apply gap-3;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+    
+    .word-card {
+      @apply p-4;
+    }
+    
+    .word-english {
+      @apply text-2xl;
+    }
+    
+    .achievements-btn {
+      @apply bottom-[90px] w-14 h-14 text-[28px];
+    }
+    
+    .achievement-badge {
+      @apply bottom-[90px] right-4 min-w-[220px] px-4 py-3;
+    }
+    
+    .pinyin-list {
+      @apply gap-2;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+    
+    .pinyin-btn {
+      @apply p-3 min-h-[80px];
+    }
+    
+    .pinyin-text {
+      @apply text-2xl mb-1;
+    }
+    
+    .pinyin-btn .learn-count {
+      @apply text-[10px];
+    }
+    
+    .achievements-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    
+    .modal-content {
+      @apply w-[95%] px-5 py-6 max-h-[90vh];
+    }
+    
+    .modal-title {
+      @apply text-xl;
+    }
+    
+    .celebration {
+      @apply text-4xl;
+    }
+    
+    .btn {
+      @apply px-5 py-2.5 text-sm;
+    }
+    
+    /* AI辅导页面移动端适配 */
+    .header {
+      @apply px-3 py-2;
+    }
+    
+    .header-title {
+      @apply text-base;
+    }
+    
+    .model-selector {
+      @apply gap-1.5;
+    }
+    
+    .voice-toggle {
+      @apply px-2 py-1 text-xs;
+    }
+    
+    .model-btn {
+      @apply px-2 py-1 text-xs;
+    }
+    
+    #chat-container {
+      @apply p-4;
+      height: calc(100vh - 120px);
+    }
+    
+    .message {
+      @apply max-w-[90%] p-3;
+    }
+    
+    .input-area {
+      @apply p-3;
+    }
+    
+    .input-box {
+      @apply text-sm;
+    }
+    
+    .icon-btn {
+      @apply w-8 h-8 text-base;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    #list {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    
+    .word-display {
+      @apply text-4xl min-h-[80px];
+    }
+  }
+}

@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>声母韵母 - 拼音学习</title>
+  <!-- Tailwind CSS -->
+  <link href="/output.css?v=4.0.0" rel="stylesheet">
   <style>
+    /* 只保留 Tailwind 无法实现的特殊样式 */
     :root {
       --primary-color: #58cc02;
       --primary-hover: #46a302;
@@ -16,76 +19,9 @@
 
     body {
       font-family: "din-round", "Microsoft YaHei", sans-serif;
-      background: #ffffff;
-      color: var(--text-color);
-      padding: 0;
-      margin: 0;
     }
 
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .section-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text-color);
-      margin: 40px 0 20px;
-      padding-left: 12px;
-      border-left: 6px solid var(--secondary-color);
-    }
-
-    .pinyin-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 16px;
-    }
-
-    .pinyin-btn {
-      background: white;
-      border: 2px solid var(--border-color);
-      border-radius: 20px;
-      padding: 20px 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 4px 0 var(--border-color);
-    }
-
-    .pinyin-btn:hover {
-      background-color: #f7f7f7;
-      transform: translateY(-2px);
-    }
-
-    .pinyin-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 0px 0 var(--border-color);
-    }
-
-    .pinyin-text {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--secondary-color);
-    }
-
-    .learn-count {
-      font-size: 12px;
-      font-weight: 800;
-      color: #afafaf;
-    }
-
-    @media (max-width: 480px) {
-      .pinyin-list {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
+    /* 拼音按钮样式已移至styles.css */
   </style>
 </head>
 <body>
@@ -95,7 +31,17 @@
 </div>
 
 <script>
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+// 安全获取用户信息
+let currentUser = null;
+try {
+  const userStr = localStorage.getItem("currentUser");
+  if (userStr) {
+    currentUser = JSON.parse(userStr);
+  }
+} catch (err) {
+  console.error("解析用户信息失败：", err);
+  currentUser = null;
+}
 
 const initials = [
   "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h",
@@ -154,49 +100,74 @@ function createPinyinButton(py, type, learnCount) {
     speakPinyin(py);
     recordLearn(py, type);
     const countSpan = btn.querySelector(".learn-count");
-    const currentCount = parseInt(countSpan.textContent.match(/\d+/)[0]);
-    countSpan.textContent = `🔊 ${currentCount + 1}`;
+    if (countSpan) {
+      const match = countSpan.textContent.match(/\d+/);
+      const currentCount = match ? parseInt(match[0]) : 0;
+      countSpan.textContent = `🔊 ${currentCount + 1}`;
+    }
   };
   
   return btn;
 }
 
 async function loadPinyinPage() {
-  if (!currentUser) return;
-
-  try {
-    const res = await fetch(`/api/pinyin/${currentUser.user_id}`);
-    let data = await res.json();
-
-    if (data.length === 0) {
-      await fetch("/api/pinyin-init", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: currentUser.user_id })
-      });
-      loadPinyinPage();
-      return;
-    }
-
-    const learnMap = {};
-    data.forEach(item => { learnMap[`${item.type}:${item.pinyin}`] = item.learn_count || 0; });
-
-    const initialsSection = document.getElementById("initialsSection");
-    initialsSection.innerHTML = '<div class="section-title">声母</div>';
-    const initialsList = document.createElement("div");
-    initialsList.className = "pinyin-list";
-    initials.forEach(py => initialsList.appendChild(createPinyinButton(py, "initial", learnMap[`initial:${py}`])));
-    initialsSection.appendChild(initialsList);
-
-    const finalsSection = document.getElementById("finalsSection");
-    finalsSection.innerHTML = '<div class="section-title">韵母</div>';
-    const finalsList = document.createElement("div");
-    finalsList.className = "pinyin-list";
-    finals.forEach(py => finalsList.appendChild(createPinyinButton(py, "final", learnMap[`final:${py}`])));
-    finalsSection.appendChild(finalsList);
-  } catch (err) {
-    console.error(err);
+  const initialsSection = document.getElementById("initialsSection");
+  const finalsSection = document.getElementById("finalsSection");
+  
+  if (!initialsSection || !finalsSection) {
+    console.error("找不到必要的DOM元素");
+    return;
   }
+
+  // 初始化学习次数映射
+  let learnMap = {};
+
+  if (currentUser) {
+    try {
+      const res = await fetch(`/api/pinyin/${currentUser.user_id}`);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
+      let data = await res.json();
+
+      if (!Array.isArray(data)) {
+        data = [];
+      }
+
+      if (data.length === 0) {
+        await fetch("/api/pinyin-init", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: currentUser.user_id })
+        });
+        loadPinyinPage();
+        return;
+      }
+
+      data.forEach(item => { 
+        learnMap[`${item.type}:${item.pinyin}`] = item.learn_count || 0; 
+      });
+    } catch (err) {
+      console.error("加载拼音学习记录失败：", err);
+      // 即使加载失败，也显示拼音表（学习次数为0）
+    }
+  }
+
+  // 渲染声母
+  initialsSection.innerHTML = '<div class="section-title">声母</div>';
+  const initialsList = document.createElement("div");
+  initialsList.className = "pinyin-list";
+  initials.forEach(py => initialsList.appendChild(createPinyinButton(py, "initial", learnMap[`initial:${py}`])));
+  initialsSection.appendChild(initialsList);
+
+  // 渲染韵母
+  finalsSection.innerHTML = '<div class="section-title">韵母</div>';
+  const finalsList = document.createElement("div");
+  finalsList.className = "pinyin-list";
+  finals.forEach(py => finalsList.appendChild(createPinyinButton(py, "final", learnMap[`final:${py}`])));
+  finalsSection.appendChild(finalsList);
 }
 
 loadPinyinPage();

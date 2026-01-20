@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>英语单词本</title>
+  <!-- Tailwind CSS -->
+  <link href="/output.css?v=4.0.0" rel="stylesheet">
   <style>
+    /* 只保留 Tailwind 无法实现的特殊样式 */
     :root {
       --primary-color: #58cc02;
       --primary-hover: #46a302;
@@ -16,43 +19,10 @@
 
     body {
       font-family: "din-round", "Microsoft YaHei", sans-serif;
-      background: #ffffff;
-      color: var(--text-color);
-      padding: 0;
-      margin: 0;
     }
 
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid var(--border-color);
-    }
-
-    .section-title {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--primary-color);
-    }
-
+    /* 交互动画 */
     .back-btn {
-      padding: 12px 24px;
-      background: white;
-      color: #afafaf;
-      border: 2px solid var(--border-color);
-      border-radius: 16px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 800;
-      box-shadow: 0 4px 0 var(--border-color);
       transition: all 0.1s;
     }
 
@@ -65,26 +35,8 @@
       box-shadow: 0 0 0;
     }
 
-    .word-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 24px;
-    }
-
     .word-card {
-      background: white;
-      border: 2px solid var(--border-color);
-      border-radius: 24px;
-      padding: 24px;
-      cursor: pointer;
       transition: all 0.2s;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      position: relative;
-      box-shadow: 0 4px 0 var(--border-color);
     }
 
     .word-card:hover {
@@ -97,78 +49,24 @@
       box-shadow: 0 0px 0 var(--border-color);
     }
 
-    .word-english {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--secondary-color);
-    }
-
+    /* 音标显示交互 */
     .word-phonetic {
-      font-size: 14px;
-      color: #afafaf;
-      font-weight: 500;
-      opacity: 0;
-      filter: blur(6px);
+      display: none;
       transition: all 0.3s;
-      cursor: pointer;
-      user-select: none;
     }
     
     .word-phonetic.show {
-      opacity: 1;
-      filter: blur(0);
-    }
-    
-    .word-phonetic:hover {
-      color: var(--secondary-color);
+      display: inline-block !important;
     }
 
-    .word-chinese {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text-color);
-      background: #f1f1f1;
-      padding: 6px 16px;
-      border-radius: 12px;
-      width: 100%;
-    }
-
+    /* 删除按钮动画 */
     .remove-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 28px;
-      height: 28px;
-      background: #ff4b4b;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 0 #d33131;
       transition: all 0.1s;
     }
 
     .remove-btn:active {
       transform: translateY(2px);
       box-shadow: 0 0 0;
-    }
-
-    .empty-message {
-      text-align: center;
-      color: #afafaf;
-      padding: 80px 16px;
-      font-size: 20px;
-      font-weight: 800;
-    }
-
-    @media (max-width: 480px) {
-      .word-list {
-        grid-template-columns: repeat(2, 1fr);
-      }
     }
   </style>
 </head>
@@ -184,7 +82,20 @@
 </div>
 
 <script>
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+// 安全获取用户信息
+let currentUser = null;
+try {
+  const userStr = localStorage.getItem("currentUser");
+  if (userStr) {
+    currentUser = JSON.parse(userStr);
+  }
+} catch (err) {
+  console.error("解析用户信息失败：", err);
+  currentUser = null;
+}
+
+// 保存已显示的音标状态
+let shownPhoneticSet = new Set();
 
 function goBack() {
   window.location.href = "english.html";
@@ -193,28 +104,7 @@ function goBack() {
 function speakWord(english) {
   if (!english) return;
   
-  if (currentUser) {
-    fetch("/api/english-new-words/speak", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        user_id: currentUser.user_id, 
-        word: english 
-      })
-    }).then(() => {
-      const cards = document.querySelectorAll(".word-card");
-      cards.forEach(card => {
-        if (card.querySelector(".word-english").textContent === english) {
-          const countEl = card.querySelector(".play-count");
-          if (countEl) {
-            const count = parseInt(countEl.textContent.match(/\d+/)[0]);
-            countEl.textContent = `🔊 ${count + 1}`;
-          }
-        }
-      });
-    }).catch(err => console.error("更新播放次数失败：", err));
-  }
-
+  // 先播放语音
   if (window.parent && window.parent.speak) {
     window.parent.speak(english, 'english');
   } else {
@@ -228,7 +118,34 @@ function speakWord(english) {
       speechSynthesis.speak(u);
     }, 50);
   }
-
+  
+  // 更新播放次数
+  if (currentUser) {
+    fetch("/api/english-new-words/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        user_id: currentUser.user_id, 
+        word: english 
+      })
+    }).then(res => {
+      if (res.ok) {
+        // 更新UI显示的播放次数
+        const cards = document.querySelectorAll(".word-card");
+        cards.forEach(card => {
+          const englishEl = card.querySelector(".word-english");
+          if (englishEl && englishEl.textContent === english) {
+            const countEl = card.querySelector(".play-count");
+            if (countEl) {
+              const countMatch = countEl.textContent.match(/\d+/);
+              const count = countMatch ? parseInt(countMatch[0]) : 0;
+              countEl.textContent = `🔊 ${count + 1}`;
+            }
+          }
+        });
+      }
+    }).catch(err => console.error("更新播放次数失败：", err));
+  }
 }
 
 async function removeWord(event, wordObj) {
@@ -268,55 +185,114 @@ async function removeWord(event, wordObj) {
 
 function createWordCard(wordObj) {
   const date = new Date(wordObj.created_at).toLocaleDateString();
+  const playCount = wordObj.play_count || 0;
   const card = document.createElement("div");
   card.className = "word-card";
   card.innerHTML = `
     <button class="remove-btn" onclick="removeWord(event, ${JSON.stringify(wordObj).replace(/"/g, '&quot;')})">✕</button>
-    <div class="word-english">${wordObj.word}</div>
-    <div class="word-phonetic" title="点击显示/隐藏音标">${wordObj.phonetic || ''}</div>
+    <div class="word-content-wrapper">
+      <div class="word-english">${wordObj.word}</div>
+      <div class="word-phonetic" data-phonetic="${wordObj.phonetic || ''}">${wordObj.phonetic || ''}</div>
+    </div>
     <div class="word-chinese">${wordObj.chinese || ''}</div>
+    <div class="word-info">
+      <span>📅 ${date}</span>
+      <span class="play-count">🔊 ${playCount}</span>
+    </div>
   `;
   
   const phoneticEl = card.querySelector(".word-phonetic");
+  const removeBtn = card.querySelector(".remove-btn");
   
-  // 点击音标切换显示/隐藏
-  phoneticEl.onclick = (e) => {
-    e.stopPropagation();
-    phoneticEl.classList.toggle('show');
-  };
+  // 恢复之前显示的音标状态
+  if (phoneticEl && shownPhoneticSet.has(wordObj.word)) {
+    phoneticEl.classList.add('show');
+    phoneticEl.style.display = 'inline-block';
+    phoneticEl.style.backgroundColor = '#e3f2fd';
+    phoneticEl.style.color = '#1976d2';
+  }
   
-  // 点击卡片朗读
-  card.onclick = (e) => {
-    if (!e.target.classList.contains('word-phonetic')) {
+  // 点击卡片朗读并显示音标
+  card.addEventListener('click', function(e) {
+    // 检查点击的是否是删除按钮
+    const target = e.target;
+    const isExcluded = target.classList.contains('remove-btn') || 
+                      target.closest('.remove-btn');
+    
+    if (!isExcluded) {
+      // 显示音标（一直显示，不自动隐藏）
+      const currentPhoneticEl = card.querySelector(".word-phonetic");
+      
+      if (currentPhoneticEl) {
+        // 确保音标有内容
+        const phoneticText = currentPhoneticEl.getAttribute('data-phonetic') || wordObj.phonetic || '';
+        if (phoneticText) {
+          currentPhoneticEl.textContent = phoneticText;
+        }
+        
+        // 直接显示 - 使用display控制
+        currentPhoneticEl.classList.add('show');
+        currentPhoneticEl.style.display = 'inline-block';
+        currentPhoneticEl.style.backgroundColor = '#e3f2fd';
+        currentPhoneticEl.style.color = '#1976d2';
+        
+        // 保存到已显示集合
+        shownPhoneticSet.add(wordObj.word);
+      }
+      
+      // 朗读
       speakWord(wordObj.word);
     }
-  };
+  });
   
   return card;
 }
 
 async function loadNewWords() {
-  if (!currentUser) return;
+  if (!currentUser) {
+    document.getElementById("contentArea").innerHTML = '<div class="empty-message">请先登录</div>';
+    return;
+  }
+  
+  const contentArea = document.getElementById("contentArea");
+  const wordList = document.getElementById("wordList");
+  
+  if (!contentArea || !wordList) return;
   
   try {
     const res = await fetch(`/api/english-new-words/${currentUser.user_id}`);
+    
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    
     const words = await res.json();
     
-    const wordList = document.getElementById("wordList");
-    if (!wordList) return;
+    if (!Array.isArray(words)) {
+      throw new Error("返回的数据格式不正确");
+    }
     
     wordList.innerHTML = "";
     
     if (words.length === 0) {
-      document.getElementById("contentArea").innerHTML = '<div class="empty-message">单词本还是空的，去学习新单词吧！</div>';
+      contentArea.innerHTML = '<div class="empty-message">单词本还是空的，去学习新单词吧！</div>';
       return;
     }
     
+    // 确保contentArea包含wordList
+    if (!contentArea.contains(wordList)) {
+      contentArea.innerHTML = '<div class="word-list" id="wordList"></div>';
+    }
+    
     words.forEach(word => {
-      wordList.appendChild(createWordCard(word));
+      const list = document.getElementById("wordList");
+      if (list) {
+        list.appendChild(createWordCard(word));
+      }
     });
   } catch (err) {
     console.error("加载单词本失败：", err);
+    contentArea.innerHTML = '<div class="empty-message">加载单词本失败，请刷新页面重试</div>';
   }
 }
 

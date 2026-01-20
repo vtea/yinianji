@@ -5,256 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
   <title>配对游戏 - 生字学习</title>
   <style>
-    :root {
-      --primary-color: #58cc02;
-      --primary-hover: #46a302;
-      --primary-gradient: linear-gradient(180deg, #58cc02 0%, #46a302 100%);
-      --secondary-color: #1cb0f6;
-      --secondary-gradient: linear-gradient(180deg, #1cb0f6 0%, #0e8ac7 100%);
-      --accent-color: #ffc800;
-      --accent-gradient: linear-gradient(180deg, #ffd700 0%, #ffc800 100%);
-      --text-color: #3c3c3c;
-      --border-color: #e5e5e5;
-      --error-color: #ff4b4b;
-      --error-gradient: linear-gradient(180deg, #ff6b6b 0%, #ff4b4b 100%);
-      --success-color: #58cc02;
-      --success-gradient: linear-gradient(180deg, #6dd802 0%, #58cc02 100%);
-      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      --hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      font-family: "din-round", "Microsoft YaHei", sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      background-attachment: fixed;
-      color: var(--text-color);
-      padding: 0;
-      margin: 0;
-      min-height: 100vh;
-      min-height: 100dvh; /* 使用动态视口高度，考虑浏览器工具栏 */
-      overflow-x: hidden;
-      /* 安全区域适配，避免被浏览器栏遮挡 */
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 24px;
-      display: grid;
-      grid-template-rows: auto 1fr;
-      min-height: 100vh;
-      min-height: 100dvh;
-      gap: 16px;
-    }
-
-    /* iPad横屏和大平板 */
-    @media (max-width: 1024px) and (min-width: 769px) {
-      .container {
-        padding: 20px;
-      }
-    }
-
-    /* iPad竖屏和小平板 */
-    @media (max-width: 768px) and (min-width: 601px) {
-      .container {
-        padding: 16px;
-      }
-    }
-
-    /* 大手机 */
-    @media (max-width: 600px) and (min-width: 481px) {
-      .container {
-        padding: 12px;
-      }
-    }
-
-    /* 小手机 */
-    @media (max-width: 480px) {
-      .container {
-        padding: 8px;
-      }
-    }
-
-    .header {
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(10px);
-      border: none;
-      border-radius: 24px;
-      padding: 20px;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      box-shadow: var(--card-shadow);
-    }
-
-    .header-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--primary-color);
-    }
-
-    .score-info {
-      display: flex;
-      gap: 16px;
-      font-weight: 800;
-      font-size: 16px;
-    }
-
-    /* iPad横屏和大平板 */
-    @media (max-width: 1024px) and (min-width: 769px) {
-      .header {
-        padding: 18px;
-        margin-bottom: 20px;
-        border-radius: 20px;
-      }
-      .header-title {
-        font-size: 22px;
-      }
-      .score-info {
-        font-size: 15px;
-        gap: 14px;
-      }
-    }
-
-    /* iPad竖屏和小平板 */
-    @media (max-width: 768px) and (min-width: 601px) {
-      .header {
-        padding: 16px;
-        margin-bottom: 18px;
-        border-radius: 18px;
-      }
-      .header-title {
-        font-size: 20px;
-      }
-      .score-info {
-        font-size: 14px;
-        gap: 12px;
-      }
-    }
-
-    /* 大手机 */
-    @media (max-width: 600px) and (min-width: 481px) {
-      .header {
-        padding: 14px;
-        margin-bottom: 14px;
-        border-radius: 14px;
-      }
-      .header-title {
-        font-size: 19px;
-      }
-      .score-info {
-        font-size: 13px;
-        gap: 10px;
-      }
-    }
-
-    /* 小手机 */
-    @media (max-width: 480px) {
-      .header {
-        padding: 12px;
-        margin-bottom: 12px;
-        border-radius: 12px;
-      }
-      .header-title {
-        font-size: 18px;
-      }
-      .score-info {
-        font-size: 12px;
-        gap: 8px;
-      }
-    }
-
-    .score-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .game-area {
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(10px);
-      border: none;
-      border-radius: 24px;
-      padding: 24px;
-      min-height: 400px;
-      box-shadow: var(--card-shadow);
-      transition: box-shadow 0.3s ease;
-    }
-
-    .game-area:hover {
-      box-shadow: var(--hover-shadow);
-    }
-
-    /* iPad横屏和大平板 */
-    @media (max-width: 1024px) and (min-width: 769px) {
-      .game-area {
-        padding: 20px;
-        border-radius: 20px;
-        min-height: 380px;
-      }
-    }
-
-    /* iPad竖屏和小平板 */
-    @media (max-width: 768px) and (min-width: 601px) {
-      .game-area {
-        padding: 18px;
-        border-radius: 18px;
-        min-height: 350px;
-      }
-    }
-
-    /* 大手机 */
-    @media (max-width: 600px) and (min-width: 481px) {
-      .game-area {
-        padding: 14px;
-        border-radius: 14px;
-        min-height: 300px;
-      }
-    }
-
-    /* 小手机 */
-    @media (max-width: 480px) {
-      .game-area {
-        padding: 8px;
-        border-radius: 12px;
-        min-height: auto;
-        max-height: calc(100vh - 200px);
-        overflow-y: auto;
-      }
-    }
-
-    .question-container {
-      margin-bottom: 24px;
-    }
-
-    .question-title {
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: var(--text-color);
-    }
-
-    .question-hanzi {
-      font-size: 64px;
-      font-weight: 800;
-      text-align: center;
-      color: white;
-      margin: 20px 0;
-      padding: 24px;
-      background: var(--secondary-gradient);
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(28, 176, 246, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .question-hanzi::before {
+    /* 只保留Tailwind无法实现的动画和特殊效果 */
+    
+    /* 汉字显示光效动画 */
+    .pinyin-box::before {
       content: '';
       position: absolute;
       top: -50%;
@@ -263,6 +17,7 @@
       height: 200%;
       background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
       animation: shimmer 3s infinite;
+      pointer-events: none;
     }
 
     @keyframes shimmer {
@@ -270,80 +25,8 @@
       50% { transform: translate(-30%, -30%) rotate(180deg); opacity: 0.8; }
     }
 
-    /* iPad横屏和大平板 */
-    @media (max-width: 1024px) and (min-width: 769px) {
-      .question-hanzi {
-        font-size: 58px;
-        margin: 18px 0;
-        padding: 18px;
-        border-radius: 15px;
-      }
-    }
-
-    /* iPad竖屏和小平板 */
-    @media (max-width: 768px) and (min-width: 601px) {
-      .question-hanzi {
-        font-size: 52px;
-        margin: 16px 0;
-        padding: 16px;
-        border-radius: 14px;
-      }
-    }
-
-    /* 大手机 */
-    @media (max-width: 600px) and (min-width: 481px) {
-      .question-hanzi {
-        font-size: 40px;
-        margin: 12px 0;
-        padding: 12px;
-        border-radius: 12px;
-      }
-    }
-
-    /* 小手机 */
-    @media (max-width: 480px) {
-      .question-hanzi {
-        font-size: 28px;
-        margin: 6px 0;
-        padding: 8px;
-        border-radius: 10px;
-      }
-    }
-
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-top: 24px;
-    }
-
-    @media (max-width: 768px) {
-      .options-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 480px) {
-      .options-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .option-btn {
-      padding: 24px 20px;
-      border: none;
-      border-radius: 20px;
-      background: white;
-      font-size: 20px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1), inset 0 -3px 0 rgba(0, 0, 0, 0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .option-btn::before {
+    /* 选项按钮光泽扫过效果 */
+    .option-button::before {
       content: '';
       position: absolute;
       top: 0;
@@ -352,288 +35,46 @@
       height: 100%;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
       transition: left 0.5s;
+      pointer-events: none;
     }
 
-    .option-btn:hover::before {
+    .option-button:hover::before {
       left: 100%;
     }
 
-    /* iPad横屏和大平板 */
-    @media (max-width: 1024px) and (min-width: 769px) {
-      .option-btn {
-        padding: 22px 18px;
-        font-size: 19px;
-        border-radius: 15px;
-      }
-    }
-
-    /* iPad竖屏和小平板 */
-    @media (max-width: 768px) and (min-width: 601px) {
-      .option-btn {
-        padding: 20px 16px;
-        font-size: 18px;
-        border-radius: 14px;
-      }
-    }
-
-    /* 大手机 */
-    @media (max-width: 600px) and (min-width: 481px) {
-      .option-btn {
-        padding: 16px 12px;
-        font-size: 16px;
-        border-radius: 12px;
-      }
-    }
-
-    /* 小手机 */
-    @media (max-width: 480px) {
-      .option-btn {
-        padding: 14px 10px;
-        font-size: 15px;
-        border-radius: 10px;
-        border-width: 2px;
-        box-shadow: 0 2px 0 var(--border-color);
-      }
-    }
-
-    .option-btn:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), inset 0 -3px 0 rgba(0, 0, 0, 0.1);
-    }
-
-    .option-btn:active {
-      transform: translateY(-1px) scale(0.98);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
-    }
-
-    .option-btn.selected {
-      background: linear-gradient(135deg, #1cb0f6 0%, #0e8ac7 100%);
-      color: white;
-      box-shadow: 0 8px 24px rgba(28, 176, 246, 0.4), inset 0 -3px 0 rgba(14, 138, 199, 0.3);
+    /* 选项按钮状态样式 */
+    .option-button.selected {
+      @apply bg-gradient-to-r from-blue-500 to-blue-700 text-white;
+      box-shadow: 0 8px 24px rgba(28, 176, 246, 0.6), 
+                  0 0 0 4px rgba(28, 176, 246, 0.3),
+                  inset 0 -4px 0 rgba(14, 138, 199, 0.4);
       transform: scale(1.05);
+      border: 3px solid #1cb0f6;
+      font-weight: 900;
     }
 
-    .option-btn.correct {
-      background: var(--success-gradient);
-      color: white;
-      box-shadow: 0 8px 24px rgba(88, 204, 2, 0.4);
+    .option-button.correct {
+      @apply bg-gradient-to-b from-green-600 to-green-700 text-white;
+      box-shadow: 0 8px 24px rgba(34, 197, 94, 0.6), 
+                  0 0 0 4px rgba(34, 197, 94, 0.3);
+      border: 3px solid #22c55e;
+      font-weight: 900;
     }
 
-    .option-btn.wrong {
-      background: var(--error-gradient);
-      color: white;
-      box-shadow: 0 8px 24px rgba(255, 75, 75, 0.4);
+    .option-button.wrong {
+      @apply bg-gradient-to-b from-red-600 to-red-700 text-white;
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.6), 
+                  0 0 0 4px rgba(239, 68, 68, 0.3);
+      border: 3px solid #ef4444;
+      font-weight: 900;
     }
 
-    .option-btn.disabled {
+    .option-button.disabled {
       pointer-events: none;
       opacity: 0.6;
     }
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 32px;
-      margin-bottom: calc(20px + env(safe-area-inset-bottom));
-    }
-
-    .btn {
-      padding: 16px 32px;
-      border: 2px solid var(--border-color);
-      border-radius: 16px;
-      font-size: 18px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 0 var(--border-color);
-    }
-
-    .btn-primary {
-      background: var(--primary-color);
-      color: white;
-      border-color: var(--primary-hover);
-      box-shadow: 0 4px 0 var(--primary-hover);
-    }
-
-    .btn-primary:active {
-      transform: translateY(4px);
-      box-shadow: 0 0 0;
-    }
-
-    .btn-secondary {
-      background: white;
-      color: var(--text-color);
-    }
-
-    .btn-secondary:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 var(--border-color);
-    }
-
-    .result-screen {
-      text-align: center;
-      padding: 40px 20px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .result-title {
-      font-size: 32px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: var(--text-color);
-    }
-
-    .result-score {
-      font-size: 48px;
-      font-weight: 800;
-      color: var(--primary-color);
-      margin: 24px 0;
-    }
-
-    .result-details {
-      font-size: 18px;
-      color: #777;
-      margin-bottom: 24px;
-      line-height: 1.8;
-    }
-
-    @media (max-width: 768px) {
-      .result-screen {
-        padding: 24px 16px;
-      }
-
-      .result-title {
-        font-size: 24px;
-        margin-bottom: 12px;
-      }
-
-      .result-score {
-        font-size: 36px;
-        margin: 16px 0;
-      }
-
-      .result-details {
-        font-size: 15px;
-        margin-bottom: 20px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .result-screen {
-        padding: 20px 12px;
-      }
-
-      .result-title {
-        font-size: 20px;
-        margin-bottom: 10px;
-      }
-
-      .result-score {
-        font-size: 32px;
-        margin: 12px 0;
-      }
-
-      .result-details {
-        font-size: 14px;
-        margin-bottom: 16px;
-      }
-    }
-
-    .celebration {
-      font-size: 64px;
-      margin: 20px 0;
-      animation: bounce 0.5s ease-in-out;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-
-    /* 平板专用优化 - 紧凑合理布局，确保所有内容可见 */
-    @media (min-width: 601px) and (max-width: 1024px) {
-      .container {
-        padding: 8px !important;
-        gap: 8px !important;
-        min-height: 100vh !important;
-        min-height: 100dvh !important;
-        grid-template-rows: auto 1fr !important;
-      }
-
-      .header {
-        padding: 10px 12px !important;
-        margin-bottom: 0 !important;
-        border-radius: 12px !important;
-      }
-
-      .header-title {
-        font-size: 18px !important;
-      }
-
-      .score-info {
-        font-size: 13px !important;
-        gap: 10px !important;
-      }
-
-      .game-area {
-        padding: 12px !important;
-        display: grid !important;
-        grid-template-rows: auto auto 1fr auto !important;
-        gap: 8px !important;
-        min-height: 0 !important;
-        max-height: 100% !important;
-        overflow: visible !important;
-      }
-      
-      .question-container {
-        margin-bottom: 0 !important;
-      }
-
-      .question-title {
-        font-size: 14px !important;
-        margin-bottom: 6px !important;
-        line-height: 1.3 !important;
-      }
-
-      .question-hanzi {
-        font-size: 40px !important;
-        padding: 12px !important;
-        margin: 4px 0 !important;
-        border-radius: 12px !important;
-      }
-      
-      .options-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-        margin-top: 0 !important;
-        align-content: start !important;
-      }
-      
-      .option-btn {
-        padding: 12px 10px !important;
-        font-size: 16px !important;
-        border-radius: 12px !important;
-        min-height: 50px !important;
-      }
-      
-      .controls {
-        margin-top: 8px !important;
-        margin-bottom: 0 !important;
-        gap: 8px !important;
-        padding-top: 4px !important;
-        flex-direction: row !important;
-      }
-
-      .btn {
-        padding: 8px 16px !important;
-        font-size: 13px !important;
-        border-radius: 10px !important;
-        flex: 0 0 auto !important;
-      }
-    }
-
+    /* 粒子动画 */
     .particle {
       position: fixed;
       pointer-events: none;
@@ -653,105 +94,32 @@
       }
     }
 
-    .loading {
-      text-align: center;
-      padding: 60px 20px;
-      font-size: 20px;
-      font-weight: 800;
-      color: #777;
-    }
-
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 6px;
-        padding-bottom: calc(6px + env(safe-area-inset-bottom));
-      }
-      .header {
-        padding: 8px 10px;
-        margin-bottom: 8px;
-      }
-      .header-title {
-        font-size: 14px;
-      }
-      .score-info {
-        font-size: 10px;
-        gap: 6px;
-      }
-      .game-area {
-        padding: 6px;
-        border-radius: 12px;
-        min-height: auto;
-        max-height: calc(100vh - 120px);
-        overflow-y: auto;
-        margin-bottom: 0;
-      }
-      .options-grid {
-        gap: 5px;
-        margin-top: 5px;
-      }
-      .question-title {
-        font-size: 12px;
-        margin-bottom: 5px;
-      }
-      .question-container {
-        margin-bottom: 8px;
-      }
-      .controls {
-        flex-direction: row;
-        flex-wrap: wrap;
-        margin-top: 10px;
-        margin-bottom: 0;
-        padding-bottom: max(60px, env(safe-area-inset-bottom));
-        gap: 8px;
-      }
-      .btn {
-        flex: 1;
-        min-width: 120px;
-      }
-      .btn {
-        width: 100%;
-        padding: 10px;
-        font-size: 13px;
-        border-radius: 10px;
-      }
-      .result-title {
-        font-size: 18px;
-      }
-      .result-score {
-        font-size: 28px;
-      }
-      .result-details {
-        font-size: 13px;
-      }
-      .celebration {
-        font-size: 36px;
-      }
-      .loading {
-        padding: 24px 10px;
-        font-size: 14px;
-      }
+    /* 字体设置 */
+    body {
+      font-family: "din-round", "Microsoft YaHei", sans-serif;
     }
   </style>
+  <!-- Tailwind CSS - 构建后引入 -->
+  <link href="/output.css?v=4.0.0" rel="stylesheet">
 </head>
-<body>
-<div class="container">
-  <div class="header">
-    <div class="header-title">🎮 配对游戏</div>
-    <div class="score-info">
-      <div class="score-item">
+<body class="font-sans bg-gradient-to-br from-purple-500 to-purple-700 min-h-screen min-h-[100dvh] overflow-x-hidden pb-[env(safe-area-inset-bottom)]">
+<div class="max-w-4xl mx-auto p-2 md:p-4 lg:p-6 grid grid-rows-[auto_1fr] gap-2 min-h-full">
+  <div class="game-card p-3 md:p-4 flex justify-between items-center flex-wrap gap-2">
+    <div class="text-lg md:text-xl lg:text-2xl font-extrabold text-green-500">🎮 配对游戏</div>
+    <div class="flex gap-2 md:gap-4 font-extrabold text-sm md:text-base">
+      <div class="flex items-center gap-1">
         <span>题目:</span>
         <span id="currentQuestion">0</span>/<span id="totalQuestions">0</span>
       </div>
-      <div class="score-item">
+      <div class="flex items-center gap-1">
         <span>得分:</span>
         <span id="currentScore">0</span>
       </div>
     </div>
   </div>
 
-  <div class="game-area" id="gameArea">
-    <div class="loading">正在加载题目...</div>
+  <div class="game-card p-3 md:p-4" id="gameArea">
+    <div class="text-center text-lg font-extrabold text-gray-500">正在加载题目...</div>
   </div>
 </div>
 
@@ -774,7 +142,7 @@ let score = 0;
 
 async function startGame() {
   if (!currentUser) {
-    document.getElementById("gameArea").innerHTML = '<div class="result-screen"><div class="result-title">请先登录</div></div>';
+    document.getElementById("gameArea").innerHTML = '<div class="game-card p-6 text-center"><div class="text-2xl font-extrabold text-gray-700">请先登录</div></div>';
     return;
   }
 
@@ -787,7 +155,7 @@ async function startGame() {
 
     if (!res.ok) {
       const data = await res.json();
-      document.getElementById("gameArea").innerHTML = `<div class="result-screen"><div class="result-title">${data.error || "加载失败"}</div></div>`;
+      document.getElementById("gameArea").innerHTML = `<div class="game-card p-6 text-center"><div class="text-2xl font-extrabold text-gray-700">${data.error || "加载失败"}</div></div>`;
       return;
     }
 
@@ -795,7 +163,7 @@ async function startGame() {
     questions = data.questions || [];
     
     if (questions.length === 0) {
-      document.getElementById("gameArea").innerHTML = '<div class="result-screen"><div class="result-title">请先添加一些生字</div></div>';
+      document.getElementById("gameArea").innerHTML = '<div class="game-card p-6 text-center"><div class="text-2xl font-extrabold text-gray-700">请先添加一些生字</div></div>';
       return;
     }
 
@@ -825,7 +193,10 @@ function showQuestion() {
   const optionsHtml = question.options.map((pinyin, idx) => {
     const isSelected = pinyin === selectedPinyin;
     return `
-      <button class="option-btn ${isSelected ? 'selected' : ''}" 
+      <button class="option-button ${isSelected ? 'selected' : ''} 
+                  text-base md:text-lg lg:text-xl landscape:text-lg
+                  py-3 px-2 md:py-4 md:px-3 landscape:py-3 landscape:px-2
+                  min-h-[50px] md:min-h-[60px] landscape:min-h-[55px]" 
               onclick="selectOption('${pinyin.replace(/'/g, "\\'")}')"
               data-pinyin="${pinyin}">
         ${pinyin}
@@ -834,17 +205,30 @@ function showQuestion() {
   }).join("");
 
   document.getElementById("gameArea").innerHTML = `
-    <div class="question-container">
-      <div class="question-title">请选择 "${question.hanzi}" 的正确拼音：</div>
-      <div class="question-hanzi">${question.hanzi}</div>
-      <div class="options-grid">
+    <div class="grid grid-rows-[auto_auto_1fr_auto] gap-2 min-h-0">
+      <!-- 标题 -->
+      <div class="text-sm md:text-base font-extrabold text-center text-gray-700 mb-1 landscape:mb-0">
+        请选择"${question.hanzi}"的正确拼音：
+      </div>
+      
+      <!-- 汉字显示 -->
+      <div class="pinyin-box text-3xl md:text-4xl lg:text-5xl py-3 px-4 md:py-4 md:px-5 landscape:text-4xl landscape:py-3 landscape:px-4 my-2 landscape:my-1">
+        ${question.hanzi}
+      </div>
+      
+      <!-- 选项网格 -->
+      <div class="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mt-2 landscape:mt-1">
         ${optionsHtml}
       </div>
-      <div class="controls">
-        <button class="btn btn-primary" onclick="nextQuestion()" ${!selectedPinyin ? 'disabled style="opacity:0.5"' : ''}>
+      
+      <!-- 控制按钮（同一行） -->
+      <div class="flex gap-2 md:gap-3 mt-3 landscape:mt-2">
+        <button class="btn-primary flex-1 text-sm md:text-base landscape:text-sm" 
+                onclick="nextQuestion()" ${!selectedPinyin ? 'disabled style="opacity:0.5"' : ''}>
           ${currentQuestionIndex === questions.length - 1 ? '完成' : '下一题'}
         </button>
-        <button class="btn btn-secondary" onclick="startGame()">重新开始</button>
+        <button class="btn-secondary flex-1 text-sm md:text-base landscape:text-sm" 
+                onclick="startGame()">重新开始</button>
       </div>
     </div>
   `;
@@ -860,8 +244,8 @@ function selectOption(pinyin) {
     answers[currentQuestionIndex].selected_pinyin = pinyin;
   }
 
-  // 更新UI
-  document.querySelectorAll(".option-btn").forEach(btn => {
+  // 更新UI - 修复类名：使用 option-button 而不是 option-btn
+  document.querySelectorAll(".option-button").forEach(btn => {
     btn.classList.remove("selected");
     if (btn.dataset.pinyin === pinyin) {
       btn.classList.add("selected");
@@ -920,28 +304,27 @@ async function showResult() {
 
     let celebration = "";
     if (isPerfect) {
-      celebration = '<div class="celebration">🎉 完美！</div>';
+      celebration = '<div class="text-5xl md:text-6xl lg:text-7xl my-4 landscape:text-6xl animate-bounce">🎉 完美！</div>';
     } else if (correctCount >= totalCount * 0.8) {
-      celebration = '<div class="celebration">🌟 很棒！</div>';
+      celebration = '<div class="text-5xl md:text-6xl lg:text-7xl my-4 landscape:text-6xl animate-bounce">🌟 很棒！</div>';
     } else if (correctCount >= totalCount * 0.6) {
-      celebration = '<div class="celebration">👍 不错！</div>';
+      celebration = '<div class="text-5xl md:text-6xl lg:text-7xl my-4 landscape:text-6xl animate-bounce">👍 不错！</div>';
     }
 
     // 生成答错题目的详情
     let wrongAnswersHtml = '';
     const wrongAnswers = results.filter(r => !r.correct);
     if (wrongAnswers.length > 0) {
-      wrongAnswersHtml = '<div style="margin: 20px auto; padding: 12px; background: #fff3cd; border-radius: 12px; text-align: left; max-width: 400px;">';
-      wrongAnswersHtml += '<div style="font-weight: 800; font-size: 14px; margin-bottom: 10px; color: #856404; text-align: center;">📝 答错的题目</div>';
+      wrongAnswersHtml = '<div class="bg-yellow-50 rounded-xl p-3 md:p-4 my-4 text-left max-w-md mx-auto landscape:my-3">';
+      wrongAnswersHtml += '<div class="text-base md:text-lg font-extrabold text-orange-500 mb-2 text-center landscape:text-base">📝 答错的题目</div>';
       wrongAnswers.forEach((item, idx) => {
-        // 直接使用 results 中的数据，这是从数据库查询的准确拼音
         if (item.hanzi && item.correct_pinyin) {
           wrongAnswersHtml += `
-            <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 8px; border: 2px solid #ffc107;">
-              <div style="font-size: 20px; font-weight: 800; color: #1cb0f6; margin-bottom: 4px; text-align: center;">${item.hanzi}</div>
-              <div style="font-size: 12px; color: #666;">
-                <div style="color: #dc3545; margin-bottom: 2px;">❌ 你选的：${item.selected_pinyin || '未选择'}</div>
-                <div style="color: #28a745;">✓ 正确答案：${item.correct_pinyin}</div>
+            <div class="bg-white rounded-lg p-2 md:p-3 mb-2 border-2 border-yellow-400 landscape:p-2">
+              <div class="text-xl md:text-2xl font-extrabold text-blue-500 mb-1 text-center landscape:text-xl">${item.hanzi}</div>
+              <div class="text-xs md:text-sm text-gray-600 space-y-1 landscape:text-xs">
+                <div class="text-red-500">❌ 你选的：${item.selected_pinyin || '未选择'}</div>
+                <div class="text-green-500">✓ 正确答案：${item.correct_pinyin}</div>
               </div>
             </div>
           `;
@@ -951,18 +334,18 @@ async function showResult() {
     }
 
     document.getElementById("gameArea").innerHTML = `
-      <div class="result-screen">
+      <div class="game-card p-4 md:p-6 text-center max-w-2xl mx-auto">
         ${celebration}
-        <div class="result-title">游戏结束</div>
-        <div class="result-score">${finalScore} 分</div>
-        <div class="result-details">
+        <div class="text-xl md:text-2xl lg:text-3xl font-extrabold text-gray-700 mb-2 landscape:text-2xl">游戏结束</div>
+        <div class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-green-500 my-4 landscape:text-4xl">${finalScore} 分</div>
+        <div class="text-base md:text-lg text-gray-600 mb-4 space-y-1 landscape:text-base">
           <div>答对: ${correctCount} / ${totalCount}</div>
           <div>获得经验: +${expEarned} EXP</div>
         </div>
         ${wrongAnswersHtml}
-        <div class="controls">
-          <button class="btn btn-primary" onclick="startGame()">再来一局</button>
-          <button class="btn btn-secondary" onclick="if(window.parent && window.parent.switchPage){window.parent.switchPage('chinese');}else{window.location.href='chinese.html';}">返回生字本</button>
+        <div class="flex gap-2 md:gap-3 mt-4 landscape:mt-3">
+          <button class="btn-primary flex-1 text-sm md:text-base landscape:text-sm" onclick="startGame()">再来一局</button>
+          <button class="btn-secondary flex-1 text-sm md:text-base landscape:text-sm" onclick="if(window.parent && window.parent.switchPage){window.parent.switchPage('chinese');}else{window.location.href='chinese.html';}">返回生字本</button>
         </div>
       </div>
     `;
@@ -973,7 +356,7 @@ async function showResult() {
     }
   } catch (err) {
     console.error("提交答案失败：", err);
-    document.getElementById("gameArea").innerHTML = '<div class="result-screen"><div class="result-title">提交失败，请重试</div></div>';
+    document.getElementById("gameArea").innerHTML = '<div class="game-card p-6 text-center"><div class="text-2xl font-extrabold text-gray-700">提交失败，请重试</div></div>';
   }
 }
 

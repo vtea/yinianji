@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>语文 - 生字学习</title>
+  <!-- Tailwind CSS -->
+  <link href="/output.css?v=4.0.0" rel="stylesheet">
   <style>
+    /* 只保留 Tailwind 无法实现的特殊样式 */
     :root {
       --primary-color: #58cc02;
       --primary-hover: #46a302;
@@ -16,39 +19,12 @@
 
     body {
       font-family: "din-round", "Microsoft YaHei", sans-serif;
-      background: #ffffff;
-      color: var(--text-color);
-      padding: 0;
-      margin: 0;
-      /* 安全区域适配，避免被浏览器栏遮挡 */
       padding-bottom: env(safe-area-inset-bottom);
     }
 
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    #list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 24px;
-    }
-
+    /* 卡片交互动画 - 保留部分特殊样式 */
     .word-wrapper {
-      background: white;
-      border: 2px solid var(--border-color);
-      border-radius: 24px;
-      padding: 24px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      position: relative;
-      box-shadow: 0 4px 0 var(--border-color);
       transition: all 0.2s;
-      cursor: pointer;
     }
 
     .word-wrapper:hover {
@@ -61,106 +37,8 @@
       box-shadow: 0 0px 0 var(--border-color);
     }
 
-
-    .word-display {
-      width: 100px;
-      height: 100px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      background: #fff;
-      border: 2px solid #333;
-    }
-
-    /* 小学米字格（十字 + 斜线） */
-    .word-display::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image:
-        linear-gradient(#ddd 1px, transparent 1px),
-        linear-gradient(90deg, #ddd 1px, transparent 1px),
-        linear-gradient(45deg, #eee 1px, transparent 1px),
-        linear-gradient(-45deg, #eee 1px, transparent 1px);
-      background-size:
-        100% 1px,
-        1px 100%,
-        100% 100%,
-        100% 100%;
-      background-position:
-        center,
-        center,
-        center,
-        center;
-      background-repeat: no-repeat;
-      pointer-events: none;
-    }
-
-    .word-display ruby {
-      font-size: 64px;
-      font-weight: 800;
-      z-index: 1;
-      line-height: 1;
-      color: #333;
-      text-align: center;
-    }
-
-    .word-display rt {
-      display: none;
-    }
-
-    .word-pinyin {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--secondary-color);
-      background: #ddf4ff;
-      padding: 4px 12px;
-      border-radius: 12px;
-      opacity: 0;
-      filter: blur(8px);
-      transition: all 0.3s;
-      cursor: pointer;
-      user-select: none;
-    }
-    
-    .word-pinyin.show {
-      opacity: 1;
-      filter: blur(0);
-    }
-    
-    .word-pinyin:hover {
-      background: #b3e5fc;
-    }
-
-    .word-info {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      font-size: 12px;
-      font-weight: 800;
-      color: #afafaf;
-    }
-
+    /* 按钮交互动画 */
     .remove-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 28px;
-      height: 28px;
-      background: #ff4b4b;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 0 #d33131;
       transition: all 0.1s;
     }
 
@@ -169,100 +47,15 @@
       box-shadow: 0 0 0;
     }
 
-    .empty-message {
-      text-align: center;
-      color: #afafaf;
-      padding: 60px 16px;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    /* 游戏化UI */
-    .game-header {
-      background: white;
-      border: 2px solid var(--border-color);
-      border-radius: 24px;
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-
-    .progress-bar-container {
-      margin-bottom: 16px;
-    }
-
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      font-weight: 800;
-      font-size: 14px;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 20px;
-      background: #f0f0f0;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 2px solid var(--border-color);
-    }
-
+    /* 进度条渐变和过渡 */
     .progress-fill {
-      height: 100%;
       background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
       transition: width 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 12px;
-      font-weight: 800;
     }
 
-    .stats-row {
-      display: flex;
-      justify-content: space-around;
-      gap: 16px;
-      margin-top: 16px;
-    }
-
-    .stat-item {
-      text-align: center;
-      flex: 1;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--secondary-color);
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: #777;
-      font-weight: 700;
-      margin-top: 4px;
-    }
-
-    .game-buttons {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 16px;
-    }
-
+    /* 游戏按钮交互 */
     .game-btn {
-      padding: 16px;
-      border: 2px solid var(--border-color);
-      border-radius: 16px;
-      background: white;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 0 var(--border-color);
-      text-align: center;
     }
 
     .game-btn:hover {
@@ -290,24 +83,7 @@
       color: var(--accent-color);
     }
 
-    /* 掌握度标识 */
-    .mastery-badge {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 800;
-      color: white;
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
+    /* 掌握度徽章颜色 */
     .mastery-0 { background: #ccc; }
     .mastery-1 { background: #ff9800; }
     .mastery-2 { background: #ffc107; }
@@ -315,7 +91,7 @@
     .mastery-4 { background: #2196f3; }
     .mastery-5 { background: #9c27b0; }
 
-    /* 已掌握生字样式 */
+    /* 已掌握生字渐变背景 */
     .word-wrapper.mastered-word {
       background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
       border-color: var(--primary-color);
@@ -326,21 +102,12 @@
       background: linear-gradient(135deg, #c8e6c9 0%, #dcedc8 100%);
     }
 
-    /* 成就系统 */
+    /* 成就弹出动画 */
     .achievement-badge {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: white;
-      border: 3px solid var(--accent-color);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      z-index: 10000;
       animation: slideInRight 0.5s ease-out;
-      max-width: 300px;
     }
 
+    /* 成就系统动画 */
     @keyframes slideInRight {
       from {
         transform: translateX(400px);
@@ -363,43 +130,7 @@
       }
     }
 
-    .achievement-icon {
-      font-size: 48px;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .achievement-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--accent-color);
-      text-align: center;
-      margin-bottom: 4px;
-    }
-
-    .achievement-desc {
-      font-size: 14px;
-      color: #777;
-      text-align: center;
-    }
-
     .achievements-btn {
-      position: fixed;
-      bottom: 110px;
-      right: 30px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: 0 6px 0 #e6b800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 101;
       transition: all 0.2s;
     }
 
@@ -410,72 +141,22 @@
 
     .achievements-modal {
       display: none;
-      position: fixed;
-      z-index: 2000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
     }
 
     .achievements-modal.show {
       display: flex;
     }
 
-    .achievements-content {
-      background: white;
-      padding: 28px 24px;
-      border-radius: 24px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
-      position: relative;
-      box-shadow: 0 12px 0 rgba(0,0,0,0.1);
-      border: 2px solid var(--border-color);
-    }
-
-    /* 熟练掌握弹窗样式 */
+    /* 模态框状态 */
     .modal {
       display: none;
-      position: fixed;
-      z-index: 2000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
-      padding: 20px;
-      box-sizing: border-box;
     }
 
     .modal.show {
       display: flex;
     }
 
-    .mastered-modal-content {
-      background: white;
-      padding: 28px 24px;
-      border-radius: 24px;
-      width: 90%;
-      max-width: 420px;
-      max-height: calc(100vh - 120px);
-      overflow-y: auto;
-      position: relative;
-      box-shadow: 0 12px 0 rgba(0,0,0,0.1);
-      border: 2px solid var(--border-color);
-      margin: auto;
-      display: flex;
-      flex-direction: column;
-    }
-
+    /* 自定义滚动条 */
     .mastered-modal-content::-webkit-scrollbar {
       width: 6px;
     }
@@ -494,26 +175,8 @@
       background: #555;
     }
 
-    .achievements-title {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--accent-color);
-      margin-bottom: 24px;
-      text-align: center;
-    }
-
-    .achievements-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 16px;
-    }
-
+    /* 成就项状态 */
     .achievement-item {
-      background: white;
-      border: 2px solid var(--border-color);
-      border-radius: 16px;
-      padding: 16px;
-      text-align: center;
       transition: all 0.2s;
     }
 
@@ -527,29 +190,8 @@
       filter: grayscale(100%);
     }
 
-    .achievement-item-icon {
-      font-size: 40px;
-      margin-bottom: 8px;
-    }
-
-    .achievement-item-name {
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--text-color);
-      margin-bottom: 4px;
-    }
-
-    .achievement-item-desc {
-      font-size: 11px;
-      color: #777;
-    }
-
     /* 粒子动画 */
     .particle {
-      position: fixed;
-      pointer-events: none;
-      z-index: 9999;
-      font-size: 20px;
       animation: particleFloat 1s ease-out forwards;
     }
 
@@ -565,20 +207,7 @@
     }
 
     /* 升级特效 */
-    .level-up-effect {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 10001;
-      text-align: center;
-      pointer-events: none;
-    }
-
     .level-up-text {
-      font-size: 64px;
-      font-weight: 800;
-      color: var(--primary-color);
       animation: levelUpPulse 1s ease-out;
     }
 
@@ -597,9 +226,10 @@
       }
     }
 
+    /* 移动端适配 */
     @media (max-width: 768px) {
-      .game-header {
-        padding: 16px;
+      .progress-bar {
+        height: 16px;
       }
       .progress-info {
         font-size: 12px;
@@ -619,89 +249,14 @@
         padding: 12px 16px;
         font-size: 14px;
       }
-      .stat-value {
-        font-size: 20px;
-      }
-      .stat-label {
-        font-size: 11px;
-      }
-      .game-buttons {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-      .game-btn {
-        padding: 12px;
-        font-size: 14px;
-      }
-      .achievements-btn {
-        bottom: 90px;
-        right: 20px;
-        width: 48px;
-        height: 48px;
-        font-size: 20px;
-      }
-      .achievement-badge {
-        top: 10px;
-        right: 10px;
-        left: 10px;
-        max-width: calc(100% - 20px);
-        padding: 16px;
-      }
-      .achievements-content {
-        width: 95%;
-        padding: 20px 16px;
-      }
-      .achievements-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
     }
 
     @media (max-width: 480px) {
-      .achievements-btn {
-        bottom: 80px;
-        right: 16px;
-        width: 44px;
-        height: 44px;
-        font-size: 18px;
-      }
-      .game-header {
-        padding: 12px;
-      }
       .progress-bar {
         height: 16px;
       }
       .progress-info {
         font-size: 11px;
-      }
-      .stat-value {
-        font-size: 18px;
-      }
-      .stat-label {
-        font-size: 10px;
-      }
-      .game-buttons {
-        gap: 6px;
-      }
-      .game-btn {
-        padding: 10px;
-        font-size: 13px;
-      }
-      #list {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-      }
-      .word-wrapper {
-        padding: 12px;
-      }
-      .word-display {
-        font-size: 32px;
-      }
-      .stats-row {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .game-header {
-        padding: 12px;
       }
     }
   </style>
@@ -1314,6 +869,7 @@ function speakChinese(hanzi, py, wordId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: wordId })
   }).then(() => {
+    // 重新加载页面，但保留拼音显示状态
     loadChinesePage();
     // 检查是否有新掌握的生字
     setTimeout(() => {
@@ -1366,11 +922,26 @@ function deleteChineseWord(event, word) {
   }
 }
 
+// 保存已显示的拼音状态
+let shownPinyinSet = new Set();
+
 function loadChinesePage() {
-  if (!currentUser) return;
+  if (!currentUser) {
+    const list = document.getElementById("list");
+    if (list) {
+      list.innerHTML = '<div class="empty-message">请先登录</div>';
+    }
+    return;
+  }
 
   // 加载游戏数据
   loadGameStats();
+
+  const list = document.getElementById("list");
+  if (!list) {
+    console.error("找不到 #list 元素");
+    return;
+  }
 
   fetch(`/api/words/${currentUser.user_id}`)
     .then(res => {
@@ -1383,8 +954,7 @@ function loadChinesePage() {
       if (!data || !Array.isArray(data)) {
         data = [];
       }
-      const list = document.getElementById("list");
-      if (!list) return;
+      
       list.innerHTML = "";
 
       // 更新总生字数
@@ -1423,9 +993,11 @@ function loadChinesePage() {
           <button class="remove-btn" type="button" ${isMastered ? 'title="移到已认识"' : ''}>${isMastered ? '✓' : '✕'}</button>
           ${masteryBadge}
           ${masteredLabel}
-          <div class="word-pinyin" title="点击显示/隐藏拼音">${w.pinyin || ''}</div>
-          <div class="word-display">
-            <ruby>${w.hanzi}<rt>${w.pinyin || ''}</rt></ruby>
+          <div class="word-content-wrapper">
+            <div class="word-pinyin" data-pinyin="${w.pinyin || ''}">${w.pinyin || ''}</div>
+            <div class="word-display">
+              <ruby>${w.hanzi}<rt>${w.pinyin || ''}</rt></ruby>
+            </div>
           </div>
           <div class="word-info">
             <span>📅 ${date}</span>
@@ -1433,50 +1005,98 @@ function loadChinesePage() {
           </div>
         `;
 
+        // 等待DOM更新后再获取元素
         const pinyinEl = wrapper.querySelector(".word-pinyin");
+        const removeBtn = wrapper.querySelector(".remove-btn");
+        const wordDisplayEl = wrapper.querySelector(".word-display");
         
-        // 点击拼音切换显示/隐藏
-        pinyinEl.onclick = (e) => {
-          e.stopPropagation();
-          pinyinEl.classList.toggle('show');
-        };
+        // 恢复之前显示的拼音状态
+        if (pinyinEl && shownPinyinSet.has(w.id)) {
+          pinyinEl.classList.add('show');
+          pinyinEl.style.display = 'inline-block';
+          pinyinEl.style.backgroundColor = '#e3f2fd';
+          pinyinEl.style.color = '#1976d2';
+        }
         
-        // 点击卡片朗读
-        wrapper.onclick = (e) => {
-          if (!e.target.classList.contains('word-pinyin') && !e.target.classList.contains('remove-btn') && !e.target.classList.contains('mastery-badge')) {
+        // 点击卡片朗读并显示拼音
+        wrapper.addEventListener('click', function(e) {
+          // 检查点击的是否是删除按钮或掌握度徽章
+          const target = e.target;
+          const isExcluded = target.classList.contains('remove-btn') || 
+                            target.classList.contains('mastery-badge') ||
+                            target.classList.contains('mastered-label') ||
+                            target.closest('.remove-btn') ||
+                            target.closest('.mastery-badge');
+          
+          if (!isExcluded) {
+            // 显示拼音（一直显示，不自动隐藏）
+            const currentPinyinEl = wrapper.querySelector(".word-pinyin");
+            
+            if (currentPinyinEl) {
+              // 确保拼音有内容
+              const pinyinText = currentPinyinEl.getAttribute('data-pinyin') || w.pinyin || '';
+              if (pinyinText) {
+                currentPinyinEl.textContent = pinyinText;
+              }
+              
+              // 直接显示 - 使用display控制
+              currentPinyinEl.classList.add('show');
+              currentPinyinEl.style.display = 'inline-block';
+              currentPinyinEl.style.backgroundColor = '#e3f2fd';
+              currentPinyinEl.style.color = '#1976d2';
+              
+              // 保存到已显示集合
+              shownPinyinSet.add(w.id);
+            }
+            
+            // 朗读
             speakChinese(w.hanzi, w.pinyin, w.id);
-            // 添加点击动画
-            wrapper.style.transform = "scale(0.95)";
-            setTimeout(() => {
-              wrapper.style.transform = "";
-            }, 150);
+            
+            // 添加点击反馈：在汉字区域显示正方形背景色
+            if (wordDisplayEl) {
+              wordDisplayEl.style.backgroundColor = '#d1ecf1'; // 浅青色，更柔和
+              wordDisplayEl.style.transition = 'background-color 0.3s ease';
+              setTimeout(() => {
+                if (wordDisplayEl) {
+                  wordDisplayEl.style.backgroundColor = 'white';
+                }
+              }, 400);
+            }
           }
-        };
+        });
         
         // 已掌握的生字，删除按钮显示不同提示
-        const removeBtn = wrapper.querySelector(".remove-btn");
-        if (isMastered) {
-          removeBtn.style.background = "var(--primary-color)";
-          removeBtn.style.color = "white";
-          removeBtn.title = "移到已认识（获得奖励）";
-        }
-        removeBtn.onclick = (e) => {
+        if (removeBtn) {
           if (isMastered) {
-            // 已掌握的生字，直接移到已认识（给予奖励）
-            currentMasteredWord = { word_id: w.id, hanzi: w.hanzi, pinyin: w.pinyin };
-            moveToKnown();
-          } else {
-            // 普通删除
-            deleteChineseWord(e, w);
+            removeBtn.style.background = "var(--primary-color)";
+            removeBtn.style.color = "white";
+            removeBtn.title = "移到已认识（获得奖励）";
           }
-        };
+          removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (isMastered) {
+              // 已掌握的生字，直接移到已认识（给予奖励）
+              currentMasteredWord = { word_id: w.id, hanzi: w.hanzi, pinyin: w.pinyin };
+              moveToKnown();
+            } else {
+              // 普通删除
+              deleteChineseWord(e, w);
+            }
+          };
+        }
 
         list.appendChild(wrapper);
       });
+    })
+    .catch(err => {
+      console.error("加载生字列表失败：", err);
+      const list = document.getElementById("list");
+      if (list) {
+        list.innerHTML = '<div class="empty-message">加载失败，请刷新页面重试</div>';
+      }
     });
 }
-
-loadChinesePage();
 
 // 初始化时先加载已显示的成就列表，然后检查新成就和已掌握生字
 function initializeAchievements() {
@@ -1514,6 +1134,12 @@ function initializeAchievements() {
 
 if (currentUser) {
   initializeAchievements();
+  loadChinesePage();
+} else {
+  const list = document.getElementById("list");
+  if (list) {
+    list.innerHTML = '<div class="empty-message">请先登录</div>';
+  }
 }
 
 // 暴露给父窗口的函数

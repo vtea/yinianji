@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>数学 - 数学练习</title>
+  <!-- Tailwind CSS -->
+  <link href="/output.css?v=4.0.0" rel="stylesheet">
   <style>
+    /* 只保留 Tailwind 无法实现的特殊样式 */
     :root {
       --primary-color: #58cc02;
       --secondary-color: #1cb0f6;
@@ -14,40 +17,6 @@
 
     body {
       font-family: "din-round", "Microsoft YaHei", sans-serif;
-      background: #ffffff;
-      color: var(--text-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 80vh;
-      margin: 0;
-    }
-
-    .container {
-      text-align: center;
-      padding: 48px;
-      border: 2px solid var(--border-color);
-      border-radius: 32px;
-      box-shadow: 0 8px 0 var(--border-color);
-      max-width: 400px;
-    }
-
-    .icon {
-      font-size: 64px;
-      margin-bottom: 24px;
-    }
-
-    .title {
-      font-size: 24px;
-      font-weight: 800;
-      margin-bottom: 16px;
-    }
-
-    .message {
-      font-size: 16px;
-      font-weight: 700;
-      color: #afafaf;
-      line-height: 1.6;
     }
   </style>
 </head>
